@@ -14,15 +14,44 @@ A little corner of the internet for casual games, curious detours, and feel-good
 
 Browse by activity type, choose a random activity, or save favourite picks for later. Favourites are stored in the browser's local storage, not on a server; they may disappear if browser data is cleared. If local storage is unavailable they last only until the page closes. In-progress games and artwork reset when closed. Postcard links are optional external links; nothing is fetched for the activities themselves.
 
+## Multiplayer
+
+Open **Play together**, enter a display name and create a room. Share the link or six-character code with friends. Up to eight people can join a room and use text chat. The host can draw shared conversation cards between games.
+
+- **Maple Quiz** — two to eight players answer five shared questions. Answers stay hidden until everyone has submitted or the host reveals the round.
+- **Campfire Four** — two players take turns placing a token on a 5 × 5 board. Four in a row wins. The host and the first other connected player play while everyone else can watch and chat.
+
+The host starts or ends games, pauses new joins, and can remove a player. Share invitations with people you trust. A removed player can use the invite again while the room is open to new joins.
+
+Keep the room tab to reconnect to the same seat after a reload or brief connection loss. A disconnected seat expires after about five minutes, and the host role can pass to a connected player after about 45 seconds. The room holds the latest 40 messages in memory. Rooms, matches, and chat disappear when all seats leave or expire, or when the process restarts.
+
 ## Run locally
 
-Serve this directory with any static web server, for example:
+With Node.js 22 or newer, run from the repository root:
 
 ```sh
-python3 -m http.server 8000
+node multiplayer/server.cjs
 ```
 
-Then visit <http://localhost:8000>. For Apache, copy the files into the site's document root; no PHP, database, dependency installation, or build step is required. Set up HTTPS and DNS separately through your hosting provider. The repository alone does not configure the funapps.ca domain or publish the site.
+Open <http://127.0.0.1:8080/>. The server defaults to `127.0.0.1:8080`. Set `HOST` and `PORT` to override those values. There is no package installation, build step, or database. Use separate browser profiles or a private window to try a room with two seats.
+
+For solo-only static hosting, publish the browser assets. Keep the server's `.cjs` files outside the document root. Multiplayer requires the Node process.
+
+## Host with Apache
+
+Run one Node process bound to loopback under your process supervisor. In the site's HTTPS virtual host, enable `mod_proxy` and `mod_proxy_http` and add:
+
+```apache
+ProxyPreserveHost On
+ProxyPass "/" "http://127.0.0.1:8080/" timeout=60
+ProxyPassReverse "/" "http://127.0.0.1:8080/"
+```
+
+Keep `/api/rooms/*/events` responses unbuffered and uncompressed through the proxy or CDN so room updates stream immediately. `GET /api/health` returns `{"ok":true}` when the app is reachable. Hostname and HTTPS configuration belong to your web server and DNS. Run a single process per site because rooms live in process memory.
+
+## Multiplayer code
+
+`multiplayer/server.cjs` serves the public files and HTTP routes. The explicit `SITE_FILES` list controls which files the server exposes. `rooms.cjs` manages room membership, chat, permissions, and per-player snapshots streamed over Server-Sent Events. `room-games.cjs` holds the authoritative game rules and quiz questions. The room browser client is in `multiplayer/rooms.js`. Add or edit quiz prompts in `QUESTIONS`, with the correct option first.
 
 ## Add another activity
 

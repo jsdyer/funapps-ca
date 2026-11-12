@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e7">
+  <meta name="description" content="Play Canadian trivia and a fireside board game with friends in a private funapps.ca room.">
+  <title>Play together · funapps.ca</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rooms.css">
+  <script src="rooms.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to multiplayer</a>
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="funapps.ca home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a>
+    <nav aria-label="Main navigation"><a class="nav-cta" href="../#games">Solo games <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main class="rooms-main" id="main">
+    <section id="entrance" class="entrance" aria-labelledby="intro-title">
+      <div class="rooms-intro">
+        <div class="eyebrow"><span class="tiny-sun" aria-hidden="true">✳</span> MULTIPLAYER</div>
+        <h1 id="intro-title">Save a seat<br><em>for a friend.</em></h1>
+        <p>Start a room, share the invite, and settle in for Canadian trivia, a game of four in a row, or a good chat.</p>
+        <ul class="preview-games" aria-label="Multiplayer games">
+          <li><span aria-hidden="true">🍁</span><div><strong>Maple Quiz</strong><p>Answer the same questions together.</p></div></li>
+          <li><span aria-hidden="true">🔥</span><div><strong>Campfire Four</strong><p>Take turns connecting four pieces.</p></div></li>
+        </ul>
+      </div>
+      <form class="room-card entrance-card" id="entry-form">
+        <h2>Find your people</h2>
+        <label for="player-name">Display name</label>
+        <input id="player-name" name="name" maxlength="24" placeholder="Your name" autocomplete="nickname" required>
+        <button class="room-button primary" type="submit" value="create" id="create-room">Create a room <span aria-hidden="true">↗</span></button>
+        <div class="room-divider"><span>or join a friend</span></div>
+        <label for="join-code">Room code</label>
+        <div class="room-field-line">
+          <input class="code-input" id="join-code" name="code" maxlength="12" placeholder="Room code" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button class="room-button secondary" type="submit" value="join" id="join-room">Join</button>
+        </div>
+        <p class="room-note">Anyone with the invite can join, so share it with people you know.</p>
+        <p id="entry-error" class="room-error" role="alert"></p>
+      </form>
+    </section>
+    <noscript><p class="room-note">Multiplayer requires JavaScript.</p></noscript>
+    <p class="connection" id="connection" role="status">Connecting to multiplayer…</p>
+    <section id="room" class="room-layout" aria-labelledby="room-title" hidden>
+      <header class="room-top">
+        <div>
+          <div class="eyebrow"><span class="tiny-sun" aria-hidden="true">✳</span> YOUR ROOM</div>
+          <h1 id="room-title" tabindex="-1"><span id="room-code"></span></h1>
+        </div>
+        <div class="room-actions">
+          <button class="room-button primary" type="button" id="copy-invite">Copy invite link</button>
+          <button class="room-button secondary" type="button" id="leave-room">Leave room</button>
+        </div>
+        <div id="invite-fallback" class="room-invite" hidden>
+          <label for="invite-url">Invite link</label>
+          <input id="invite-url" readonly>
+        </div>
+      </header>
+      <p id="room-feedback" class="room-feedback" role="status"></p>
+      <p id="game-status" class="room-sr-only" role="status"></p>
+      <div class="room-columns">
+        <section class="room-card room-game" aria-label="Room game" id="game"></section>
+        <div class="room-side">
+          <section class="room-card room-players" aria-labelledby="players-title">
+            <h2 id="players-title">Players</h2>
+            <ul id="players"></ul>
+          </section>
+          <section class="room-card room-chat" aria-labelledby="chat-title">
+            <div class="room-chat-head">
+              <h2 id="chat-title">Room chat</h2>
+              <button class="room-link" type="button" id="hide-chat" aria-expanded="true" aria-controls="chat-body">Hide chat</button>
+            </div>
+            <div id="chat-body">
+              <div class="conversation-card">
+                <h3>Conversation card</h3>
+                <p id="conversation-prompt" role="status"></p>
+                <button class="room-link" type="button" id="deal-prompt" hidden>Deal a prompt</button>
+              </div>
+              <ol id="chat-log" class="chat-log" role="log" aria-label="Room messages" tabindex="0"></ol>
+              <p id="chat-empty" class="room-note">Say hello to the room.</p>
+              <form id="chat-form">
+                <label for="chat-text" class="room-sr-only">Message</label>
+                <input id="chat-text" maxlength="240" autocomplete="off" placeholder="Say something…">
+                <button class="room-button primary" type="submit" id="send-chat">Send</button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer><a class="brand footer-brand" href="../"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Made with Canada in mind.</p><a href="../#games">BACK TO SOLO GAMES ↗</a></footer>
+</body>
+</html>
