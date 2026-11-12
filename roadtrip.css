@@ -1,0 +1,9 @@
+/* Tiny Road Trip */
+.rt-note {color:#69766a;font-size:.8rem;line-height:1.5;margin:-.6rem 0 1rem}
+.rt-routes {display:grid;gap:.6rem}
+.rt-route {display:flex;gap:.9rem;align-items:center;text-align:left;background:#f7f4eb;border:1px solid #d7ddce;border-radius:.7rem;color:#273f35;cursor:pointer;font:inherit;padding:.85rem 1rem;min-height:68px}
+.rt-route:hover {background:#edf3e9;border-color:#7b9a81}
+.rt-icon {font-size:1.7rem;line-height:1;min-width:2.25rem;text-align:center}
+.rt-route-copy {display:grid;gap:.25rem;flex:1}.rt-route-copy strong {font-family:Georgia,serif;font-size:1.08rem}.rt-route-copy span {color:#647268;font-size:.82rem;line-height:1.35}.rt-arrow {font-size:1.2rem}
+.rt-progress {display:flex;gap:.4rem;margin:.85rem 0 1.2rem}.rt-progress span {width:2.5rem;height:.28rem;border-radius:10px;background:#d9ded2}.rt-progress .is-current {background:#ba6c50}
+.rt-panel {margin-top:1.4rem}.rt-prompt {font-size:.76rem;font-weight:800;letter-spacing:.08em;margin:0 0 .8rem;color:#40594a}.rt-choice.is-selected {background:#dcebd8;border-color:#639368;box-shadow:inset 0 0 0 1px #639368}.rt-feedback {font-family:Georgia,serif;color:#3b5944;font-size:1rem;line-height:1.6}.rt-feedback:not(:empty) {margin:1rem 0}.rt-back {margin-top:.65rem}.rt-journal-list {margin:.3rem 0 1rem;padding-left:1.5rem;color:#415a48;line-height:1.8}.rt-journal-list li::first-letter {text-transform:uppercase}.rt-closing {color:#69766a;font-size:.9rem;line-height:1.5;margin:0}.rt-again {margin-top:1rem}.rt-route:focus-visible {outline:3px solid #d8744d;outline-offset:3px}
