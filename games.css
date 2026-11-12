@@ -1,0 +1,41 @@
+/* Styles for the self-contained browser games. */
+.fg-heading { margin-bottom: 1.5rem; }
+.fg-eyebrow { color: #a94d32; font: 700 .7rem/1.2 ui-monospace, monospace; letter-spacing: .12em; margin: 0 0 .65rem; }
+.fg-title { color: #273f35; font: 700 clamp(2rem, 4vw, 3rem)/1.05 Georgia, serif; letter-spacing: -.035em; margin: 0 0 .75rem; }
+.fg-intro, .fg-copy { color: #52645a; font-size: 1rem; line-height: 1.6; max-width: 42rem; margin: 0; }
+.fg-panel { background: #f7f4eb; border: 1px solid #dddccf; border-radius: 1rem; padding: clamp(1rem, 4vw, 1.75rem); }
+.fg-counter { color: #66766b; font: 700 .75rem/1.4 ui-monospace, monospace; letter-spacing: .04em; margin: 0 0 1rem; }
+.fg-question { color: #273f35; font: 700 clamp(1.2rem, 3vw, 1.6rem)/1.3 Georgia, serif; margin: 0 0 1.2rem; }
+.fg-choices { display: grid; gap: .6rem; }
+.fg-button, .fg-choice, .fg-card, .fg-square, .fg-link { font: inherit; cursor: pointer; }
+.fg-button { background: #294b3d; border: 1px solid #294b3d; border-radius: 999px; color: #fff; font-size: .9rem; font-weight: 700; min-height: 44px; padding: .72rem 1.2rem; }
+.fg-button:hover { background: #3d6352; }
+.fg-button-secondary { background: transparent; color: #294b3d; }
+.fg-button-secondary:hover { background: #e3e9df; }
+.fg-button:disabled, .fg-link:disabled { cursor: default; opacity: .55; }
+.fg-choice { background: #fffdf8; border: 1px solid #d6d9cd; border-radius: .65rem; color: #273f35; min-height: 48px; padding: .8rem 1rem; text-align: left; }
+.fg-choice:hover:not(:disabled) { background: #edf3e9; border-color: #6c8b77; }
+.fg-choice.is-correct { background: #dcebd8; border-color: #639368; color: #1f512b; }
+.fg-choice.is-wrong { background: #f9e2d9; border-color: #cf8b76; }
+.fg-choice:disabled { cursor: default; opacity: 1; }
+.fg-status { color: #395b45; font-size: .95rem; font-weight: 600; line-height: 1.5; margin: .9rem 0; min-height: 1.4em; }
+.fg-status:empty { margin: .3rem 0; min-height: 0; }
+.fg-letters { color: #294b3d; font: 700 clamp(1.4rem, 5vw, 2.2rem)/1.4 ui-monospace, monospace; letter-spacing: .08em; margin: 0 0 .8rem; overflow-wrap: anywhere; }
+.fg-hint { color: #59685e; line-height: 1.5; margin: 0 0 1rem; }
+.fg-form { align-items: end; display: flex; flex-wrap: wrap; gap: .7rem; }
+.fg-label { color: #374b3e; display: grid; flex: 1 1 12rem; font-size: .8rem; font-weight: 700; gap: .35rem; }
+.fg-input { background: #fffdf8; border: 1px solid #aab8aa; border-radius: .5rem; color: #253c30; font-family: inherit; font-size: 1rem; font-weight: 500; line-height: 1.4; min-height: 46px; padding: .65rem .75rem; width: 100%; }
+.fg-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem; margin-top: .4rem; }
+.fg-link { background: transparent; border: 0; color: #486753; font-size: .85rem; font-weight: 700; min-height: 44px; padding: .4rem .15rem; text-decoration: underline; }
+.fg-memory { display: grid; gap: .6rem; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 32rem; }
+.fg-card { aspect-ratio: 1; background: #d5e5d8; border: 1px solid #b8d0bd; border-radius: .75rem; color: #496e55; font-size: clamp(1.35rem, 5vw, 2.2rem); font-weight: bold; min-height: 54px; }
+.fg-card:hover:not(:disabled) { background: #c4ddc9; }
+.fg-card.is-open { background: #fffaf0; }
+.fg-card.is-matched { background: #e1efdd; border-color: #a6c4a4; opacity: 1; }
+.fg-bingo { display: grid; gap: .5rem; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 38rem; }
+.fg-square { background: #fffaf0; border: 1px solid #d8d8c7; border-radius: .7rem; color: #314a39; font-size: clamp(.72rem, 2vw, .9rem); font-weight: 700; min-height: 98px; padding: .6rem; }
+.fg-square:hover { border-color: #789780; }
+.fg-square.is-selected { background: #d9ead9; border-color: #6b9871; box-shadow: inset 0 0 0 2px #6b9871; }
+.fg-button:focus-visible, .fg-choice:focus-visible, .fg-card:focus-visible, .fg-square:focus-visible, .fg-link:focus-visible, .fg-input:focus-visible { outline: 3px solid #d8744d; outline-offset: 3px; }
+[hidden] { display: none !important; }
+@media (max-width: 450px) { .fg-memory { gap: .4rem; } .fg-bingo { gap: .35rem; } .fg-square { min-height: 88px; } }
