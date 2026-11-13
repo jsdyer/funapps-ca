@@ -42,6 +42,7 @@
   let gameRenderKey = '';
   let playersRenderKey = '';
   let recentAction = null;
+  let mosaic = null;
 
   function node(tag, className, text) {
     const item = document.createElement(tag);
@@ -140,6 +141,7 @@
     seat = value;
     snapshot = null;
     recentAction = null;
+    mosaic = null;
     pendingKick = null;
     retryDelay = 600;
     saveSeat(value);
@@ -170,6 +172,7 @@
     seat = null;
     snapshot = null;
     recentAction = null;
+    mosaic = null;
     pendingKick = null;
     room.hidden = true;
     entrance.hidden = false;
@@ -447,13 +450,14 @@
     const online = onlineCount();
     const isHost = snapshot.hostId === seat.playerId;
     const message = isHost
-      ? 'Pick a game when at least two players are connected. Anyone can use room chat while you wait.'
-      : 'The host will pick the next game. You can still use room chat.';
+      ? 'Start a mosaic now or pick a game once a second player joins.'
+      : 'The host will pick the next activity. You can still use room chat.';
     gameRegion.append(node('p', 'room-note', message));
     announceGame('In the room lobby. ' + online + ' players online.');
     const options = [
       { id: 'quiz', title: '🍁 Maple Quiz', description: 'Canadian trivia. Everyone answers each question before the reveal.', ready: online >= 2 },
-      { id: 'campfire', title: '🔥 Campfire Four', description: 'Two players connect four pieces in a line. The rest of the room can watch.', ready: online >= 2 }
+      { id: 'campfire', title: '🔥 Campfire Four', description: 'Two players connect four pieces in a line. The rest of the room can watch.', ready: online >= 2 },
+      { id: 'mosaic', title: '🎨 Cabin Mosaic', description: 'Make pixel art on a shared board and save it as a PNG.', ready: online >= 1 }
     ];
     for (const option of options) {
       const choice = button('', 'game-choice', () => void gameAction({ type: 'start', game: option.id }), !isHost || !option.ready || !connected || Boolean(recentAction));
@@ -574,14 +578,30 @@
     const key = JSON.stringify([stateKey, snapshot.players, snapshot.hostId, connected, Boolean(recentAction)]);
     if (key === gameRenderKey) return;
     gameRenderKey = key;
+    const isHost = snapshot.hostId === seat.playerId;
+    const mosaicState = { game, isHost, connected, busy: Boolean(recentAction) };
+    if (game?.kind === 'mosaic' && mosaic?.matchId === game.matchId) {
+      mosaic.view.update(mosaicState);
+      return;
+    }
+    mosaic = null;
     const focused = document.activeElement;
     const wasFocused = gameRegion.contains(focused);
     const focusKey = wasFocused ? focused.dataset.focusKey : null;
     gameRegion.replaceChildren();
-    const isHost = snapshot.hostId === seat.playerId;
     let title;
     if (game?.kind === 'quiz') title = showQuiz(game, isHost);
     else if (game?.kind === 'campfire') title = showCampfire(game, isHost);
+    else if (game?.kind === 'mosaic') {
+      const view = window.CabinMosaic.mount(gameRegion, mosaicState, {
+        paint: (activeGame, cell, color) => action({ type: 'paint', cell, color, matchId: activeGame.matchId }, 'mosaic-paint'),
+        clear: activeGame => action({ type: 'clear-mosaic', matchId: activeGame.matchId }, 'mosaic-clear'),
+        end: activeGame => gameAction({ type: 'end' }, activeGame)
+      });
+      mosaic = { matchId: game.matchId, view };
+      title = view.heading;
+      announceGame('Cabin Mosaic is open. Everyone in the room can paint.');
+    }
     else title = showGameMenu();
     restoreFocus(gameRegion, focusKey, title);
     if (wasFocused && !focusKey) title.focus({ preventScroll: true });

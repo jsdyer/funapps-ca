@@ -11,7 +11,8 @@ const SITE_FILES = [
   'index.html', 'favicon.svg', 'styles.css', 'games.css', 'postcards.css',
   'roadtrip.css', 'extra.css', 'games.js', 'postcards.js', 'roadtrip.js',
   'extra.js', 'extensions.js', 'app.js', 'multiplayer/index.html',
-  'multiplayer/rooms.css', 'multiplayer/rooms.js'
+  'rain-window.css', 'rain-window.js', 'postcard-maker.css', 'postcard-maker.js',
+  'multiplayer/rooms.css', 'multiplayer/rooms.js', 'multiplayer/mosaic.css', 'multiplayer/mosaic.js'
 ];
 const PUBLIC_FILES = new Map(SITE_FILES.map(file => ['/' + file, file]));
 PUBLIC_FILES.set('/', 'index.html');

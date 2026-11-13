@@ -1,0 +1,116 @@
+.rain-window {
+  display: grid;
+  gap: 1rem;
+}
+
+.rain-window-scene {
+  position: relative;
+  overflow: hidden;
+  height: clamp(98px, 20vh, 164px);
+  border: .45rem solid #4e483e;
+  border-radius: .8rem;
+  background:
+    linear-gradient(90deg, transparent 49%, #4e483e 49% 51%, transparent 51%),
+    linear-gradient(transparent 48%, #4e483e 48% 52%, transparent 52%),
+    linear-gradient(168deg, transparent 63%, #284748 63% 74%, transparent 74%),
+    linear-gradient(195deg, transparent 57%, #365b57 57% 72%, transparent 72%),
+    radial-gradient(ellipse at 74% 36%, #c4c5a2, transparent 42%),
+    linear-gradient(#435f69, #81928a 68%, #536f70 68%, #23424a);
+  isolation: isolate;
+}
+
+.rain-window-weather {
+  position: absolute;
+  inset: -34% -10%;
+  opacity: .6;
+  background-image:
+    repeating-linear-gradient(107deg, transparent 0 40px, #e9f4f08c 41px 42px, transparent 44px 65px),
+    repeating-linear-gradient(109deg, transparent 0 29px, #e9f4f055 30px 31px, transparent 32px 51px);
+  mask-image: repeating-linear-gradient(transparent 0 19px, #000 20px 28px, transparent 29px 51px);
+  pointer-events: none;
+}
+
+.rain-window-scene.is-playing .rain-window-weather {
+  animation: rain-window-drift 2s linear infinite;
+}
+
+@keyframes rain-window-drift {
+  from { transform: translate(0, -13px); }
+  to { transform: translate(-31px, 89px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rain-window-scene.is-playing .rain-window-weather { animation: none; }
+}
+
+.rain-window-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.rain-window-field {
+  display: grid;
+  gap: .35rem;
+  color: #374b3e;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.rain-window-select {
+  min-height: 44px;
+  width: 100%;
+  padding: .45rem .65rem;
+  border: 1px solid #aab8aa;
+  border-radius: .55rem;
+  background: #fffdf8;
+  color: #253c30;
+  font: inherit;
+}
+
+.rain-window-mixer {
+  display: grid;
+  gap: .55rem;
+  min-width: 0;
+  margin: 0;
+  padding: .5rem .9rem .65rem;
+  border: 1px solid #cfd9cd;
+  border-radius: .7rem;
+  background: #edf2ea;
+}
+
+.rain-window-mixer legend {
+  padding: 0 .35rem;
+  color: #374b3e;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.rain-window-slider {
+  display: grid;
+  color: #374b3e;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.rain-window-slider-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: .7rem;
+}
+
+.rain-window-slider input {
+  width: 100%;
+  min-height: 33px;
+  margin: 0;
+  accent-color: #3a604d;
+}
+
+.rain-window-select:focus-visible,
+.rain-window-slider input:focus-visible {
+  outline: 3px solid #d8744d;
+  outline-offset: 2px;
+}
+
+.rain-window-actions { margin: 0; }
+.rain-window-actions .fg-status { margin: 0; }

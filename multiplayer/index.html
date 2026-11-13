@@ -4,28 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f3e7">
-  <meta name="description" content="Play Canadian trivia and a fireside board game with friends in a private funapps.ca room.">
+  <meta name="description" content="Play Canadian trivia, make pixel art, or hang out with friends in a private funapps.ca room.">
   <title>Play together · funapps.ca</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="rooms.css">
+  <link rel="stylesheet" href="mosaic.css">
+  <script src="mosaic.js" defer></script>
   <script src="rooms.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to multiplayer</a>
   <header class="site-header">
     <a class="brand" href="../" aria-label="funapps.ca home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a>
-    <nav aria-label="Main navigation"><a class="nav-cta" href="../#games">Solo games <span aria-hidden="true">↗</span></a></nav>
+    <nav aria-label="Main navigation"><a class="nav-cta" href="../#games">Solo activities <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main class="rooms-main" id="main">
     <section id="entrance" class="entrance" aria-labelledby="intro-title">
       <div class="rooms-intro">
         <div class="eyebrow"><span class="tiny-sun" aria-hidden="true">✳</span> MULTIPLAYER</div>
         <h1 id="intro-title">Save a seat<br><em>for a friend.</em></h1>
-        <p>Start a room, share the invite, and settle in for Canadian trivia, a game of four in a row, or a good chat.</p>
-        <ul class="preview-games" aria-label="Multiplayer games">
+        <p>Start a room, share the invite, and settle in to play, make pixel art, or chat.</p>
+        <ul class="preview-games" aria-label="Multiplayer activities">
           <li><span aria-hidden="true">🍁</span><div><strong>Maple Quiz</strong><p>Answer the same questions together.</p></div></li>
           <li><span aria-hidden="true">🔥</span><div><strong>Campfire Four</strong><p>Take turns connecting four pieces.</p></div></li>
+          <li><span aria-hidden="true">🎨</span><div><strong>Cabin Mosaic</strong><p>Paint together on one shared board.</p></div></li>
         </ul>
       </div>
       <form class="room-card entrance-card" id="entry-form">
@@ -63,7 +66,7 @@
       <p id="room-feedback" class="room-feedback" role="status"></p>
       <p id="game-status" class="room-sr-only" role="status"></p>
       <div class="room-columns">
-        <section class="room-card room-game" aria-label="Room game" id="game"></section>
+        <section class="room-card room-game" aria-label="Room activity" id="game"></section>
         <div class="room-side">
           <section class="room-card room-players" aria-labelledby="players-title">
             <h2 id="players-title">Players</h2>
@@ -93,6 +96,6 @@
       </div>
     </section>
   </main>
-  <footer><a class="brand footer-brand" href="../"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Made with Canada in mind.</p><a href="../#games">BACK TO SOLO GAMES ↗</a></footer>
+  <footer><a class="brand footer-brand" href="../"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Made with Canada in mind.</p><a href="../#games">BACK TO SOLO ACTIVITIES ↗</a></footer>
 </body>
 </html>

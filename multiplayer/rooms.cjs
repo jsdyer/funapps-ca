@@ -2,11 +2,16 @@
 
 const { randomBytes, randomInt, randomUUID } = require('node:crypto');
 const { startGame, applyGameAction, viewGame, playerLeft } = require('./room-games.cjs');
+const { startMosaic, viewMosaic, updateMosaic } = require('./mosaic.cjs');
 
 const CODE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 const ROOM_LIMIT = 200;
 const PLAYER_LIMIT = 8;
 const CHAT_LIMIT = 40;
+const ACTION_WINDOW_MS = 10_000;
+const ACTION_LIMIT = 30;
+const PAINT_LIMIT = 80;
+const STREAM_BUFFER_LIMIT = 128 * 1024;
 const SEAT_GRACE_MS = 5 * 60_000;
 const HOST_GRACE_MS = 45_000;
 const CONVERSATION_CARDS = [
@@ -79,14 +84,21 @@ function createRooms() {
       })),
       messages: room.messages,
       prompt: room.prompt,
-      game: room.game ? { ...viewGame(room.game, viewer.id), matchId: room.matchId } : null
+      game: room.game ? {
+        ...(room.game.kind === 'mosaic' ? viewMosaic(room.game) : viewGame(room.game, viewer.id)),
+        matchId: room.matchId
+      } : null
     };
   }
 
   function send(seat, data) {
     const stream = seat.stream;
     if (!stream || stream.destroyed || stream.writableEnded) return;
-    if (!stream.write(data)) stream.destroy();
+    if (stream.writableLength + Buffer.byteLength(data) > STREAM_BUFFER_LIMIT) {
+      stream.destroy();
+      return;
+    }
+    stream.write(data);
   }
 
   function broadcast(room) {
@@ -99,7 +111,7 @@ function createRooms() {
   function addSeat(room, name) {
     const id = randomUUID();
     const token = randomBytes(24).toString('base64url');
-    room.seats.set(token, { id, name, stream: null, offlineSince: Date.now(), writes: [], lastChat: 0 });
+    room.seats.set(token, { id, name, stream: null, offlineSince: Date.now(), writes: [], strokes: [], lastChat: 0 });
     if (!room.hostId) room.hostId = id;
     broadcast(room);
     return { code: room.code, playerId: id, token };
@@ -152,7 +164,7 @@ function createRooms() {
       seat.stream = null;
       stream.end();
     }
-    if (room.game) playerLeft(room.game, seat.id);
+    if (room.game && room.game.kind !== 'mosaic') playerLeft(room.game, seat.id);
     chooseHost(room, Date.now());
     if (!room.seats.size) rooms.delete(room.code);
   }
@@ -182,12 +194,14 @@ function createRooms() {
     const room = roomByCode(code);
     const seat = seatByToken(room, token);
     const now = Date.now();
-    seat.writes = seat.writes.filter(at => at > now - 10_000);
-    if (seat.writes.length >= 30) throw new RoomError(429, 'Slow down for a few seconds.');
-    seat.writes.push(now);
+    const rateBucket = data.type === 'paint' ? 'strokes' : 'writes';
+    const limit = data.type === 'paint' ? PAINT_LIMIT : ACTION_LIMIT;
+    seat[rateBucket] = seat[rateBucket].filter(at => at > now - ACTION_WINDOW_MS);
+    if (seat[rateBucket].length >= limit) throw new RoomError(429, 'Slow down for a few seconds.');
+    seat[rateBucket].push(now);
 
     const isHost = room.hostId === seat.id;
-    if (['start', 'end', 'lock', 'kick', 'prompt'].includes(data.type) && !isHost) {
+    if (['start', 'end', 'lock', 'kick', 'prompt', 'clear-mosaic'].includes(data.type) && !isHost) {
       throw new RoomError(403, 'Only the host can do that.');
     }
 
@@ -201,14 +215,21 @@ function createRooms() {
         break;
       }
       case 'start': {
-        if (!['quiz', 'campfire'].includes(data.game)) throw new RoomError(400, 'Choose a game from the room.');
-        if (room.game && viewGame(room.game, seat.id).phase !== 'finished') {
-          throw new RoomError(409, 'Finish or end the current game first.');
+        if (!['quiz', 'campfire', 'mosaic'].includes(data.game)) {
+          throw new RoomError(400, 'Choose an activity from the room.');
         }
-        const online = [...room.seats.values()].filter(item => item.stream && item !== seat);
-        if (!seat.stream || !online.length) throw new RoomError(409, 'Two connected players are needed to start.');
-        const playerIds = [seat.id, ...online.map(item => item.id)];
-        room.game = startGame(data.game, data.game === 'campfire' ? playerIds.slice(0, 2) : playerIds);
+        if (room.game && room.game.phase !== 'finished') {
+          throw new RoomError(409, 'Finish or end the current activity first.');
+        }
+        if (!seat.stream) throw new RoomError(409, 'Reconnect to the room first.');
+        if (data.game === 'mosaic') {
+          room.game = startMosaic();
+        } else {
+          const online = [...room.seats.values()].filter(item => item.stream && item !== seat);
+          if (!online.length) throw new RoomError(409, 'Two connected players are needed to start.');
+          const playerIds = [seat.id, ...online.map(item => item.id)];
+          room.game = startGame(data.game, data.game === 'campfire' ? playerIds.slice(0, 2) : playerIds);
+        }
         room.matchId = randomUUID();
         break;
       }
@@ -233,6 +254,18 @@ function createRooms() {
       case 'leave':
         removeSeat(room, token, seat);
         break;
+      case 'paint':
+      case 'clear-mosaic':
+        if (room.game?.kind !== 'mosaic' || data.matchId !== room.matchId) {
+          throw new RoomError(409, 'That mosaic has changed. Try again.');
+        }
+        if (!seat.stream) throw new RoomError(409, 'Reconnect to the room first.');
+        try {
+          if (!updateMosaic(room.game, data)) return;
+        } catch (error) {
+          throw new RoomError(400, error.message);
+        }
+        break;
       case 'end':
       case 'answer':
       case 'reveal':
@@ -243,6 +276,7 @@ function createRooms() {
           room.game = null;
           room.matchId = null;
         } else {
+          if (room.game.kind === 'mosaic') throw new RoomError(409, 'That action is unavailable on the mosaic.');
           try {
             applyGameAction(room.game, seat.id, data, isHost);
           } catch (error) {

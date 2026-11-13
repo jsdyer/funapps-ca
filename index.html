@@ -12,18 +12,22 @@
   <link rel="stylesheet" href="postcards.css">
   <link rel="stylesheet" href="roadtrip.css">
   <link rel="stylesheet" href="extra.css">
+  <link rel="stylesheet" href="rain-window.css">
+  <link rel="stylesheet" href="postcard-maker.css">
   <script src="games.js" defer></script>
   <script src="postcards.js" defer></script>
   <script src="roadtrip.js" defer></script>
   <script src="extra.js" defer></script>
+  <script src="rain-window.js" defer></script>
+  <script src="postcard-maker.js" defer></script>
   <script src="extensions.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
-<a class="skip-link" href="#games">Skip to the games</a>
+<a class="skip-link" href="#games">Skip to activities</a>
 <header class="site-header">
   <a class="brand" href="#top" aria-label="funapps.ca home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a>
-  <nav aria-label="Main navigation"><a href="#games">The games</a><a href="#about">Our little corner</a><a class="nav-cta" href="multiplayer/">Play together <span aria-hidden="true">↗</span></a></nav>
+  <nav aria-label="Main navigation"><a href="#games">Activities</a><a href="#about">Our little corner</a><a class="nav-cta" href="multiplayer/">Play together <span aria-hidden="true">↗</span></a></nav>
 </header>
 <main id="top">
   <section class="hero" aria-labelledby="hero-title">
@@ -69,7 +73,7 @@
   <section class="multiplayer-callout" aria-labelledby="multiplayer-heading">
     <div>
       <h2 id="multiplayer-heading">Play together</h2>
-      <p>Invite friends for a round of Maple Quiz or Campfire Four. Up to eight people can hang out and chat in a room.</p>
+      <p>Make a shared pixel mural, play a game, or just chat. Rooms hold up to eight people.</p>
     </div>
     <a class="button button-dark" href="multiplayer/">Open multiplayer <span aria-hidden="true">↗</span></a>
   </section>
@@ -77,9 +81,9 @@
     <div class="about-art" aria-hidden="true"><div class="sun-icon">✳</div><span>FOR THE JOY<br>OF IT ALL.</span><div class="about-wave">〰</div></div>
     <div class="about-copy"><div class="eyebrow"><span class="tiny-sun">✳</span> NICE TO HAVE YOU HERE</div><h2>A little less scroll.<br><em>A little more play.</em></h2><p>Fun doesn’t have to be complicated. This is a place for tiny adventures, peaceful puzzles, and the occasional very Canadian detour.</p><p>Come as you are, play at your own pace, and leave whenever real life calls. We’ll be here when you need another break.</p><a class="button button-light" href="#games">Back to the fun <span aria-hidden="true">↗</span></a></div>
   </section>
-  <section class="next-section"><div><div class="eyebrow"><span class="tiny-sun">✳</span> MORE GOOD THINGS AHEAD</div><h2>We're just getting <em>started.</em></h2><p>There are more little adventures on the horizon: rainy-day soundscapes, a Canadian roadside oddities collection, and cozy seasonal games. Stay curious.</p></div><span class="next-mark" aria-hidden="true">✳</span></section>
+  <section class="next-section"><div><div class="eyebrow"><span class="tiny-sun">✳</span> MORE GOOD THINGS AHEAD</div><h2>We're just getting <em>started.</em></h2><p>There are more little adventures on the horizon: a Canadian roadside oddities collection and cozy seasonal activities. Stay curious.</p></div><span class="next-mark" aria-hidden="true">✳</span></section>
 </main>
 <footer><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Little things. Good times. Made with Canada in mind. <span aria-hidden="true">♥</span></p><a href="#top">BACK TO TOP ↑</a></footer>
-<dialog id="game-dialog" aria-labelledby="dialog-title"><div class="dialog-header"><div><div class="eyebrow">✳ &nbsp; YOUR FUN BREAK</div><h2 id="dialog-title"></h2></div><button class="close-button" id="close-dialog" aria-label="Close game">×</button></div><div id="game-container"></div></dialog>
+<dialog id="game-dialog" aria-labelledby="dialog-title"><div class="dialog-header"><div><div class="eyebrow">✳ &nbsp; YOUR FUN BREAK</div><h2 id="dialog-title"></h2></div><button class="close-button" id="close-dialog" aria-label="Close activity">×</button></div><div id="game-container"></div></dialog>
 </body>
 </html>

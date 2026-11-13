@@ -7,7 +7,7 @@
   const filterNote = document.getElementById('filter-note');
   let lastTrigger;
   if (!window.FunGames || !Array.isArray(window.FunGames.list)) {
-    grid.textContent = 'The games could not load. Please refresh and try again.';
+    grid.textContent = 'The activities could not load. Please refresh and try again.';
     return;
   }
   const games = window.FunGames.list;
@@ -47,10 +47,8 @@
       grid.append(empty); return;
     }
     visibleGames.forEach(game => {
-      const index = games.indexOf(game);
       const card = document.createElement('article'); card.className = 'game-card';
       const art = document.createElement('div'); art.className = 'card-art';
-      const number = document.createElement('span'); number.className = 'card-number'; number.setAttribute('aria-hidden','true'); number.textContent = String(index + 1).padStart(2, '0') + ' / PLAY';
       const icon = document.createElement('span'); icon.className = 'card-symbol'; icon.setAttribute('aria-hidden','true'); icon.textContent = game.icon || '✳';
       const favorite = document.createElement('button'); favorite.type = 'button'; favorite.className = 'card-favorite';
       const active = favorites.has(game.id); favorite.setAttribute('aria-pressed', String(active)); favorite.setAttribute('aria-label', `Save ${game.title}`); favorite.textContent = active ? '♥' : '♡';
@@ -64,12 +62,17 @@
           filterNote.textContent = `${saved ? 'Saved' : 'Removed'} ${game.title} · ${storageAvailable ? 'Saved picks stay in this browser' : 'Saved picks last for this visit'}`;
         }
       });
-      art.append(number, icon, favorite);
+      art.append(icon, favorite);
       const body = document.createElement('div'); body.className = 'card-body';
       const tag = document.createElement('span'); tag.className = 'game-tag'; tag.textContent = game.tag;
       const heading = document.createElement('h3'); heading.textContent = game.title;
       const desc = document.createElement('p'); desc.textContent = game.description;
-      const button = document.createElement('button'); button.type = 'button'; button.className = 'play-button'; button.setAttribute('aria-label', `Play ${game.title}`); button.innerHTML = 'LET’S PLAY <span aria-hidden="true">↗</span>';
+      const button = document.createElement('button');
+      const explore = isExploration(game);
+      button.type = 'button';
+      button.className = 'play-button';
+      button.setAttribute('aria-label', `${explore ? 'Open' : 'Play'} ${game.title}`);
+      button.innerHTML = explore ? 'OPEN <span aria-hidden="true">↗</span>' : 'LET’S PLAY <span aria-hidden="true">↗</span>';
       button.addEventListener('click', () => openGame(game, button));
       body.append(tag, heading, desc, button); card.append(art, body); grid.append(card);
     });
