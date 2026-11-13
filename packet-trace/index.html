@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081016">
+  <meta name="description" content="Investigate and contain a simulated network intrusion in a 3D incident response game.">
+  <title>Packet Trace · funapps.ca</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="engine.js" defer></script>
+  <script src="scene.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the mission</a>
+  <header class="terminal-header">
+    <div class="header-inner">
+      <a class="brand" href="../" aria-label="funapps.ca home"><span class="brand-mark" aria-hidden="true">✳</span> funapps.ca</a>
+      <a class="home-link" href="../#games"><span aria-hidden="true">←</span> All activities</a>
+    </div>
+  </header>
+
+  <main class="layout" id="main">
+    <div class="intro">
+      <div>
+        <p class="eyebrow">Network incident response</p>
+        <h1>Packet Trace</h1>
+        <p>Follow suspicious traffic, work out which hosts were compromised, and bring the network back online.</p>
+      </div>
+      <div class="mission-picker">
+        <label for="mission-select">Mission
+          <select id="mission-select"><option value="">Loading missions…</option></select>
+        </label>
+        <button id="restart-mission" type="button">Restart</button>
+      </div>
+    </div>
+
+    <noscript><p class="notice">Packet Trace needs JavaScript to run the simulation.</p></noscript>
+
+    <dl class="status-bar" aria-label="Mission status">
+      <div><dt>Difficulty</dt><dd id="mission-difficulty">—</dd></div>
+      <div><dt>Turn</dt><dd id="turn-stat">—</dd></div>
+      <div><dt>Availability</dt><dd id="availability-stat">—</dd></div>
+      <div><dt>Incident status</dt><dd id="status-stat">—</dd></div>
+    </dl>
+
+    <div class="dashboard">
+      <section class="panel mission-panel" aria-labelledby="mission-heading">
+        <header class="panel-header"><h2 id="mission-heading">Mission briefing</h2></header>
+        <div class="panel-body">
+          <h3 id="mission-title" class="briefing-title"></h3>
+          <p id="mission-briefing" class="briefing-copy"></p>
+          <h3 class="panel-subtitle">Objective</h3>
+          <p id="mission-objective" class="briefing-copy objective"></p>
+          <details class="playbook">
+            <summary>Response playbook</summary>
+            <ol>
+              <li>Follow alerts and scan devices for evidence. An alert alone doesn’t prove compromise.</li>
+              <li>Isolate a compromised device, rotate its credentials, then restore it to the network.</li>
+              <li>Each successful action advances the incident. Keep critical devices online when you can.</li>
+            </ol>
+          </details>
+          <h3 class="panel-subtitle">Network devices</h3>
+          <ul id="node-list" class="nodes" aria-label="Choose a network device"></ul>
+        </div>
+      </section>
+
+      <section class="panel map-panel" aria-labelledby="map-heading">
+        <header class="panel-header map-header">
+          <h2 id="map-heading">Network topology</h2>
+          <ul class="legend" aria-label="Network status colours">
+            <li><span class="swatch" aria-hidden="true"></span> Online</li>
+            <li><span class="swatch blue" aria-hidden="true"></span> Isolated</li>
+            <li><span class="swatch amber" aria-hidden="true"></span> Flagged</li>
+            <li><span class="swatch green" aria-hidden="true"></span> Remediated</li>
+          </ul>
+        </header>
+        <div class="viewport">
+          <canvas id="topology" aria-label="Interactive 3D network topology" aria-describedby="map-help">
+            Use the network device list to select a host and investigate the incident.
+          </canvas>
+          <p id="scene-note" class="scene-note" role="status" hidden></p>
+        </div>
+        <div class="map-toolbar">
+          <p id="map-help">Drag to orbit. Scroll to zoom. Select a device on the map or in the list. <a href="#inspector-heading">Open inspector ↓</a></p>
+          <div class="view-tools" role="group" aria-label="3D camera controls">
+            <button id="view-left" type="button" aria-label="Rotate view left" title="Rotate left">←</button>
+            <button id="view-right" type="button" aria-label="Rotate view right" title="Rotate right">→</button>
+            <button id="view-up" type="button" aria-label="Tilt view up" title="Tilt up">↑</button>
+            <button id="view-down" type="button" aria-label="Tilt view down" title="Tilt down">↓</button>
+            <button id="view-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+            <button id="view-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+            <button id="view-reset" type="button" aria-label="Reset view" title="Reset view">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel inspector-panel" aria-labelledby="inspector-heading">
+        <header class="panel-header"><h2 id="inspector-heading">Device inspector</h2></header>
+        <div class="panel-body inspector-content">
+          <h3 id="node-title">Select a device</h3>
+          <p id="node-description"></p>
+          <ul id="node-lines" class="node-lines" aria-label="Device information"></ul>
+          <h3 class="panel-subtitle">Respond</h3>
+          <div class="action-list" role="group" aria-label="Incident actions">
+            <button id="scan-node" class="primary-button" type="button" title="Read the device logs">Scan</button>
+            <button id="isolate-node" type="button" title="Take this device off the network">Isolate</button>
+            <button id="rotate-node" type="button" title="Rotate the credentials on this device">Rotate credentials</button>
+            <button id="restore-node" type="button" title="Reconnect the device to the network">Restore</button>
+            <button id="wait-turn" type="button" title="Advance the simulation by one turn">Wait a turn</button>
+          </div>
+          <p id="feedback" class="feedback" role="status"></p>
+        </div>
+      </section>
+
+      <section class="panel console-panel" aria-labelledby="console-heading">
+        <header class="panel-header"><h2 id="console-heading">Command console</h2></header>
+        <pre class="console" id="command-output" tabindex="0" aria-label="Command output"></pre>
+        <form id="command-form" class="command-form">
+          <label class="sr-only" for="command-input">Simulated command</label>
+          <input id="command-input" type="text" placeholder="help" spellcheck="false" autocomplete="off" autocapitalize="off">
+          <button type="submit">Run</button>
+        </form>
+        <p class="terminal-help">Type <code>help</code> for the commands available in this simulation.</p>
+      </section>
+
+      <section class="panel timeline-panel" aria-labelledby="timeline-heading">
+        <header class="panel-header"><h2 id="timeline-heading">Incident timeline</h2></header>
+        <div class="panel-body">
+          <ol id="event-list" class="timeline" tabindex="0" aria-label="Incident events"></ol>
+        </div>
+      </section>
+    </div>
+
+    <section id="report" class="result-panel" aria-labelledby="report-title" tabindex="-1" hidden>
+      <h2 id="report-title">Mission report</h2>
+      <div class="report-metrics">
+        <p>Grade <strong id="report-grade"></strong></p>
+        <p>Score <strong id="report-score"></strong></p>
+      </div>
+      <p id="report-summary"></p>
+      <ul id="report-details"></ul>
+    </section>
+
+    <footer class="footer">This simulation runs entirely in your browser. All devices and traffic are fictional.</footer>
+  </main>
+</body>
+</html>

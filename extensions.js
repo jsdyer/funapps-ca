@@ -24,6 +24,14 @@
   };
 
   extensions.forEach(extension => games.list.push(extension.info));
+  games.list.unshift({
+    id: 'packet-trace',
+    title: 'Packet Trace',
+    description: 'Investigate a breach on a 3D network map. Trace the pivot, contain it, and bring services back online.',
+    tag: '3D INCIDENT RESPONSE',
+    icon: '⌬',
+    href: 'packet-trace/'
+  });
   games.mount = function (id, container) {
     const extension = extensions.find(item => item.info.id === id);
     games.unmount(container);

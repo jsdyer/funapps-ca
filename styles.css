@@ -32,3 +32,18 @@
     flex-direction: column;
   }
 }
+
+
+.game-card.packet-card .card-art {
+  background: radial-gradient(ellipse at 50% 35%, #1a4e48, #0a2225 72%);
+  color: #9de9d4;
+}
+
+.packet-card .card-symbol {
+  color: #b6ffe8;
+  text-shadow: 0 0 20px #76d2b9;
+}
+
+.game-card a.play-button {
+  text-decoration: none;
+}

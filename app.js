@@ -24,6 +24,10 @@
     catch (_) { storageAvailable = false; }
   }
   function openGame(game, trigger) {
+    if (game.href) {
+      window.location.assign(game.href);
+      return;
+    }
     lastTrigger = trigger || document.activeElement;
     title.textContent = game.title;
     window.FunGames.mount(game.id, container);
@@ -48,6 +52,7 @@
     }
     visibleGames.forEach(game => {
       const card = document.createElement('article'); card.className = 'game-card';
+      if (game.id === 'packet-trace') card.classList.add('packet-card');
       const art = document.createElement('div'); art.className = 'card-art';
       const icon = document.createElement('span'); icon.className = 'card-symbol'; icon.setAttribute('aria-hidden','true'); icon.textContent = game.icon || '✳';
       const favorite = document.createElement('button'); favorite.type = 'button'; favorite.className = 'card-favorite';
@@ -67,13 +72,14 @@
       const tag = document.createElement('span'); tag.className = 'game-tag'; tag.textContent = game.tag;
       const heading = document.createElement('h3'); heading.textContent = game.title;
       const desc = document.createElement('p'); desc.textContent = game.description;
-      const button = document.createElement('button');
+      const button = document.createElement(game.href ? 'a' : 'button');
       const explore = isExploration(game);
-      button.type = 'button';
+      if (game.href) button.href = game.href;
+      else button.type = 'button';
       button.className = 'play-button';
       button.setAttribute('aria-label', `${explore ? 'Open' : 'Play'} ${game.title}`);
       button.innerHTML = explore ? 'OPEN <span aria-hidden="true">↗</span>' : 'LET’S PLAY <span aria-hidden="true">↗</span>';
-      button.addEventListener('click', () => openGame(game, button));
+      if (!game.href) button.addEventListener('click', () => openGame(game, button));
       body.append(tag, heading, desc, button); card.append(art, body); grid.append(card);
     });
   }

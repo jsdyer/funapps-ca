@@ -4,6 +4,7 @@ A little corner of the internet for casual games, curious detours, and feel-good
 
 ## Activities
 
+- **Packet Trace** — investigate and contain three simulated network breaches on a rotatable 3D topology. Use the device inspector or command console to follow evidence, isolate hosts, rotate credentials, and restore services.
 - **The Canada Quiz** — eight randomly selected trivia questions, with immediate feedback.
 - **The Great Unscramble** — Canadian-flavoured word puzzles with hints and answer reveal.
 - **Cabin Match** — a relaxed six-pair memory game with no clock.
@@ -15,6 +16,14 @@ A little corner of the internet for casual games, curious detours, and feel-good
 - **Postcard Maker** — customize an illustrated scene, stamp, and message, then download a PNG.
 
 Browse by activity type, choose a random activity, or save favourite picks for later. Favourites are stored in the browser's local storage, not on a server; they may disappear if browser data is cleared. If local storage is unavailable they last only until the page closes. In-progress games and artwork reset when closed. Postcard links are optional external links; nothing is fetched for the activities themselves.
+
+## Packet Trace
+
+Open **Packet Trace** from the activity collection or visit `/packet-trace/`. Each incident advances on successful actions, so reading logs, checking links, and moving the camera leave the turn counter alone. The mission briefing identifies what needs to be restored. The debrief scores your response on speed, service availability, and whether the intrusion spread.
+
+Use the map or the device list to select a node. The console supports `help`, `nodes`, `inspect`, `links`, `scan`, `isolate`, `rotate`, `restore`, `wait`, `brief`, `status`, `report`, and `clear`. For example, type `nodes` to see device IDs, then `scan <device-id>` to collect evidence. The same actions are available as buttons.
+
+The network and incidents are fictional. The game runs entirely in the browser and sends no commands to real hosts. It works on static hosting and uses no packages or external services. Keep `packet-trace/` intact when publishing the browser assets. The scenarios and rules live in `engine.js`, the 3D camera and drawing code in `scene.js`, and the interface in `app.js`.
 
 ## Multiplayer
 

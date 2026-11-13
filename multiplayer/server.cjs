@@ -12,11 +12,14 @@ const SITE_FILES = [
   'roadtrip.css', 'extra.css', 'games.js', 'postcards.js', 'roadtrip.js',
   'extra.js', 'extensions.js', 'app.js', 'multiplayer/index.html',
   'rain-window.css', 'rain-window.js', 'postcard-maker.css', 'postcard-maker.js',
+  'packet-trace/index.html', 'packet-trace/styles.css', 'packet-trace/app.js',
+  'packet-trace/engine.js', 'packet-trace/scene.js',
   'multiplayer/rooms.css', 'multiplayer/rooms.js', 'multiplayer/mosaic.css', 'multiplayer/mosaic.js'
 ];
 const PUBLIC_FILES = new Map(SITE_FILES.map(file => ['/' + file, file]));
 PUBLIC_FILES.set('/', 'index.html');
 PUBLIC_FILES.set('/multiplayer/', 'multiplayer/index.html');
+PUBLIC_FILES.set('/packet-trace/', 'packet-trace/index.html');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -128,9 +131,9 @@ function createApp() {
       }
 
       if (method === 'GET' || method === 'HEAD') {
-        if (pathname === '/multiplayer') {
+        if (pathname === '/multiplayer' || pathname === '/packet-trace') {
           const url = new URL(request.url, 'http://localhost');
-          response.writeHead(308, { Location: '/multiplayer/' + url.search });
+          response.writeHead(308, { Location: pathname + '/' + url.search });
           return response.end();
         }
         const file = PUBLIC_FILES.get(pathname);
