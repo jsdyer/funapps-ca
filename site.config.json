@@ -4,6 +4,120 @@
   "description": "A little Canadian arcade: Maritime food games, curious adventures, clickers, puzzles and creative escapes. Pick something and play.",
   "games": [
     {
+      "slug": "rockies-explorer",
+      "name": "Westward: A Maritimer in the Rockies",
+      "url": "https://funapps.ca/play/rockies-explorer/",
+      "description": "Trade sea-level strolls for mountain lookouts. Plan climbs, collect sketches, and find your way home on Banff- and Jasper-inspired expeditions.",
+      "category": "Roads & trails",
+      "icon": "🏔️",
+      "color": "#b8ccd3",
+      "technology": "Svelte + TypeScript + SVG",
+      "controls": [
+        "Choose connected trails and compare their daylight and energy costs.",
+        "Collect the expedition’s lookout sketches and use rest stops wisely.",
+        "Return to the trailhead before daylight runs out."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "prairie-windrider",
+      "name": "Prairie Windrider",
+      "url": "https://funapps.ca/play/prairie-windrider/",
+      "description": "A Maritime sailor finds a sea of grass. Read the wind and steer a land yacht across prairie courses to deliver your postcards.",
+      "category": "Puzzles & planning",
+      "icon": "🌾",
+      "color": "#e7cf91",
+      "technology": "p5.js + Canvas 2D",
+      "controls": [
+        "Choose your heading and sail strength before each move.",
+        "Use the wind to reach delivery stops while avoiding obstacles.",
+        "Complete each course within its move allowance."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "arctic-expedition",
+      "name": "North of the Harbour",
+      "url": "https://funapps.ca/play/arctic-expedition/",
+      "description": "Leave the familiar harbour for a fictional northern research expedition. Read the forecast, choose camps, and bring your observations home.",
+      "category": "Roads & trails",
+      "icon": "❄️",
+      "color": "#b9d8e4",
+      "technology": "Vue + TypeScript + SVG",
+      "controls": [
+        "Choose routes and camp actions using the expedition map and buttons.",
+        "Balance supplies, warmth, and energy against the weather forecast.",
+        "Complete your observations and return to base."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "quebec-bonjour",
+      "name": "Bonjour, voisin! — Québec",
+      "url": "https://funapps.ca/play/quebec-bonjour/",
+      "description": "Follow a friendly errand trail through a Québec neighbourhood. Collect clues, practise a little French, and get everyone ready for a gathering—with English help whenever you want it.",
+      "category": "Words & stories",
+      "icon": "⚜️",
+      "color": "#c3c7e6",
+      "technology": "Alpine.js + SVG",
+      "controls": [
+        "Explore the neighbourhood and talk to its residents.",
+        "Use clues, collected items, and your phrase notebook to complete the errands.",
+        "Show English translations or hints at any time without penalty."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "cabot-tower-signals",
+      "name": "Signal Hill: Harbour Watch",
+      "url": "https://funapps.ca/play/cabot-tower-signals/",
+      "description": "Take a turn at Cabot Tower’s fictional harbour watch. Decode signals, consult the codebook, and send the right reply across the water.",
+      "category": "Words & stories",
+      "icon": "📡",
+      "color": "#b8d2d4",
+      "technology": "Web Components + Web Audio + SVG",
+      "controls": [
+        "Read the visual Morse signal and use the codebook to decode it.",
+        "Build your reply with dot and dash buttons, then submit it.",
+        "Optional audio starts only when requested; every mission is playable silently."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "niagara-currents",
+      "name": "Niagara: Current Keeper",
+      "url": "https://funapps.ca/play/niagara-currents/",
+      "description": "A Maritimer meets the mighty inland falls. Turn channels, plan the water’s path, and make every drop count in Niagara-inspired flow puzzles.",
+      "category": "Puzzles & planning",
+      "icon": "💦",
+      "color": "#a7d4d2",
+      "technology": "React + TypeScript + SVG",
+      "controls": [
+        "Select channel tiles and rotate them to connect the water’s path.",
+        "Meet the flow targets without spilling water.",
+        "Release the water, inspect the result, and undo or retry your arrangement."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
       "slug": "fundy-tidekeeper",
       "name": "Fundy Tidekeeper",
       "url": "https://funapps.ca/play/fundy-tidekeeper/",

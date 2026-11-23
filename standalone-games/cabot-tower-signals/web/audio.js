@@ -1,0 +1,8 @@
+import {audioEvents} from './engine.js';
+export class SignalAudio {
+ constructor(){this.context=null;this.enabled=false;this.nodes=[];this.version=0;}
+ async setEnabled(enabled){this.stop();const version=this.version;this.enabled=Boolean(enabled);if(!enabled)return false;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw new Error('Audio unavailable');this.context??=new Audio();await this.context.resume();return this.enabled&&version===this.version;}catch(error){if(version===this.version)this.enabled=false;throw error;}}
+ async play(word){if(!this.enabled)return;this.stop();const version=this.version;await this.context.resume();if(!this.enabled||version!==this.version)return;const plan=audioEvents(word),start=this.context.currentTime+.02;for(const event of plan.events){const osc=this.context.createOscillator(),gain=this.context.createGain();osc.type='sine';osc.frequency.value=640;gain.gain.setValueAtTime(0,start+event.start);gain.gain.linearRampToValueAtTime(.11,start+event.start+.008);gain.gain.setValueAtTime(.11,start+event.start+event.duration-.008);gain.gain.linearRampToValueAtTime(0,start+event.start+event.duration);osc.connect(gain);gain.connect(this.context.destination);osc.start(start+event.start);osc.stop(start+event.start+event.duration+.01);this.nodes.push(osc);osc.onended=()=>{osc.disconnect();gain.disconnect();this.nodes=this.nodes.filter(n=>n!==osc);};}return plan.duration;}
+ stop(){this.version++;for(const osc of this.nodes){try{osc.stop();}catch{}}this.nodes=[];}
+ close(){this.stop();this.context?.close().catch(()=>{});this.context=null;this.enabled=false;}
+}

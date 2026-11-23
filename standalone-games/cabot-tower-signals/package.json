@@ -1,0 +1,10 @@
+{
+  "name": "funapps-cabot-tower-signals",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node --check web/app.js && node --check web/engine.js && node --check web/audio.js"
+  }
+}

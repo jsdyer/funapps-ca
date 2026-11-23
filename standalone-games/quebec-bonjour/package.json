@@ -1,0 +1,1 @@
+{"name":"funapps-quebec-bonjour","version":"1.0.0","private":true,"type":"module","scripts":{"build":"node build.mjs","test":"node --test tests/*.test.mjs"},"dependencies":{"alpinejs":"3.17.5"},"devDependencies":{"esbuild":"0.28.2"}}

@@ -2,7 +2,7 @@
 
 A little corner of the internet for casual games, curious detours, and feel-good fun. Built for funapps.ca with Canada in mind.
 
-The public Netlify hub includes a configurable directory of standalone games, the original local activities below, and a central sitemap. The original games retain their own hosting; six new games are bundled into this hub at `/play/<slug>/`. Every catalogue game also gets a descriptive page.
+The public Netlify hub includes a configurable directory of standalone games, the original local activities below, and a central sitemap. The original games retain their own hosting; regional games are bundled into this hub at `/play/<slug>/`. Every catalogue game also gets a descriptive page.
 
 ## Publish the FunApps hub on Netlify
 
@@ -53,7 +53,7 @@ The builder rejects duplicate slugs, duplicate play URLs, unsafe URLs and malfor
 
 Run the focused build checks with `python3 -m unittest test_build.py`.
 
-## Six regional games
+## Regional games
 
 | Game | Browser technology | Play path |
 | --- | --- | --- |
@@ -63,10 +63,16 @@ Run the focused build checks with `python3 -m unittest test_build.py`.
 | PEI Potato Harvest | Svelte and TypeScript | `/play/pei-potato-harvest/` |
 | Newfoundland Ferry | React, TypeScript and SVG | `/play/newfoundland-ferry/` |
 | Postcards from Canada | Vue, TypeScript and SVG | `/play/canada-roadtrip/` |
+| Westward: A Maritimer in the Rockies | Svelte + TypeScript + SVG | `/play/rockies-explorer/` |
+| Prairie Windrider | p5.js + Canvas 2D | `/play/prairie-windrider/` |
+| North of the Harbour | Vue + TypeScript + SVG | `/play/arctic-expedition/` |
+| Bonjour, voisin! — Québec | Alpine.js + SVG | `/play/quebec-bonjour/` |
+| Signal Hill: Harbour Watch | Web Components + Web Audio + SVG | `/play/cabot-tower-signals/` |
+| Niagara: Current Keeper | React + TypeScript + SVG | `/play/niagara-currents/` |
 
 Each game's source, tests, reference notes, and build instructions are in its `standalone-games/<slug>/` directory. The generated `web/` releases are committed, including framework code, so the production Python build needs no npm downloads. There are no runtime CDN dependencies or API keys. Rebuild a game's release after changing its source; commit both source and release.
 
-To install locked dependencies, run all six rule-test suites, and rebuild the framework releases:
+To install locked dependencies, run the regional game rule-test suites, and rebuild the framework releases:
 
 ```sh
 python3 scripts/build_new_games.py --install --test
