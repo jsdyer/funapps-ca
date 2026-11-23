@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SOME GOOD! — The Great Maritime Gauntlet</title>
+<meta name="description" content="8 tiny tests of East Coast character. Storm chips, sorry-offs, moose, and one very strong opinion about lettuce on a donair.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦞</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E2438;        /* Fundy night */
+  --navy2:#16324C;       /* stage water */
+  --navy3:#1E4160;
+  --cream:#F7F0E1;       /* chowder */
+  --cream-d:#E4D9C2;
+  --red:#E23B2E;         /* weathered buoy */
+  --red-d:#8F1D14;       /* lobster shell */
+  --gold:#F5B921;        /* rain slicker */
+  --spruce:#2F7A52;
+  --spruce-d:#1F5237;
+  --ink:#17222E;
+  --shadow:0 6px 0 rgba(0,0,0,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Nunito',system-ui,-apple-system,sans-serif;
+  background:var(--navy);
+  color:var(--cream);
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100dvh;
+  overflow-x:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+/* falling snow */
+body::before,body::after{
+  content:"";position:fixed;inset:-100vh 0 0 0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(3px 3px at 22px 40px,rgba(255,255,255,.55) 45%,transparent 55%),
+    radial-gradient(2px 2px at 120px 160px,rgba(255,255,255,.4) 45%,transparent 55%),
+    radial-gradient(2.5px 2.5px at 220px 90px,rgba(255,255,255,.5) 45%,transparent 55%),
+    radial-gradient(2px 2px at 300px 220px,rgba(255,255,255,.35) 45%,transparent 55%);
+  background-size:340px 280px;
+  animation:snow 11s linear infinite;
+}
+body::after{background-size:260px 340px;animation-duration:17s;opacity:.6}
+@keyframes snow{to{transform:translateY(100vh)}}
+@media (prefers-reduced-motion:reduce){
+  body::before,body::after{animation:none}
+  .tickerwrap .ticker{animation:none}
+  *{animation-duration:.001s !important}
+}
+.wrap{position:relative;z-index:1;width:min(560px,100%);padding:10px 8px 4px;display:flex;flex-direction:column;flex:1}
+/* ---------- HUD (rec-league scoreboard) ---------- */
+.hud{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(#0B1A29,#0E2438);
+  border:3px solid var(--cream);border-bottom-width:0;
+  border-radius:18px 18px 0 0;
+  padding:8px 14px;font-family:'Lilita One',cursive;
+}
+.hud .cell{display:flex;flex-direction:column;line-height:1}
+.hud .lbl{font-size:9px;letter-spacing:.14em;color:var(--cream-d);opacity:.8;font-family:'Nunito';font-weight:800}
+.hud .val{font-size:22px;color:var(--gold);letter-spacing:.03em;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+.hud .val.small{font-size:18px;color:var(--cream)}
+.hud .spacer{flex:1}
+#mittens{font-size:18px;letter-spacing:2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+#muteBtn{background:none;border:2px solid var(--cream-d);color:var(--cream);border-radius:10px;
+  font-size:15px;padding:4px 8px;cursor:pointer;line-height:1}
+#muteBtn:hover{background:var(--navy3)}
+.timerTrack{height:9px;background:#0B1A29;border-left:3px solid var(--cream);border-right:3px solid var(--cream);overflow:hidden}
+#timerFill{height:100%;background:linear-gradient(90deg,var(--gold),#FFD766);transform-origin:left;transform:scaleX(1)}
+#timerFill.low{background:linear-gradient(90deg,var(--red),#FF6B5E)}
+/* ---------- The Boards (stage) ---------- */
+.boards{
+  position:relative;
+  background:var(--navy2);
+  border:3px solid var(--cream);
+  border-radius:0 0 22px 22px;
+  overflow:hidden;
+  height:clamp(430px,66dvh,600px);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px}
+.screen.on{display:flex}
+/* ---------- Title ---------- */
+.tickerwrap{position:absolute;top:0;left:0;right:0;background:var(--gold);color:var(--ink);
+  overflow:hidden;white-space:nowrap;font-weight:900;font-size:12px;letter-spacing:.06em;padding:5px 0;border-bottom:3px solid rgba(0,0,0,.2)}
+.ticker{display:inline-block;padding-left:100%;animation:tick 38s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+.title-lob{font-size:56px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-6px)}}
+h1{font-family:'Lilita One',cursive;font-size:clamp(46px,13vw,68px);line-height:.92;color:var(--cream);
+  text-shadow:0 4px 0 var(--red-d), 0 8px 0 rgba(0,0,0,.3);letter-spacing:.01em}
+h1 .bang{color:var(--gold)}
+.subtitle{font-family:'Lilita One',cursive;font-size:clamp(15px,4.4vw,20px);color:var(--gold);letter-spacing:.12em;margin-top:6px}
+.byline{margin-top:10px;font-weight:700;color:var(--cream-d);font-size:14px;max-width:340px}
+.bestline{margin-top:14px;font-weight:800;font-size:13px;color:var(--gold)}
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:'Lilita One',cursive;font-size:22px;letter-spacing:.06em;
+  background:var(--red);color:var(--cream);
+  border:3px solid var(--cream);border-radius:16px;
+  padding:12px 34px;margin-top:16px;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .06s,box-shadow .06s;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.btn.small{font-size:15px;padding:8px 20px;margin-top:10px}
+.btn.ghost{background:var(--navy3)}
+.btn.gold{background:var(--gold);color:var(--ink);text-shadow:none}
+.btn:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+/* ---------- Interstitial ---------- */
+#inter{cursor:pointer}
+.inter-round{font-weight:900;letter-spacing:.2em;color:var(--gold);font-size:13px}
+.inter-name{font-family:'Lilita One',cursive;font-size:clamp(34px,9.5vw,50px);color:var(--cream);
+  text-shadow:0 4px 0 var(--red-d);margin:8px 0 4px;line-height:1}
+.inter-tag{font-weight:700;color:var(--cream-d);font-size:15px;max-width:360px}
+.inter-go{margin-top:22px;font-weight:900;color:var(--gold);font-size:13px;letter-spacing:.15em;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.4}}
+/* ---------- Arena generic ---------- */
+#arena{position:absolute;inset:0;display:none;overflow:hidden;touch-action:none}
+#arena.on{display:block}
+.hint{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:11px;font-weight:800;color:var(--cream-d);opacity:.75;pointer-events:none}
+.bigcount{position:absolute;top:10px;left:14px;font-family:'Lilita One',cursive;font-size:22px;color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,.5);z-index:5}
+.pop{position:absolute;font-family:'Lilita One',cursive;color:var(--gold);font-size:18px;pointer-events:none;
+  animation:popup .8s ease-out forwards;text-shadow:0 2px 0 rgba(0,0,0,.5);z-index:9}
+.pop.bad{color:#FF7A6E}
+@keyframes popup{to{transform:translateY(-46px);opacity:0}}
+.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+/* storm chips */
+.cart{position:absolute;font-size:46px;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.4));z-index:4}
+.cart.stun{filter:grayscale(1) drop-shadow(0 3px 0 rgba(0,0,0,.4));animation:shake .5s}
+.chipbag{position:absolute;width:56px;height:66px;border-radius:9px 9px 13px 13px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  font-size:9px;font-weight:900;color:#fff;line-height:1.1;padding:3px;
+  border:2px solid rgba(0,0,0,.3);box-shadow:inset 0 -8px 0 rgba(0,0,0,.15), 0 3px 5px rgba(0,0,0,.3);z-index:3}
+.chipbag::before{content:"";position:absolute;top:-4px;left:8px;right:8px;height:5px;background:inherit;border-radius:3px;border:2px solid rgba(0,0,0,.3)}
+.chipbag .x2{background:var(--ink);color:var(--gold);border-radius:6px;padding:1px 4px;margin-top:2px;font-size:8px}
+.hazard{position:absolute;display:flex;flex-direction:column;align-items:center;font-size:34px;line-height:1;z-index:3;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4))}
+.hazard span{font-size:8px;font-weight:900;color:#FFB3AB;background:rgba(0,0,0,.45);border-radius:5px;padding:1px 4px;margin-top:2px;letter-spacing:.04em}
+/* timmies */
+.tim-order{position:absolute;top:44px;left:50%;transform:translateX(-50%);width:min(320px,92%);
+  background:var(--cream);color:var(--ink);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow);z-index:4}
+.tim-order .who{font-family:'Lilita One',cursive;font-size:15px;color:var(--red-d)}
+.tim-order ul{list-style:none;margin-top:4px}
+.tim-order li{font-weight:800;font-size:14px;display:flex;justify-content:space-between}
+.tim-order li.done{text-decoration:line-through;opacity:.4}
+.tim-grid{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:min(380px,96%);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;z-index:4}
+.tim-btn{background:var(--navy3);border:2px solid var(--cream-d);border-radius:12px;color:var(--cream);
+  font-weight:800;font-size:11px;padding:8px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px}
+.tim-btn em{font-style:normal;font-size:22px;line-height:1}
+.tim-btn:active{background:var(--red)}
+.tim-served{position:absolute;top:12px;right:14px;font-family:'Lilita One',cursive;color:var(--gold);font-size:18px;text-shadow:0 2px 0 rgba(0,0,0,.5);z-index:5}
+/* sorry off */
+.sry-stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.sry-faces{display:flex;align-items:center;gap:18px;font-size:52px}
+.sry-vs{font-family:'Lilita One',cursive;font-size:20px;color:var(--gold)}
+.sry-name{font-weight:900;font-size:12px;color:var(--cream-d);text-align:center;margin-top:2px}
+.sry-meter{width:min(330px,86%);height:26px;background:var(--red-d);border:3px solid var(--cream);border-radius:14px;overflow:hidden}
+.sry-fill{height:100%;width:50%;background:linear-gradient(90deg,var(--spruce),#43A970);transition:width .08s linear}
+.sry-btn{font-family:'Lilita One',cursive;font-size:30px;background:var(--red);color:var(--cream);
+  border:3px solid var(--cream);border-radius:20px;padding:20px 52px;cursor:pointer;box-shadow:var(--shadow)}
+.sry-btn:active{transform:translateY(3px)}
+.sry-bubble{position:absolute;background:var(--cream);color:var(--ink);font-weight:900;font-size:12px;
+  border-radius:12px;padding:4px 10px;pointer-events:none;animation:popup 1s ease-out forwards;z-index:8}
+.sry-bubble.them{background:#FFD9D4}
+/* wave */
+.wv-road{position:absolute;left:0;right:0;top:42%;height:74px;background:#233247;border-top:3px dashed #4E637E;border-bottom:3px dashed #4E637E}
+.wv-zone{position:absolute;top:34%;bottom:36%;left:37%;width:26%;border-left:3px dashed var(--gold);border-right:3px dashed var(--gold);opacity:.75}
+.wv-zone::after{content:"WAVE ZONE";position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:var(--gold);letter-spacing:.1em;white-space:nowrap}
+.wv-car{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:3}
+.wv-car .lab{font-size:9px;font-weight:900;color:var(--cream-d);background:rgba(0,0,0,.4);padding:1px 6px;border-radius:6px;margin-bottom:2px;white-space:nowrap}
+.wv-car .em{font-size:40px;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.4))}
+.wv-car.flip .em{transform:scaleX(-1)}
+.wv-you{position:absolute;left:50%;transform:translateX(-50%);bottom:16%;font-size:44px;text-align:center;z-index:2}
+.wv-you .mb{font-size:24px;display:block}
+.wv-stats{position:absolute;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;
+  font-family:'Lilita One',cursive;font-size:16px;color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,.5);z-index:5}
+.wv-btn{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:6;
+  font-family:'Lilita One',cursive;font-size:22px;background:var(--gold);color:var(--ink);
+  border:3px solid var(--cream);border-radius:16px;padding:12px 40px;cursor:pointer;box-shadow:var(--shadow)}
+.wv-btn:active{transform:translate(-50%,3px)}
+/* shovel */
+.sh-stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}
+.sh-house{font-size:44px}
+.sh-drive{position:relative;width:min(300px,80%);height:120px;background:#39424E;border:3px solid var(--cream);border-radius:12px;overflow:hidden}
+.sh-snow{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#FFFFFF,#D8E4EE);transition:height .1s linear}
+.sh-guy{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:34px;z-index:3;transition:transform .07s}
+.sh-guy.l{transform:translate(-50%,-50%) scaleX(-1)}
+.sh-pct{font-family:'Lilita One',cursive;font-size:26px;color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,.5)}
+.sh-msg{font-weight:900;font-size:13px;color:var(--cream-d);min-height:18px}
+.sh-btns{display:flex;gap:12px}
+.sh-btn{font-family:'Lilita One',cursive;font-size:22px;background:var(--red);color:var(--cream);border:3px solid var(--cream);
+  border-radius:16px;padding:16px 30px;cursor:pointer;box-shadow:var(--shadow)}
+.sh-btn:active{transform:translateY(3px)}
+.sh-btn.next{background:var(--gold);color:var(--ink)}
+.plowwarn{position:absolute;top:64px;left:0;right:0;text-align:center;font-family:'Lilita One',cursive;
+  font-size:26px;color:#FF8A7E;text-shadow:0 2px 0 rgba(0,0,0,.6);animation:pulse .3s infinite;z-index:6}
+/* moose */
+.mo-road{position:absolute;inset:0;background:#233247}
+.mo-line{position:absolute;top:-20%;bottom:-20%;width:6px;background:repeating-linear-gradient(#E8DFC8 0 34px,transparent 34px 70px)}
+.mo-obj{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:3;line-height:1}
+.mo-obj .em{font-size:42px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.4))}
+.mo-obj .lab{font-size:8px;font-weight:900;color:var(--cream-d);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:5px;margin-top:1px;white-space:nowrap}
+.mo-you{position:absolute;bottom:9%;font-size:44px;z-index:4;transition:left .09s;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
+.mo-you.hurt{animation:shake .4s}
+/* trivia */
+.tv-stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.tv-tag{font-weight:900;letter-spacing:.18em;font-size:11px;color:var(--gold)}
+.tv-q{font-family:'Lilita One',cursive;font-size:clamp(18px,5vw,23px);color:var(--cream);max-width:400px;line-height:1.25}
+.tv-opts{display:grid;grid-template-columns:1fr;gap:8px;width:min(380px,94%)}
+.tv-opt{background:var(--navy3);border:2px solid var(--cream-d);color:var(--cream);border-radius:12px;
+  font-weight:800;font-size:14px;padding:11px 14px;cursor:pointer;text-align:left;font-family:'Nunito'}
+.tv-opt:active{background:var(--red)}
+.tv-opt.right{background:var(--spruce);border-color:#fff}
+.tv-opt.wrong{background:var(--red-d);opacity:.8}
+.tv-fact{font-weight:800;font-size:12px;color:var(--cream-d);max-width:360px;min-height:16px}
+/* donair */
+.dn-stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}
+.dn-title{font-family:'Lilita One',cursive;font-size:20px;color:var(--gold)}
+.dn-order{background:var(--cream);color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:900;font-size:15px;box-shadow:var(--shadow)}
+.dn-stack{min-height:96px;display:flex;flex-direction:column-reverse;align-items:center;gap:2px}
+.dn-layer{background:var(--navy3);border:2px solid var(--cream-d);border-radius:9px;padding:2px 14px;font-weight:900;font-size:13px;animation:dropin .18s ease-out}
+@keyframes dropin{from{transform:translateY(-14px);opacity:0}}
+.dn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:min(340px,94%)}
+.dn-btn{background:var(--navy3);border:2px solid var(--cream-d);border-radius:12px;color:var(--cream);
+  font-weight:900;font-size:13px;padding:11px 6px;cursor:pointer}
+.dn-btn:active{background:var(--red)}
+.dn-msg{font-weight:900;font-size:12px;color:#FFB3AB;min-height:16px}
+/* splash + toast */
+#splash{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;
+  background:rgba(10,20,32,.82);z-index:20;text-align:center;padding:20px}
+#splash.on{display:flex}
+#splash .big{font-family:'Lilita One',cursive;font-size:clamp(32px,9vw,46px);line-height:1.05;
+  text-shadow:0 4px 0 rgba(0,0,0,.5)}
+#splash.good .big{color:var(--gold)}
+#splash.bad .big{color:#FF8A7E}
+#splash .sub{margin-top:10px;font-weight:800;color:var(--cream-d);font-size:15px;max-width:360px}
+#toasts{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:var(--gold);color:var(--ink);font-weight:900;font-size:13px;border-radius:12px;
+  padding:8px 16px;box-shadow:var(--shadow);animation:toastin .25s ease-out;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+@keyframes toastin{from{transform:translateY(16px);opacity:0}}
+/* game over */
+.over-rank{font-family:'Lilita One',cursive;font-size:clamp(24px,7vw,34px);color:var(--gold);line-height:1.1;
+  text-shadow:0 3px 0 rgba(0,0,0,.4);max-width:400px}
+.over-score{font-family:'Lilita One',cursive;font-size:clamp(44px,13vw,62px);color:var(--cream);text-shadow:0 4px 0 var(--red-d);line-height:1}
+.over-epitaph{margin-top:10px;font-weight:800;color:var(--cream-d);font-size:14px;max-width:340px;font-style:italic}
+.over-stats{margin-top:12px;font-weight:800;font-size:13px;color:var(--cream-d)}
+.over-next{margin-top:6px;font-weight:900;font-size:12px;color:var(--gold)}
+/* how to */
+.howto{position:absolute;inset:0;background:rgba(10,20,32,.94);z-index:30;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:22px}
+.howto.on{display:flex}
+.howto h2{font-family:'Lilita One',cursive;color:var(--gold);font-size:26px;margin-bottom:10px}
+.howto p{font-weight:700;font-size:14px;color:var(--cream);max-width:360px;margin-bottom:8px}
+.howto p b{color:var(--gold)}
+/* flannel footer */
+.flannel{width:min(560px,100%);height:16px;margin:10px 0 4px;border-radius:8px;opacity:.9;
+  background:
+   repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 3px, transparent 3px 26px),
+   repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 3px, transparent 3px 26px),
+   repeating-linear-gradient(90deg, #B8321F 0 26px, #7E2415 26px 52px)}
+.credit{font-size:11px;font-weight:700;color:var(--cream-d);opacity:.7;margin-bottom:10px;text-align:center;position:relative;z-index:1}
+@media (max-width:400px){
+  .hud{gap:7px;padding:7px 10px}
+  .hud .val{font-size:18px}
+  .sry-btn{padding:16px 40px}
+}
+#pauseLayer{position:fixed;inset:0;z-index:100;background:rgba(10,20,32,.96);display:grid;place-content:center;text-align:center;padding:24px;gap:16px}
+#pauseLayer[hidden]{display:none} #pauseBtn{min-width:44px;min-height:44px;cursor:pointer;border-radius:8px}
+button:focus-visible{outline:3px solid #ffd166;outline-offset:3px}
+</style>
+</head>
+<body>
+<div id="pauseLayer" hidden role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><h2 id="pauseTitle">Taking a breather</h2><p>Your round is paused.</p><button class="btn" id="resumeBtn">Resume game</button></div>
+<div class="wrap">
+  <div class="hud">
+    <div class="cell"><span class="lbl">ROUND</span><span class="val small" id="hudRound">–</span></div>
+    <div class="cell"><span class="lbl">SCORE</span><span class="val" id="hudScore">0</span></div>
+    <div class="cell"><span class="lbl">MITTENS</span><span id="mittens">🧤🧤🧤</span></div>
+    <div class="spacer"></div>
+    <div class="cell"><span class="lbl">BEST</span><span class="val small" id="hudBest">0</span></div>
+    <button id="pauseBtn" aria-label="Pause (P or Escape)">⏸</button>
+    <button id="muteBtn" aria-label="Toggle sound">🔊</button>
+  </div>
+  <div class="timerTrack"><div id="timerFill"></div></div>
+
+  <div class="boards" id="boards">
+
+    <!-- TITLE -->
+    <section class="screen on" id="scrTitle">
+      <div class="tickerwrap"><div class="ticker" id="ticker"></div></div>
+      <div class="title-lob">🦞</div>
+      <h1>SOME GOOD<span class="bang">!</span></h1>
+      <div class="subtitle">THE GREAT MARITIME GAUNTLET</div>
+      <p class="byline">8 tiny tests of East Coast character. Catch storm chips, out-sorry a stranger, and never — <b>never</b> — put lettuce on a donair.</p>
+      <button class="btn" id="btnPlay">GIVE 'ER</button>
+      <button class="btn small ghost" id="btnHow">HOW'S SHE WORK?</button>
+      <div class="bestline" id="titleBest"></div>
+    </section>
+
+    <!-- INTERSTITIAL -->
+    <section class="screen" id="inter">
+      <div class="inter-round" id="interRound">ROUND 1</div>
+      <div class="inter-name" id="interName">STORM CHIPS</div>
+      <div class="inter-tag" id="interTag"></div>
+      <div class="inter-go">TAP TO START</div>
+    </section>
+
+    <!-- ARENA -->
+    <div id="arena"></div>
+
+    <!-- GAME OVER -->
+    <section class="screen" id="scrOver">
+      <div class="inter-round">FINAL STANDING</div>
+      <div class="over-rank" id="overRank"></div>
+      <div class="over-score" id="overScore"></div>
+      <div class="over-epitaph" id="overEpitaph"></div>
+      <div class="over-stats" id="overStats"></div>
+      <div class="over-next" id="overNext"></div>
+      <button class="btn" id="btnAgain">ONE MORE GO</button>
+      <button class="btn small gold" id="btnShare">COPY YER BRAGGIN' RIGHTS</button>
+    </section>
+
+    <!-- SPLASH -->
+    <div id="splash"><div class="big" id="splashBig"></div><div class="sub" id="splashSub"></div></div>
+
+    <!-- HOW TO -->
+    <div class="howto" id="howto">
+      <h2>HOW'S SHE WORK?</h2>
+      <p>Survive a run of quick East Coast challenges. Each round's a new one, and she gets faster as ya go.</p>
+      <p>Fail a round, ya lose a <b>mitten 🧤</b>. Lose all three and yer done — but score enough and Nan knits ya a fresh one.</p>
+      <p><b>Desktop:</b> arrow keys + spacebar. <b>Phone:</b> tap, drag, mash. Ya know. Like at the wharf.</p>
+      <p>Chain wins for a <b>HEATER</b> bonus. Go on — give 'er.</p>
+      <button class="btn small" id="btnHowClose">FILL YER BOOTS</button>
+    </div>
+
+  </div>
+
+  <div class="flannel"></div>
+  <div class="credit">Made with love, fog, and a family bag of ketchup chips · works best with the sound on</div>
+</div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   SOME GOOD! — The Great Maritime Gauntlet
+   One file. No build step. Drag 'er onto Netlify and she goes.
+   ============================================================ */
+
+/* ---------- utilities ---------- */
+const $ = s => document.querySelector(s);
+const rand = (a,b) => a + Math.random()*(b-a);
+const ri = (a,b) => Math.floor(rand(a,b+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function el(tag,cls,html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- sound (tiny synth) ---------- */
+let AC=null, muted=store.get('sg_muted',false);
+function ac(){ try{ if(!AC && (window.AudioContext||window.webkitAudioContext)) AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} return AC; }
+function tone(f,dur,type,vol,delay){
+  if(muted) return;
+  const a=ac(); if(!a) return;
+  try{
+    const t0=a.currentTime+(delay||0);
+    const o=a.createOscillator(), g=a.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(vol||0.13,t0);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(t0); o.stop(t0+dur+0.02);
+  }catch(e){}
+}
+const sfx = {
+  tap(){ tone(600,.05,'square',.09); },
+  good(){ tone(740,.07,'square',.11); tone(988,.1,'square',.1,.07); },
+  catch(){ tone(880,.06,'triangle',.12); },
+  bad(){ tone(150,.22,'sawtooth',.13); },
+  crash(){ tone(110,.3,'sawtooth',.16); tone(90,.3,'sawtooth',.12,.05); },
+  win(){ [523,659,784,1047].forEach((f,i)=>tone(f,.13,'square',.12,i*.09)); },
+  lose(){ [392,311,262,196].forEach((f,i)=>tone(f,.17,'triangle',.13,i*.12)); },
+  honk(){ tone(392,.09,'square',.14); tone(392,.09,'square',.14,.13); },
+  plow(){ tone(80,.5,'sawtooth',.15); }
+};
+window.addEventListener('pointerdown',()=>{ const a=ac(); if(a&&a.state==='suspended')a.resume(); },{once:false});
+
+/* ---------- flavour text ---------- */
+const TICKER = [
+  "SCHOOL CANCELLATIONS: ALL OF THEM. EVEN THE ONES THAT DIDN'T CALL IN.",
+  "WIND WARNING: TRAMPOLINE FROM THREE STREETS OVER NOW LEGALLY YOURS.",
+  "SOBEYS REPORTS CHIP AISLE DOWN TO 'PLAIN' ONLY. STAY CALM.",
+  "FOG ADVISORY: SAINT JOHN STILL IN THERE SOMEWHERE, PROBABLY.",
+  "TRAFFIC: FELLA IN A BATHROBE WAVING EVERYONE THROUGH THE 4-WAY STOP. IT'S WORKING.",
+  "MARINE FORECAST: SHE'S BLOWIN'.",
+  "ROAD REPORT: THE POTHOLE ON MAIN ST HAS BEEN DECLARED A HERITAGE SITE.",
+  "ALERT: SOMEBODY'S NAN SAW YA OUT WITHOUT A JACKET. WORD'S GETTIN' AROUND.",
+  "POWER UPDATE: 'CREWS ARE ON IT.' SOURCES SAY THE CREWS ARE ALSO AT TIM'S.",
+  "TIM'S DRIVE-THRU LINE VISIBLE FROM SPACE AGAIN.",
+  "BRIDGE CLOSED TO HIGH-SIDED VEHICLES AND STRONG OPINIONS.",
+  "FLURRIES ENDING: NEVER."
+];
+const GOOD_WORDS = ["SOME GOOD!","BEST KIND!","WICKED!","BEAUTY!","RIGHT ON!","GO ON WITH YA!","DECENT!","LOVELY STUFF!","DEADLY, B'Y!"];
+const EPITAPHS = [
+  "Ya gave 'er. That's all anyone can ask.",
+  "Even the fog thought that was a decent run.",
+  "Yer Nan's already tellin' the church about it.",
+  "The moose sends its regards.",
+  "Storm stayed. So did yer dignity. Mostly.",
+  "Not bad for someone raised on plain chips.",
+  "They'll talk about this at the wharf for years. Well, weeks.",
+  "Somewhere, a bagpipe played softly."
+];
+const RANKS = [
+  [0,    "TOURIST WHO ASKED IF THE WATER'S ALWAYS THIS COLD"],
+  [500,  "COME FROM AWAY"],
+  [1200, "BEEN HERE 20 YEARS (STILL FROM AWAY)"],
+  [2200, "HONORARY MARITIMER"],
+  [3500, "SALT OF THE EARTH"],
+  [5000, "RIGHT SOME GOOD"],
+  [7000, "TRUE BLUENOSER"],
+  [9500, "ABSOLUTE LEGEND, B'Y 🦞"]
+];
+function rankFor(score){ let r=RANKS[0][1]; for(const [t,n] of RANKS){ if(score>=t) r=n; } return r; }
+function nextRank(score){ for(const [t,n] of RANKS){ if(score<t) return [t-score,n]; } return null; }
+
+/* ---------- trivia bank ---------- */
+const TRIVIA = [
+  {q:"A proper storm's comin'. What do ya grab first?", a:"Storm chips", w:["A generator","Bottled water","Nothing, she'll blow over"], f:"Milk, bread, and a family bag. That's the whole emergency plan."},
+  {q:"Halifax's official food is…", a:"The donair", w:["The lobster roll","Garlic fingers","Whatever's at the dome at 3am"], f:"Council made it official in 2015. Democracy at its finest."},
+  {q:"A 'double-double' is coffee with…", a:"Two cream, two sugar", w:["Two shots, two naps","Double the regret","Two spoons, both stirring"], f:"Order it anywhere in the country. They'll know."},
+  {q:"Sobeys got its start in…", a:"Stellarton, Nova Scotia", w:["Toronto (obviously not)","A parking lot dispute","Moncton"], f:"1907, Stellarton. Pictou County's greatest export besides opinions."},
+  {q:"Anne of Green Gables lives on…", a:"Prince Edward Island", w:["Cape Breton","A cruise ship now","The mainland, tragically"], f:"Green Gables, Cavendish, PEI. The braids are load-bearing."},
+  {q:"The Confederation Bridge connects PEI to…", a:"New Brunswick", w:["Nova Scotia","Maine, on a clear day","Nothing. It's decorative"], f:"12.9 km to Cape Jourimain, NB. White-knuckle it in the wind."},
+  {q:"The Cabot Trail wraps around…", a:"Cape Breton", w:["The Valley","Fundy","A Tim's, eventually"], f:"Drive it clockwise so the passenger gets the cliff views. Sorry, passenger."},
+  {q:"The secret to a proper Caesar is…", a:"Clamato", w:["Maple syrup","Gravy","Sea water, strained twice"], f:"Clam juice in a cocktail. Canada looked at that and said yes."},
+  {q:"'Right some good' means…", a:"Extremely good", w:["Legally acceptable","Slightly to the right of good","Good, but with paperwork"], f:"The full scale: good → some good → right some good. Peer reviewed."},
+  {q:"Magnetic Hill, where yer car rolls 'uphill', is in…", a:"Moncton", w:["Narnia","Anywhere after two Keith's","Truro"], f:"It's an optical illusion. Or magnets. Nobody's checked."},
+  {q:"Frenchys is…", a:"A used-clothes treasure hunt", w:["A poutine chain","A French immersion school","Yer cousin's boat"], f:"Ya go in for a sweater, ya come out with a wedding dress and a toboggan."},
+  {q:"Peggy's Cove is world-famous for…", a:"The lighthouse", w:["The parking","Peggy herself","Warm swimming"], f:"And STAY OFF THE BLACK ROCKS. This is trivia AND a safety briefing."},
+  {q:"Tim Horton, the actual fella, was…", a:"An NHL defenceman", w:["A donut scientist","A Mountie","Three raccoons in a coat"], f:"24 NHL seasons. The coffee empire was the side hustle."},
+  {q:"The capital of New Brunswick is…", a:"Fredericton", w:["Moncton","Saint John","Irving"], f:"Fredericton. Though Irving was a genuinely strong guess."},
+  {q:"The world's largest fiddle stands in…", a:"Sydney, Nova Scotia", w:["Charlottetown","A very big case","Antigonish"], f:"60 feet of fiddle on the Sydney waterfront. As is right and proper."},
+  {q:"Finish it: 'Farewell to Nova Scotia…'", a:"…you sea-bound coast", w:["…I left the stove on","…see ya at Sobeys","…the fog was lovely though"], f:"Let your mountains dark and dreary be. Now it's stuck in yer head. You're welcome."},
+  {q:"A 'sook' is…", a:"Someone havin' a whine", w:["A type of eel","A wet mitten","A small sock"], f:"Usage: 'Quit yer sookin', it's only minus 20.'"},
+  {q:"Fiddleheads are…", a:"Baby ferns ya eat", w:["Violin repair experts","A hairstyle from Bathurst","Tiny green trumpets"], f:"Picked in spring, boiled hard, drowned in butter. New Brunswick delicacy."},
+  {q:"Hodge podge is…", a:"New veggies drowned in cream and butter", w:["A legal defence","What's under the deck","A NASCAR move"], f:"First feed of summer vegetables. Cardiologists look away."},
+  {q:"The sauce on a donair is…", a:"Sweet sauce", w:["Tzatziki (careful now)","Ranch (get out)","Ketchup (GET OUT)"], f:"Condensed milk, sugar, vinegar, garlic. Sounds wrong. Tastes like home."},
+  {q:"Alexander Keith's has brewed in Halifax since…", a:"1820", w:["1867","Last Tuesday","The Jurassic"], f:"'Those who like it, like it a lot.' The marketing writes itself."},
+  {q:"A toonie is…", a:"The two-dollar coin", w:["A small toque","A cartoon lobster","Half a fournie"], f:"A polar bear ya can lose in a couch. National treasure."},
+  {q:"Terry Fox's run was called…", a:"The Marathon of Hope", w:["The Big Jog","Run for the Border","The Long Way to Tim's"], f:"Started in St. John's, 1980, dipped his leg in the Atlantic first. Legend."},
+  {q:"In the famous Heritage Minute, the patient smells…", a:"Burnt toast", w:["Low tide","A rink at 6am","Regret"], f:"'Doctor Penfield… I smell burnt toast!' Every Canadian just heard that in the voice."},
+  {q:"After a bag of ketchup chips, yer fingers are…", a:"Red as a boiled lobster", w:["Clean (I use a fork)","Blue somehow","Legally seasoned"], f:"Anyone who picked 'fork' is lying and we all know it."},
+  {q:"To get screeched in down Newfoundland way, ya gotta kiss…", a:"The cod", w:["The mayor","A moose (once, allegedly)","Whoever's closest"], f:"Kiss the cod, drink the screech, say the words. Then yer an honorary Newfoundlander."},
+  {q:"Pothole season blooms every…", a:"April", w:["Never, roads are fine","Ski season","Whenever the plow's bored"], f:"The fifth season. The road grows new ones overnight like mushrooms."},
+  {q:"The Bay of Fundy has the world's highest…", a:"Tides", w:["Seagull morale","Insurance premiums","Fog density rating"], f:"16 metres of tide. The ocean just leaves twice a day. Rude, honestly."},
+  {q:"Stan Rogers' privateer ballad is called…", a:"Barrett's Privateers", w:["Garnet's Rowboat","The Scarborough Fella","Keith's Keelhaulers"], f:"1778, the cursed Antelope. Every east coast kitchen party ends with it."},
+  {q:"Two Maritimers bump carts at Sobeys. Who apologizes?", a:"Both. Repeatedly. Forever.", w:["Whoever's cart is bigger","Neither, they duel","The cart"], f:"They're still there now, takin' turns. Beautiful, really."}
+];
+
+/* ============================================================
+   GAME MANAGER
+   ============================================================ */
+const arena = $('#arena');
+const G = {
+  level:1, score:0, lives:3, streak:0, rounds:0,
+  best: store.get('sg_best',0),
+  plays: store.get('sg_plays',0),
+  bag:[], last:null, nextMitten:2500,
+  usedTrivia:new Set(), running:false, paused:false
+};
+
+function ctx(){
+  const offs=[], rafs=[];
+  let closed=false;
+  const cx={
+    on(t,e,f,o){const handler=event=>{if((G.paused||document.hidden)&&e!=='keyup'&&e!=='blur')return;f(event)};t.addEventListener(e,handler,o);offs.push(()=>t.removeEventListener(e,handler,o));},
+    after(ms,f){let left=ms;const cancel=cx.raf(dt=>{left-=dt*1000;if(left<=0){cancel();f();}});return cancel;},
+    every(ms,f){let left=ms;return cx.raf(dt=>{left-=dt*1000;if(left<=0){left+=ms;f();}});},
+    raf(loop){let id,last=performance.now(),active=true;
+      const step=t=>{if(closed||!active)return;id=requestAnimationFrame(step);const dt=Math.min(.05,(t-last)/1000);last=t;if(!G.paused&&!document.hidden)loop(dt,t);};
+      id=requestAnimationFrame(step);const cancel=()=>{active=false;cancelAnimationFrame(id)};rafs.push(cancel);return cancel;},
+    cleanup(){closed=true;offs.forEach(f=>f());rafs.forEach(f=>f());}
+  };return cx;
+}
+
+let curCx=null, curDone=false, interTid=null, runCx=null;
+
+function setBar(frac){
+  const f=$('#timerFill');
+  f.style.transform='scaleX('+Math.max(0,Math.min(1,frac))+')';
+  f.classList.toggle('low', frac<0.28);
+}
+function makeApi(cx){
+  const api = {
+    diff: 1 + (G.level-1)*0.12,
+    level: G.level,
+    sfx,
+    pop(x,y,txt,bad){ const p=el('div','pop'+(bad?' bad':''),txt); p.style.left=x+'px'; p.style.top=y+'px'; arena.appendChild(p); setTimeout(()=>p.remove(),820); },
+    countdown(total,onEnd){
+      let left=total, over=false;
+      setBar(1);
+      cx.raf(dt=>{ if(over)return; left-=dt; setBar(left/total); if(left<=0){ over=true; setBar(0); onEnd&&onEnd(); } });
+      return { left:()=>Math.max(0,left), add:s=>{ left=Math.max(0.01,Math.min(total,left+s)); }, stop:()=>{ over=true; } };
+    },
+    done(ok,pts,note){ finishRound(ok,pts,note); }
+  };
+  api.diff = Math.min(api.diff, 2.3);
+  return api;
+}
+
+function showScreen(id){
+  ['scrTitle','inter','scrOver'].forEach(s=>$('#'+s).classList.toggle('on', s===id));
+  arena.classList.toggle('on', id==='arena');
+}
+function updateHUD(){
+  $('#hudRound').textContent = G.running ? G.rounds : '–';
+  $('#hudScore').textContent = G.score;
+  $('#hudBest').textContent = G.best;
+  $('#mittens').textContent = G.lives>0 ? '🧤'.repeat(G.lives) : '—';
+}
+function toast(msg){
+  const t=el('div','toast',msg); $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; },2600);
+  setTimeout(()=>t.remove(),3100);
+}
+function splash(kind,big,sub,ms){
+  const s=$('#splash'); s.className=kind; s.classList.add('on');
+  $('#splashBig').textContent=big; $('#splashSub').textContent=sub||'';
+  setTimeout(()=>s.classList.remove('on'), ms||1100);
+}
+
+function startRun(){
+  if(curCx)curCx.cleanup();if(runCx)runCx.cleanup();runCx=ctx();G.paused=false;$('#pauseLayer').hidden=true;
+  G.level=1; G.score=0; G.lives=3; G.streak=0; G.rounds=0;
+  G.bag=[]; G.last=null; G.nextMitten=2500; G.running=true;
+  G.plays++; store.set('sg_plays',G.plays);
+  updateHUD();
+  nextRound();
+}
+
+function pickGame(){
+  if(!G.bag.length){
+    G.bag = shuffle(GAMES.map(g=>g.id));
+    if(G.bag[0]===G.last && G.bag.length>1){ const j=ri(1,G.bag.length-1); [G.bag[0],G.bag[j]]=[G.bag[j],G.bag[0]]; }
+  }
+  const id=G.bag.shift(); G.last=id;
+  return GAMES.find(g=>g.id===id);
+}
+
+function nextRound(){
+  G.rounds++; G.level=G.rounds; updateHUD(); setBar(1);
+  const g=pickGame();
+  $('#interRound').textContent='ROUND '+G.rounds+(G.streak>=3?'  ·  🔥 ON A HEATER':'');
+  $('#interName').textContent=g.name;
+  $('#interTag').textContent=pick(g.lines);
+  showScreen('inter');
+  let started=false;
+  const begin=()=>{ if(started||G.paused)return; started=true;if(interTid)interTid(); playGame(g); };
+  interTid=runCx.after(2400,begin);
+  $('#inter').onclick=begin;
+}
+
+function playGame(g){
+  arena.innerHTML='';
+  showScreen('arena');
+  curDone=false;
+  curCx=ctx();
+  const api=makeApi(curCx);
+  try{ g.run(arena,api,curCx); }
+  catch(e){ console.error(e); finishRound(false,0,'This round could not load. Please try again.'); }
+}
+
+function finishRound(ok,pts,note){
+  if(curDone) return; curDone=true;
+  if(curCx){ curCx.cleanup(); curCx=null; }
+  if(ok){
+    G.streak++;
+    const mult = 1 + Math.min(0.5,(G.streak-1)*0.1);
+    const add = Math.round(pts*mult);
+    G.score += add;
+    sfx.win();
+    const sub = (G.streak>=2 ? '+'+add+' pts  ·  heater ×'+mult.toFixed(1) : '+'+add+' pts') + (note?'  ·  '+note:'');
+    splash('good', pick(GOOD_WORDS), sub);
+    if(G.score>=G.nextMitten && G.lives<4){
+      G.lives++; G.nextMitten+=2500;
+      setTimeout(()=>toast('🧤 Nan knit ya a fresh mitten. +1 life, dear.'),650);
+    } else if(G.score>=G.nextMitten){ G.nextMitten+=2500; }
+  } else {
+    G.streak=0; G.lives--;
+    sfx.lose();
+    splash('bad', 'AH GEEZ.', (note||'That didn\u2019t go great.')+'  ·  lost a mitten 🧤');
+  }
+  updateHUD();
+  if(G.lives<=0){ runCx.after(1250,gameOver); return; }
+  runCx.after(1250,nextRound);
+}
+
+function gameOver(){
+  G.running=false;
+  const isBest = G.score>G.best;
+  if(isBest){ G.best=G.score; store.set('sg_best',G.best); }
+  updateHUD();
+  $('#overRank').textContent = rankFor(G.score);
+  $('#overScore').textContent = G.score;
+  $('#overEpitaph').textContent = '\u201C'+pick(EPITAPHS)+'\u201D';
+  $('#overStats').textContent = 'Survived '+(G.rounds-1)+' round'+(G.rounds-1===1?'':'s')+'  ·  Best: '+G.best+(isBest?'  ·  NEW RECORD 🎉':'');
+  const nx = nextRank(G.score);
+  $('#overNext').textContent = nx ? 'Only '+nx[0]+' points from \u201C'+nx[1]+'\u201D. Just sayin\u2019.' : 'There is no higher rank. Go touch sea water.';
+  showScreen('scrOver');
+}
+
+/* ============================================================
+   MINIGAME 1 — STORM CHIPS
+   ============================================================ */
+function gameStormChips(a,api,cx){
+  const W=a.clientWidth, H=a.clientHeight;
+  const quota = 8 + Math.min(4, Math.floor(api.level/3));
+  let count=0, stun=0;
+
+  const counter=el('div','bigcount','🛍️ 0/'+quota);
+  const hint=el('div','hint','← → or drag · catch the chips, dodge the debris');
+  const cart=el('div','cart','🛒');
+  a.append(counter,hint,cart);
+
+  const cartW=52; let cx_=W/2, target=W/2;
+  cart.style.bottom='14px';
+  const keys={};
+  cx.on(window,'keydown',e=>{ if(e.key==='ArrowLeft'||e.key==='ArrowRight'){keys[e.key]=1;e.preventDefault();} });
+  cx.on(window,'keyup',e=>{ keys[e.key]=0; });
+  cx.on(window,'blur',()=>{Object.keys(keys).forEach(k=>keys[k]=0)});
+  const setTarget=e=>{ const r=a.getBoundingClientRect(); target=e.clientX-r.left; };
+  cx.on(a,'pointerdown',setTarget); cx.on(a,'pointermove',e=>{ if(e.buttons||e.pointerType==='touch')setTarget(e); });
+
+  const FLAV=[
+    {n:'KETCHUP',c:'#C22A1C',v:1},{n:'ALL DRESSED',c:'#7A3FA0',v:2},
+    {n:'SALT &amp; VINEGAR',c:'#2B6CB0',v:1},{n:'DILL PICKLE',c:'#2F7A52',v:1},{n:'BBQ',c:'#B45A18',v:1}
+  ];
+  const HAZ=[{e:'🪑',t:"LAWN CHAIR"},{e:'🧊',t:"FREEZIN' RAIN"},{e:'🗑️',t:'GREEN BIN'}];
+  const items=[];
+  const fallV = H*(0.34+0.13*api.diff);
+  cx.every(Math.max(400, 780/api.diff), ()=>{
+    const bad = Math.random()<0.3;
+    let node;
+    if(bad){ const h=pick(HAZ); node=el('div','hazard',h.e+'<span>'+h.t+'</span>'); node._bad=true; }
+    else{ const f=pick(FLAV); node=el('div','chipbag',f.n+(f.v>1?'<div class="x2">×2</div>':'')); node.style.background=f.c; node._v=f.v; }
+    node.style.top='-70px'; const x=rand(30,W-30); node.style.left=(x-28)+'px';
+    node._x=x; node._y=-70; a.appendChild(node); items.push(node);
+  });
+
+  api.countdown(20,()=>{
+    const ok = count>=quota;
+    const extra = Math.max(0,count-quota);
+    if(ok) api.done(true, 140+api.level*20+extra*30, extra>0 ? extra+' extra bag'+(extra>1?'s':'')+' for the neighbours' : 'the pantry is ready');
+    else api.done(false, 0, 'Only '+count+'/'+quota+' bags. The storm won.');
+  });
+
+  cx.raf(dt=>{
+    if(stun>0) stun-=dt;
+    else{
+      if(keys['ArrowLeft']) target=cx_-W*1.4*dt*1.1;
+      if(keys['ArrowRight']) target=cx_+W*1.4*dt*1.1;
+      cx_ += (target-cx_)*Math.min(1,dt*14);
+      cx_=Math.max(cartW/2,Math.min(W-cartW/2,cx_));
+    }
+    cart.style.left=(cx_-cartW/2)+'px';
+    cart.classList.toggle('stun',stun>0);
+    for(let i=items.length-1;i>=0;i--){
+      const it=items[i]; it._y+=fallV*dt; it.style.top=it._y+'px';
+      const iw=it._bad?36:56;
+      if(it._y> H-100 && it._y<H-40 && Math.abs(it._x-cx_)<(cartW/2+iw/2-6)){
+        if(it._bad){ stun=0.75; sfx.bad(); api.pop(it._x,H-120,'OW!',true); }
+        else{ count+=it._v; sfx.catch(); api.pop(it._x,H-130,'+'+it._v);
+          counter.textContent='🛍️ '+count+'/'+quota+(count>=quota?' ✓':''); }
+        it.remove(); items.splice(i,1); continue;
+      }
+      if(it._y>H+30){ it.remove(); items.splice(i,1); }
+    }
+  });
+}
+
+/* ============================================================
+   MINIGAME 2 — TIMMIES RUSH
+   ============================================================ */
+function gameTimmies(a,api,cx){
+  const MENU=[
+    {id:'dd',e:'☕',n:'Double-Double'},
+    {id:'tea',e:'🍵',n:'Steeped Tea'},
+    {id:'ice',e:'🥤',n:'Iced Capp'},
+    {id:'bc',e:'🍩',n:'Boston Cream'},
+    {id:'tb',e:'🧆',n:'Timbits'},
+    {id:'fw',e:'🌯',n:"Farmer's Wrap"}
+  ];
+  const NAMES=["Buddy in the F-150","Aunt Darlene","Fella Named Gordie","The Whole Hockey Team","The Minister","Cape Breton Tour Bus","Yer Old Gym Teacher"];
+  const THANKS=["'Preciate ya, dear.","Yer some quick!","Keep the change, luh.","Bless yer heart.","See ya at bingo."];
+
+  const perOrder = api.level>=8?[2,3,3] : api.level>=4?[2,2,3] : [1,2,2];
+  const customers = perOrder.map((n,i)=>{
+    const picks={};
+    for(let k=0;k<n;k++){ const m=pick(MENU); picks[m.id]=(picks[m.id]||0)+1; }
+    return { who:NAMES[(ri(0,NAMES.length-1)+i)%NAMES.length], need:picks };
+  });
+
+  let ci=0, served=0;
+  const servedEl=el('div','tim-served','☕ 0/'+customers.length);
+  const card=el('div','tim-order','');
+  const grid=el('div','tim-grid','');
+  const hint=el('div','hint','tap what they ordered — wrong taps cost time');
+  a.append(servedEl,card,grid,hint);
+
+  MENU.forEach(m=>{
+    const b=el('button','tim-btn','<em>'+m.e+'</em>'+m.n);
+    b.onclick=()=>hit(m.id,b);
+    grid.appendChild(b);
+  });
+
+  function renderOrder(){
+    const c=customers[ci];
+    let html='<div class="who">'+c.who+' wants:</div><ul>';
+    for(const id in c.need){
+      const m=MENU.find(x=>x.id===id);
+      html+='<li class="'+(c.need[id]<=0?'done':'')+'"><span>'+m.e+' '+m.n+'</span><span>×'+Math.max(0,c.need[id])+'</span></li>';
+    }
+    card.innerHTML=html+'</ul>';
+  }
+  renderOrder();
+
+  const t=api.countdown(21,()=>{
+    api.done(false,0,'Served '+served+'/'+customers.length+'. The line honked.');
+  });
+
+  let locked=false;
+  function hit(id,btn){
+    if(locked) return;
+    const c=customers[ci];
+    if(c.need[id]>0){
+      c.need[id]--; sfx.catch(); renderOrder();
+      if(Object.values(c.need).every(v=>v<=0)){
+        served++; servedEl.textContent='☕ '+served+'/'+customers.length;
+        toast('🍩 '+pick(THANKS));
+        locked=true;
+        if(served>=customers.length){
+          t.stop();
+          cx.after(300,()=>api.done(true, 150+api.level*20+Math.round(t.left()*8), 'the drive-thru flows'));
+          return;
+        }
+        cx.after(420,()=>{ ci++; locked=false; renderOrder(); });
+      }
+    } else {
+      sfx.bad(); t.add(-1.4); btn.classList.add('shake');
+      setTimeout(()=>btn.classList.remove('shake'),380);
+      api.pop(a.clientWidth/2, a.clientHeight/2, '-1.4s', true);
+    }
+  }
+}
+
+/* ============================================================
+   MINIGAME 3 — THE SORRY-OFF
+   ============================================================ */
+function gameSorryOff(a,api,cx){
+  const RIVALS=["Aunt Brenda","A Fella from Glace Bay","The Nicest Man Alive","Yer Grade 4 Teacher","A Retired Lighthouse Keeper","Somebody's Pop-Pop"];
+  const MY=["sorry","so sorry","oh gosh, sorry","no no, MY fault","sorry sorry sorry","I'm SO sorry","truly, sorry"];
+  const THEIRS=["no I'M sorry","my fault entirely","sorry, dear","oh heavens, sorry","I do apologize","sorry now"];
+  const rival=pick(RIVALS);
+
+  const stage=el('div','sry-stage',
+    '<div style="font-weight:900;font-size:13px;color:var(--cream-d)">Ya bumped carts at Frenchys with</div>'+
+    '<div class="sry-faces"><div>😳<div class="sry-name">YOU</div></div><div class="sry-vs">VS</div><div>😤<div class="sry-name">'+rival.toUpperCase()+'</div></div></div>'+
+    '<div class="sry-meter"><div class="sry-fill" id="sryFill"></div></div>'+
+    '<button class="sry-btn" id="sryBtn">SORRY!</button>'+
+    '<div class="hint">mash SORRY (or spacebar) — out-apologize \u2019em</div>');
+  a.appendChild(stage);
+  const fill=$('#sryFill'), btn=$('#sryBtn');
+
+  let m=0.5, won=false, t=null;
+  const drain=0.135+0.055*api.diff;
+  function bubble(mine,txt){
+    const b=el('div','sry-bubble'+(mine?'':' them'),txt);
+    b.style.left=(mine?rand(12,38):rand(58,84))+'%';
+    b.style.top=rand(16,34)+'%';
+    a.appendChild(b); setTimeout(()=>b.remove(),1000);
+  }
+  function press(){
+    if(won) return;
+    m=Math.min(1,m+0.052); sfx.tap();
+    if(Math.random()<0.4) bubble(true,pick(MY));
+    if(m>=1){ won=true; if(t)t.stop(); fill.style.width='100%';
+      api.done(true, 160+api.level*18+Math.round((t?t.left():0)*15), rival+' concedes. \u201CNo worries at all.\u201D'); }
+  }
+  btn.addEventListener('click',()=>{if(!G.paused&&!curDone)press()});
+  cx.on(window,'keydown',e=>{ if(e.code==='Space'){e.preventDefault();if(!e.repeat)press();} });
+  cx.every(650,()=>bubble(false,pick(THEIRS)));
+
+  t=api.countdown(8.5,()=>{
+    if(!won) api.done(false,0, rival+' out-sorried ya. Devastating.');
+  });
+  cx.raf(dt=>{
+    if(won) return;
+    m=Math.max(0,m-drain*dt);
+    fill.style.width=(m*100)+'%';
+    if(m<=0){ t.stop(); api.done(false,0, rival+' out-sorried ya. \u201CNo hard feelings, dear.\u201D Devastating.'); }
+  });
+}
+
+/* ============================================================
+   MINIGAME 4 — THE MARITIME WAVE
+   ============================================================ */
+function gameWave(a,api,cx){
+  const W=a.clientWidth, H=a.clientHeight;
+  const LABELS=["COUSIN'S F-150","THE PRIEST","BUDDY FROM THE WHARF","YER EX'S NEW FELLA (WAVE ANYWAY)","THE MAIL LADY","FELLA YA OWES $20","SOMEONE, PROBABLY","THE PLOW GUY (OFF DUTY)","DRIVING SCHOOL CAR (STRESSFUL)"];
+  const CARS=['🛻','🚗','🚙','🚐','🚜'];
+  const TOTAL=7;
+  let waved=0, fails=0, spawned=0, car=null;
+
+  a.append(
+    el('div','wv-road'),
+    el('div','wv-zone'),
+    el('div','wv-you','<span class="mb">📬</span>🧍'),
+    el('div','wv-stats','<span id="wvW">👋 0/'+TOTAL+'</span><span id="wvM">😬 0/3</span>'),
+    el('div','hint','tap WAVE (or spacebar) when they\u2019re in the zone — miss 3 and word gets around')
+  );
+  const btn=el('button','wv-btn','WAVE 👋'); a.appendChild(btn);
+  const wvW=$('#wvW'), wvM=$('#wvM');
+
+  function failUp(msg){
+    fails++; wvM.textContent='😬 '+fails+'/3'; sfx.bad();
+    if(msg) api.pop(W/2,H*0.3,msg,true);
+    if(fails>=3){ api.done(false,0,'Three snubs. It\u2019ll be in the church bulletin.'); }
+  }
+  function spawn(){
+    if(spawned>=TOTAL||fails>=3) return;
+    spawned++;
+    const flip=Math.random()<0.5;
+    const c=el('div','wv-car'+(flip?' flip':''),'<div class="lab">'+pick(LABELS)+'</div><div class="em">'+pick(CARS)+'</div>');
+    c._x = flip? W+70 : -70;
+    c._v = (W/rand(1.7,2.5))* (flip?-1:1) * (0.8+0.2*api.diff);
+    c._waved=false;
+    c.style.top=(H*0.42+6)+'px';
+    a.appendChild(c); car=c;
+  }
+  spawn();
+
+  function inZone(c){ const cxp=c._x; return cxp>W*0.37 && cxp<W*0.63; }
+  function wave(){
+    if(car && !car._waved && inZone(car)){
+      car._waved=true; waved++; wvW.textContent='👋 '+waved+'/'+TOTAL;
+      sfx.honk(); api.pop(car._x,H*0.36,'👋 beep beep!');
+    } else {
+      failUp('waved at nothin\u2019. neighbours saw.');
+    }
+  }
+  btn.addEventListener('click',()=>{if(!G.paused&&!curDone)wave()});
+  cx.on(window,'keydown',e=>{ if(e.code==='Space'){e.preventDefault();if(!e.repeat)wave();} });
+
+  api.countdown(TOTAL*3.1,()=>{ /* generous ceiling; normally ends when the cars do */
+    api.done(waved>=TOTAL-2 && fails<3, 150+api.level*18+(3-fails)*30, waved+'/'+TOTAL+' waves');
+  });
+
+  cx.raf(dt=>{
+    if(!car) return;
+    car._x+=car._v*dt;
+    car.style.left=(car._x-34)+'px';
+    const gone = car._v>0 ? car._x>W+70 : car._x<-70;
+    if(gone){
+      if(!car._waved) failUp('drove off un-waved-at.');
+      car.remove(); car=null;
+      if(fails>=3) return;
+      if(spawned>=TOTAL){
+        api.done(true, 150+api.level*18+(3-fails)*35, waved+'/'+TOTAL+' waves. The road respects ya.');
+      } else cx.after(260,spawn);
+    }
+  });
+}
+
+/* ============================================================
+   MINIGAME 5 — SHOVEL 'ER OUT
+   ============================================================ */
+function gameShovel(a,api,cx){
+  let p=0, lastSide=null, plowed=false;
+  const MSGS=[[0.25,"That's the spirit."],[0.5,"Halfway. Back's gone, keep goin'."],[0.75,"There's the asphalt!"],[0.92,"SO CLOSE. DIG."]];
+  let msgIdx=0;
+
+  const stage=el('div','sh-stage',
+    '<div class="sh-house">🏠</div>'+
+    '<div class="sh-drive"><div class="sh-snow" id="shSnow"></div><div class="sh-guy" id="shGuy">🧍‍♂️</div></div>'+
+    '<div class="sh-pct" id="shPct">0%</div>'+
+    '<div class="sh-msg" id="shMsg">Storm dumped 40cm. Company\u2019s comin\u2019.</div>'+
+    '<div class="sh-btns"><button class="sh-btn" id="shL">⛏ LEFT</button><button class="sh-btn next" id="shR">RIGHT ⛏</button></div>'+
+    '<div class="hint">alternate LEFT / RIGHT (arrow keys work too) — beat the refill</div>');
+  a.appendChild(stage);
+  const snow=$('#shSnow'), pct=$('#shPct'), msg=$('#shMsg'), guy=$('#shGuy');
+
+  let won=false, t=null;
+  function stroke(side){
+    if(won) return;
+    if(side===lastSide){ guy.classList.add('shake'); setTimeout(()=>guy.classList.remove('shake'),200); return; }
+    lastSide=side;
+    guy.classList.toggle('l', side==='L');
+    p=Math.min(1,p+0.026); sfx.tap();
+    while(msgIdx<MSGS.length && p>=MSGS[msgIdx][0]){ msg.textContent=MSGS[msgIdx][1]; msgIdx++; }
+    if(p>=1){ won=true; if(t)t.stop(); snow.style.height='0%'; pct.textContent='100%';
+      api.done(true, 150+api.level*20+Math.round((t?t.left():0)*12), 'driveway\u2019s bare. Yer back is not.'); }
+  }
+  $('#shL').addEventListener('click',()=>{if(!G.paused&&!curDone)stroke('L')});
+  $('#shR').addEventListener('click',()=>{if(!G.paused&&!curDone)stroke('R')});
+  cx.on(window,'keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();stroke('L');}
+    if(e.key==='ArrowRight'){e.preventDefault();stroke('R');}
+  });
+
+  cx.after(ri(4500,7500),()=>{
+    const w=el('div','plowwarn','🚜 PLOW COMIN\u2019!!');
+    a.appendChild(w); sfx.plow();
+    cx.after(950,()=>{ w.remove(); if(plowed)return; plowed=true;
+      p=Math.max(0,p-0.13); msg.textContent='The plow buried the end of \u2019er in again. Classic.';
+    });
+  });
+
+  const refill=0.020+0.014*api.diff;
+  t=api.countdown(15,()=>{
+    if(!won) api.done(false,0,'Got \u2019er to '+Math.round(p*100)+'%. Company parked on the lawn.');
+  });
+  cx.raf(dt=>{
+    if(won) return;
+    p=Math.max(0,p-refill*dt);
+    snow.style.height=((1-p)*100)+'%';
+    pct.textContent=Math.round(p*100)+'%';
+  });
+}
+
+/* ============================================================
+   MINIGAME 6 — MOOSE ON THE LOOSE
+   ============================================================ */
+function gameMoose(a,api,cx){
+  const W=a.clientWidth, H=a.clientHeight;
+  const laneX=i=>W*(0.5+(i-1)*0.28);
+  let lane=1, coffees=0, hurtUntil=0, over=false;
+
+  const road=el('div','mo-road');
+  const l1=el('div','mo-line'); l1.style.left=(W*0.36-3)+'px';
+  const l2=el('div','mo-line'); l2.style.left=(W*0.64-3)+'px';
+  road.append(l1,l2); a.appendChild(road);
+  const you=el('div','mo-you','🛻'); a.appendChild(you);
+  const cEl=el('div','bigcount','☕ 0'); a.appendChild(cEl);
+  a.appendChild(el('div','hint','← → or tap sides · dodge the wildlife, grab the coffee'));
+
+  function setLane(i){ lane=Math.max(0,Math.min(2,i)); you.style.left=(laneX(lane)-26)+'px'; }
+  setLane(1);
+  cx.on(window,'keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();setLane(lane-1);sfx.tap();}
+    if(e.key==='ArrowRight'){e.preventDefault();setLane(lane+1);sfx.tap();}
+  });
+  cx.on(a,'pointerdown',e=>{
+    const r=a.getBoundingClientRect();
+    setLane((e.clientX-r.left) < W/2 ? lane-1 : lane+1); sfx.tap();
+  });
+
+  const objs=[];
+  const fallTime=Math.max(1.15, 1.9-0.3*api.diff);
+  const TYPES=[
+    {k:'moose', e:'🫎', lab:'MOOSE', w:0.30},
+    {k:'car',   e:'🚗', lab:'TOURIST DOIN\u2019 80', w:0.22},
+    {k:'hole',  e:'🕳️', lab:'POTHOLE', w:0.24},
+    {k:'cof',   e:'☕', lab:'', w:0.24}
+  ];
+  function pickType(){ let r=Math.random(),acc=0; for(const t of TYPES){acc+=t.w; if(r<acc)return t;} return TYPES[0]; }
+  cx.every(Math.max(500, 860/api.diff), ()=>{
+    if(over) return;
+    const tp=pickType();
+    const ln=ri(0,2);
+    const o=el('div','mo-obj','<div class="em">'+tp.e+'</div>'+(tp.lab?'<div class="lab">'+tp.lab+'</div>':''));
+    o._y=-70; o._ln=ln; o._k=tp.k;
+    o.style.left=(laneX(ln)-24)+'px';
+    a.appendChild(o); objs.push(o);
+  });
+
+  const t=api.countdown(18,()=>{
+    if(over) return; over=true;
+    api.done(true, 160+api.level*20+coffees*40, coffees? coffees+' coffee'+(coffees>1?'s':'')+' rescued':'clean run up the 104');
+  });
+
+  cx.raf((dt,now)=>{
+    if(over) return;
+    const v=H/fallTime;
+    for(let i=objs.length-1;i>=0;i--){
+      const o=objs[i]; o._y+=v*dt; o.style.top=o._y+'px';
+      const youY=H*0.91-44;
+      if(o._ln===lane && o._y> youY-34 && o._y< youY+30){
+        if(o._k==='cof'){ coffees++; cEl.textContent='☕ '+coffees; sfx.catch(); api.pop(laneX(lane),youY-20,'+40'); o.remove(); objs.splice(i,1); continue; }
+        if(o._k==='hole'){
+          if(now>hurtUntil){ hurtUntil=now+700; sfx.bad(); you.classList.add('hurt'); setTimeout(()=>you.classList.remove('hurt'),420);
+            api.pop(laneX(lane),youY-20,'ALIGNMENT!',true); }
+          o.remove(); objs.splice(i,1); continue;
+        }
+        over=true; t.stop(); sfx.crash();
+        api.done(false,0, o._k==='moose' ? 'Ya hit a moose. The moose is fine. The truck is not.' : 'Rear-ended a tourist admirin\u2019 the view.');
+        return;
+      }
+      if(o._y>H+40){ o.remove(); objs.splice(i,1); }
+    }
+  });
+}
+
+/* ============================================================
+   MINIGAME 7 — KITCHEN PARTY TRIVIA
+   ============================================================ */
+function gameTrivia(a,api,cx){
+  if(G.usedTrivia.size>=TRIVIA.length) G.usedTrivia.clear();
+  let idx; do{ idx=ri(0,TRIVIA.length-1); }while(G.usedTrivia.has(idx));
+  G.usedTrivia.add(idx);
+  const Q=TRIVIA[idx];
+  const opts=shuffle([Q.a, ...Q.w]);
+
+  const stage=el('div','tv-stage',
+    '<div class="tv-tag">🎻 KITCHEN PARTY TRIVIA</div>'+
+    '<div class="tv-q">'+Q.q+'</div>'+
+    '<div class="tv-opts" id="tvOpts"></div>'+
+    '<div class="tv-fact" id="tvFact"></div>');
+  a.appendChild(stage);
+  const box=$('#tvOpts');
+  let answered=false;
+
+  const t=api.countdown(11,()=>{
+    if(answered) return; answered=true;
+    reveal(null);
+    cx.after(1400,()=>api.done(false,0,'Time! It was \u201C'+Q.a+'\u201D.'));
+  });
+
+  function reveal(chosenBtn){
+    [...box.children].forEach(b=>{
+      if(b.textContent===Q.a) b.classList.add('right');
+      else if(b===chosenBtn) b.classList.add('wrong');
+      b.disabled=true;
+    });
+  }
+  opts.forEach(o=>{
+    const b=el('button','tv-opt',o);
+    b.onclick=()=>{
+      if(answered) return; answered=true; t.stop();
+      reveal(b);
+      if(o===Q.a){
+        sfx.good(); $('#tvFact').textContent=Q.f;
+        cx.after(1500,()=>api.done(true, 170+api.level*15+Math.round(t.left()*10), null));
+      } else {
+        sfx.bad(); $('#tvFact').textContent='It was \u201C'+Q.a+'\u201D. '+Q.f;
+        cx.after(1900,()=>api.done(false,0,'Wrong answer at the kitchen party. The fiddle stopped.'));
+      }
+    };
+    box.appendChild(b);
+  });
+}
+
+/* ============================================================
+   MINIGAME 8 — BUILD-A-DONAIR
+   ============================================================ */
+function gameDonair(a,api,cx){
+  const ORDER=['PITA','MEAT','SWEET SAUCE','TOMATO','ONION'];
+  const DECOYS=[
+    {n:'LETTUCE',msg:'LETTUCE? On a DONAIR? Out. OUT.'},
+    {n:'KETCHUP',msg:'Ketchup. On a donair. Who raised ya?'}
+  ];
+  let step=0, slips=0, phase='show';
+
+  const stage=el('div','dn-stage',
+    '<div class="dn-title">🥙 BUILD-A-DONAIR</div>'+
+    '<div class="dn-order" id="dnOrder">Order: '+ORDER.join(' → ')+'</div>'+
+    '<div class="dn-stack" id="dnStack"></div>'+
+    '<div class="dn-grid" id="dnGrid"></div>'+
+    '<div class="dn-msg" id="dnMsg"></div>'+
+    '<div class="hint">memorize the order… then build \u2019er</div>');
+  a.appendChild(stage);
+  const grid=$('#dnGrid'), stack=$('#dnStack'), msg=$('#dnMsg'), orderEl=$('#dnOrder');
+
+  const showFor = Math.max(1400, 2400-api.level*100);
+  let t=null;
+  cx.after(showFor,()=>{
+    phase='build';
+    orderEl.textContent='Order: ??? (ya had one job)';
+    const btns=shuffle([...ORDER.map(n=>({n})), ...DECOYS]);
+    btns.forEach(b=>{
+      const e=el('button','dn-btn',b.n);
+      e.onclick=()=>tap(b,e);
+      grid.appendChild(e);
+    });
+    t=api.countdown(10,()=>{
+      api.done(false,0,'Half-built donair. The 2am crowd riots.');
+    });
+  });
+
+  function tap(b,e){
+    if(phase!=='build') return;
+    if(b.msg){ sfx.crash(); api.done(false,0,b.msg); return; }
+    if(b.n===ORDER[step]){
+      step++; sfx.catch();
+      stack.appendChild(el('div','dn-layer',b.n));
+      e.disabled=true; e.style.opacity=.35;
+      if(step>=ORDER.length){
+        if(t)t.stop();
+        api.done(true, 150+api.level*18+Math.round((t?t.left():0)*12),'wrapped in foil, dripping correctly');
+      }
+    } else {
+      slips++; sfx.bad();
+      e.classList.add('shake'); setTimeout(()=>e.classList.remove('shake'),380);
+      if(slips>=2){ api.done(false,0,'Assembly disaster. Sauce everywhere. Somehow on the ceiling.'); }
+      else msg.textContent='Not yet, b\u2019y — think of the ORDER. One more slip and she\u2019s ruined.';
+    }
+  }
+}
+
+/* ============================================================
+   registry + interstitial lines
+   ============================================================ */
+const GAMES=[
+  {id:'chips', name:'STORM CHIPS', run:gameStormChips, lines:[
+    "She's trackin' up the coast. Sobeys is chaos. Fill the cart.",
+    "Environment Canada says 40cm. The chip aisle says war.",
+    "Milk? Got it. Bread? Got it. Now for the ACTUAL essentials."]},
+  {id:'timmies', name:'TIMMIES RUSH', run:gameTimmies, lines:[
+    "Yer on drive-thru. The line's around the building. Godspeed.",
+    "Every order's sacred. Especially Gordie's.",
+    "The morning rush waits for no one, dear."]},
+  {id:'sorry', name:'THE SORRY-OFF', run:gameSorryOff, lines:[
+    "Two carts. One aisle. Zero fault. Infinite apologies.",
+    "There's no winning. Only out-sorrying.",
+    "May the most apologetic soul prevail."]},
+  {id:'wave', name:'THE MARITIME WAVE', run:gameWave, lines:[
+    "Yer at the mailbox. Cars are comin'. Ya know what to do.",
+    "Wave at every single one or move to the city.",
+    "Two fingers off the wheel is law around here."]},
+  {id:'shovel', name:"SHOVEL 'ER OUT", run:gameShovel, lines:[
+    "40 centimetres overnight. Company's comin' at noon.",
+    "The driveway won't clear itself. Believe me, we've waited.",
+    "Lift with yer legs. Complain with yer whole chest."]},
+  {id:'moose', name:'MOOSE ON THE LOOSE', run:gameMoose, lines:[
+    "Dusk on the 104. Ya know what that means.",
+    "The moose has the right of way. Physically.",
+    "Eyes up. Coffee's a bonus, moose is a lifestyle change."]},
+  {id:'trivia', name:'KITCHEN PARTY TRIVIA', run:gameTrivia, lines:[
+    "The fiddle stops. All eyes on you.",
+    "Answer wrong and someone's uncle will correct ya for an hour.",
+    "One question between you and another square of gingerbread."]},
+  {id:'donair', name:'BUILD-A-DONAIR', run:gameDonair, lines:[
+    "2am. Pizza Corner. Yer shift starts NOW.",
+    "Sweet sauce is a covenant. Don't break it.",
+    "Build it right or answer to all of Halifax."]}
+];
+
+/* ---------- wiring ---------- */
+$('#ticker').textContent = shuffle(TICKER).join('  ⚠️  ') + '  ⚠️  ';
+$('#titleBest').textContent = G.best>0 ? '🏆 Best haul: '+G.best+' · Rank: '+rankFor(G.best) : 'No score yet. The fog awaits.';
+$('#hudBest').textContent=G.best;
+$('#muteBtn').textContent = muted?'🔇':'🔊';
+$('#muteBtn').onclick=()=>{ muted=!muted; store.set('sg_muted',muted); $('#muteBtn').textContent=muted?'🔇':'🔊'; };
+$('#btnPlay').onclick=()=>{ sfx.good(); startRun(); };
+$('#btnAgain').onclick=()=>{ sfx.good(); startRun(); };
+$('#btnHow').onclick=()=>$('#howto').classList.add('on');
+$('#btnHowClose').onclick=()=>$('#howto').classList.remove('on');
+$('#btnShare').onclick=()=>{
+  const txt='I scored '+G.score+' in SOME GOOD! and ranked \u201C'+rankFor(G.score)+'\u201D 🦞 Storm chips were harmed. Think ya can out-sorry me? '+location.href;
+  const done=()=>toast('📋 Copied. Go make \u2019em jealous.');
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>toast(txt)); }
+  else toast(txt);
+};
+// keep spacebar from scrolling the page mid-game
+function setPaused(value){
+  if(!G.running)return;G.paused=value;$('#pauseLayer').hidden=!value;
+  if(value)$('#resumeBtn').focus();
+}
+$('#pauseBtn').onclick=()=>setPaused(true);
+$('#resumeBtn').onclick=()=>setPaused(false);
+window.addEventListener('blur',()=>setPaused(true));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true)});
+window.addEventListener('keydown',e=>{
+  if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!G.paused);}
+  if(e.code==='Space'&&G.running&&!e.target.closest?.('button'))e.preventDefault();
+});
+
+updateHUD();
+window.__SG={G,startRun,GAMES}; // wee testing hook
+</script>
+</body>
+</html>

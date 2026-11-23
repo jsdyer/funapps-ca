@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YES B'Y! — The Great East Coast Clicker</title>
+<meta name="description" content="Haul traps, sling donairs, weather nor'easters. Build an Atlantic Canadian empire from one busted lobster trap. Yes b'y.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦞</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:ital,wght@0,400;0,700;0,800;1,700&display=swap');
+
+:root{
+  --night:#0b2237;
+  --night2:#123049;
+  --harbour:#143b57;
+  --sea:#0f4a63;
+  --cream:#f6eedc;
+  --cream2:#efe3c8;
+  --ink:#21323f;
+  --red:#d2503c;
+  --red-dk:#b03e2d;
+  --buoy:#f4a93c;
+  --foam:#8fd0c2;
+  --gold:#f2c14e;
+  --shadow:0 6px 0 rgba(11,34,55,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(246,238,220,.9) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 9%, rgba(246,238,220,.8) 50%, transparent 51%),
+    radial-gradient(2px 2px at 55% 22%, rgba(246,238,220,.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90% 30%, rgba(246,238,220,.6) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 30% 8%, rgba(246,238,220,.75) 50%, transparent 51%),
+    radial-gradient(2px 2px at 68% 34%, rgba(246,238,220,.5) 50%, transparent 51%),
+    linear-gradient(180deg, var(--night) 0%, var(--night2) 45%, var(--harbour) 78%, var(--sea) 100%);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none !important}
+
+/* ---------- lighthouse ---------- */
+#lighthouse{position:fixed;left:2vw;bottom:52px;width:74px;z-index:0;pointer-events:none}
+#lh-beam{
+  position:fixed;left:calc(2vw + 30px);bottom:238px;width:min(46vw,560px);height:120px;
+  transform-origin:left center;
+  background:linear-gradient(90deg, rgba(242,193,78,.34), rgba(242,193,78,0));
+  clip-path:polygon(0 44%, 100% 0, 100% 100%, 0 56%);
+  animation:sweep 9s ease-in-out infinite alternate;
+  z-index:0;pointer-events:none;
+}
+@keyframes sweep{from{transform:rotate(6deg)}to{transform:rotate(-28deg)}}
+
+/* ---------- waves ---------- */
+.waves{position:fixed;left:0;right:0;bottom:0;height:64px;z-index:1;pointer-events:none}
+.wave{
+  position:absolute;left:0;bottom:0;width:200%;height:100%;
+  background-image:radial-gradient(circle at 24px -12px, transparent 30px, var(--harbour) 31px);
+  background-size:96px 64px;background-repeat:repeat-x;
+  animation:drift 13s linear infinite;opacity:.85;
+}
+.wave.two{
+  background-image:radial-gradient(circle at 32px -18px, transparent 40px, var(--sea) 41px);
+  background-size:128px 64px;height:78%;
+  animation-duration:19s;animation-direction:reverse;opacity:.95;
+}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-96px)}}
+
+/* ---------- weather overlays ---------- */
+#fog{
+  position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;transition:opacity 2.5s;
+  background:
+    radial-gradient(60% 45% at 20% 30%, rgba(230,232,230,.55), transparent 70%),
+    radial-gradient(70% 50% at 80% 60%, rgba(230,232,230,.5), transparent 70%),
+    radial-gradient(90% 60% at 50% 90%, rgba(230,232,230,.6), transparent 75%);
+}
+#fog.on{opacity:1}
+#snowbox{position:fixed;inset:0;z-index:39;pointer-events:none;overflow:hidden}
+.flake{position:absolute;top:-6%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.5);animation:fall linear forwards;user-select:none}
+@keyframes fall{to{transform:translateY(112vh) rotate(200deg)}}
+
+/* ---------- layout ---------- */
+#app{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:16px 16px 120px}
+header{color:var(--cream);text-align:center;padding:8px 0 4px}
+h1{
+  font-family:'Alfa Slab One',serif;font-weight:400;
+  font-size:clamp(2.4rem,7vw,4rem);letter-spacing:.02em;line-height:1;
+  text-shadow:0 4px 0 rgba(11,34,55,.6), 0 0 26px rgba(242,193,78,.22);
+}
+h1 .yb-red{color:var(--red)}
+h1 .yb-gold{color:var(--gold)}
+.tagline{font-style:italic;font-weight:700;opacity:.85;margin-top:6px;font-size:.95rem}
+
+/* ticker */
+#tickerbar{
+  display:flex;align-items:center;gap:10px;margin:14px auto 18px;max-width:860px;
+  background:rgba(11,34,55,.55);border:2px solid rgba(246,238,220,.25);
+  border-radius:999px;padding:7px 14px;color:var(--cream);
+}
+#tickerbar .chip{
+  flex:none;font-family:'Alfa Slab One',serif;font-size:.62rem;letter-spacing:.08em;
+  background:var(--red);color:var(--cream);padding:4px 9px;border-radius:999px;
+}
+#ticker{font-size:.9rem;font-weight:700;opacity:1;transition:opacity .5s;min-height:1.2em}
+#ticker.fade{opacity:0}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media (max-width:840px){.cols{grid-template-columns:1fr}}
+
+.panel{
+  background:var(--cream);border:3px solid var(--ink);border-radius:16px;
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.panel h2{
+  font-family:'Alfa Slab One',serif;font-weight:400;font-size:1rem;letter-spacing:.05em;
+  background:var(--ink);color:var(--cream);padding:9px 14px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+}
+.panel h2 .sub{font-family:'Nunito';font-weight:700;font-size:.72rem;opacity:.75;letter-spacing:0}
+.rope{height:7px;background:repeating-linear-gradient(-45deg, var(--buoy) 0 9px, var(--red) 9px 18px)}
+
+/* ---------- money / clicker ---------- */
+#moneybar{position:sticky;top:8px;z-index:30;margin-bottom:14px;text-align:center;padding:12px 10px}
+#money{font-family:'Alfa Slab One',serif;font-size:clamp(1.9rem,6vw,2.7rem);line-height:1.05;color:var(--ink)}
+#mps{font-weight:800;color:var(--red-dk);font-size:.95rem;margin-top:2px}
+#boostline{font-weight:800;font-size:.8rem;color:#0e6a4f;min-height:1.1em;margin-top:2px}
+
+#wharf{padding:22px 14px 26px;text-align:center;position:relative}
+#buoy{
+  position:relative;width:min(232px,62vw);aspect-ratio:1;border-radius:50%;
+  border:5px solid var(--ink);margin:6px auto 4px;
+  background:repeating-linear-gradient(180deg, var(--red) 0 17%, var(--cream) 17% 34%);
+  box-shadow:0 10px 0 rgba(11,34,55,.3), inset 0 -14px 0 rgba(11,34,55,.14);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .06s;user-select:none;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#buoy:active{transform:scale(.94)}
+#buoy .shine{position:absolute;top:9%;left:16%;width:22%;height:14%;background:rgba(255,255,255,.5);border-radius:50%;transform:rotate(-24deg)}
+#buoy .lob{font-size:clamp(4rem,17vw,6.2rem);filter:drop-shadow(0 5px 0 rgba(11,34,55,.35));transform:translateY(2px)}
+#clickhint{font-weight:800;font-style:italic;font-size:.85rem;color:var(--ink);opacity:.7;margin-top:10px}
+#clickval{font-weight:800;font-size:.8rem;color:var(--red-dk);margin-top:2px}
+
+.float{
+  position:fixed;font-family:'Alfa Slab One',serif;font-size:1.05rem;color:var(--cream);
+  text-shadow:0 2px 0 var(--ink), 0 0 8px rgba(11,34,55,.4);
+  pointer-events:none;animation:rise 1.15s ease-out forwards;white-space:nowrap;z-index:5;
+}
+.float.quip{color:var(--gold);font-size:.9rem}
+@keyframes rise{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-84px)}}
+
+/* ---------- store ---------- */
+.rows{max-height:430px;overflow-y:auto;scrollbar-width:thin}
+.brow{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-bottom:2px dashed rgba(33,50,63,.22);background:var(--cream);
+}
+.brow:last-child{border-bottom:none}
+.brow .icon{flex:none;font-size:1.8rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--cream2);border:2px solid var(--ink);border-radius:10px}
+.brow .info{flex:1;min-width:0}
+.brow .bname{font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.brow .owned{font-family:'Alfa Slab One',serif;font-size:.7rem;background:var(--ink);color:var(--cream);border-radius:6px;padding:1px 7px}
+.brow .bdesc{font-size:.76rem;opacity:.78;line-height:1.25;margin-top:2px}
+.brow .brate{font-size:.72rem;font-weight:800;color:#0e6a4f;margin-top:2px}
+.buy{
+  flex:none;font-family:'Alfa Slab One',serif;font-size:.8rem;letter-spacing:.02em;
+  background:var(--red);color:var(--cream);border:3px solid var(--ink);border-radius:12px;
+  padding:9px 12px;min-width:96px;box-shadow:0 4px 0 rgba(11,34,55,.3);
+  transition:transform .05s, filter .15s;
+}
+.buy:hover{filter:brightness(1.07)}
+.buy:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(11,34,55,.3)}
+.buy:disabled{background:#9aa7ad;color:#e7e2d2;cursor:not-allowed;filter:none}
+.buy small{display:block;font-family:'Nunito';font-weight:800;font-size:.66rem;margin-top:1px}
+.brow.tease{opacity:.6;filter:saturate(.4)}
+.brow.tease .icon{filter:blur(2px)}
+
+.upg{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;width:100%;text-align:left;
+  background:var(--cream);border:none;border-bottom:2px dashed rgba(33,50,63,.22);
+  transition:background .15s;
+}
+.upg:hover:not(:disabled){background:var(--cream2)}
+.upg:disabled{cursor:not-allowed;opacity:.55}
+.upg .icon{flex:none;font-size:1.35rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--gold);border:2px solid var(--ink);border-radius:9px}
+.upg .info{flex:1;min-width:0}
+.upg .uname{font-weight:800;font-size:.88rem}
+.upg .udesc{font-size:.73rem;opacity:.78;line-height:1.25}
+.upg .ucost{flex:none;font-family:'Alfa Slab One',serif;font-size:.78rem;color:var(--red-dk)}
+#upsEmpty{padding:12px 14px;font-size:.8rem;font-style:italic;opacity:.7}
+
+#qtyToggle{
+  font-family:'Alfa Slab One',serif;font-size:.68rem;background:var(--buoy);color:var(--ink);
+  border:2px solid var(--cream);border-radius:8px;padding:3px 9px;
+}
+
+/* ---------- footer dock ---------- */
+#dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  background:var(--ink);border-top:3px solid var(--buoy);
+  display:flex;justify-content:center;gap:8px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+  flex-wrap:wrap;
+}
+.dbtn{
+  background:var(--harbour);color:var(--cream);border:2px solid rgba(246,238,220,.35);
+  border-radius:10px;padding:7px 11px;font-weight:800;font-size:.78rem;
+  display:flex;align-items:center;gap:5px;transition:filter .15s;
+}
+.dbtn:hover{filter:brightness(1.25)}
+.dbtn.truck{background:var(--red);border-color:var(--gold);font-family:'Alfa Slab One',serif;letter-spacing:.02em}
+
+/* ---------- toasts / banner / gull ---------- */
+#toasts{position:fixed;top:12px;right:12px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:290px}
+.toast{
+  background:var(--cream);border:3px solid var(--ink);border-left:10px solid var(--gold);
+  border-radius:12px;padding:9px 12px;box-shadow:var(--shadow);
+  animation:slidein .35s ease-out;
+}
+.toast .tt{font-family:'Alfa Slab One',serif;font-size:.78rem}
+.toast .td{font-size:.74rem;opacity:.8;line-height:1.3}
+@keyframes slidein{from{transform:translateX(120%)}to{transform:translateX(0)}}
+
+#evbanner{
+  position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:55;
+  background:var(--ink);color:var(--cream);border:3px solid var(--buoy);border-radius:14px;
+  padding:10px 18px;font-weight:800;font-size:.9rem;text-align:center;max-width:92vw;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);animation:slidedown .35s ease-out;
+}
+@keyframes slidedown{from{transform:translate(-50%,-140%)}to{transform:translate(-50%,0)}}
+
+#gull{
+  position:fixed;z-index:58;font-size:46px;background:none;border:none;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.45));
+  animation:bob 1.1s ease-in-out infinite;padding:6px;line-height:1;
+}
+#gull::after{content:"✨";position:absolute;top:-8px;right:-6px;font-size:18px}
+@keyframes bob{0%,100%{margin-top:0}50%{margin-top:-13px}}
+
+/* ---------- modal ---------- */
+#overlay{
+  position:fixed;inset:0;z-index:70;background:rgba(11,34,55,.72);
+  display:flex;align-items:center;justify-content:center;padding:18px;
+}
+#modal{max-width:470px;width:100%;max-height:84vh;overflow-y:auto}
+#modal .mbody{padding:16px 18px;font-size:.92rem;line-height:1.5}
+#modal .mbody h3{font-family:'Alfa Slab One',serif;font-weight:400;font-size:1.15rem;margin-bottom:8px}
+#modal .mbody p{margin-bottom:10px}
+#modal .mbody .big{font-family:'Alfa Slab One',serif;color:var(--red-dk);font-size:1.3rem;text-align:center;margin:12px 0}
+.mrow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed rgba(33,50,63,.25);font-size:.85rem}
+.mrow b{font-weight:800}
+.mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.mbtn{
+  font-family:'Alfa Slab One',serif;font-size:.8rem;border:3px solid var(--ink);border-radius:11px;
+  padding:9px 14px;background:var(--cream2);color:var(--ink);box-shadow:0 4px 0 rgba(11,34,55,.3);
+}
+.mbtn.primary{background:var(--red);color:var(--cream)}
+.mbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(11,34,55,.3)}
+textarea.save{width:100%;height:90px;font-family:monospace;font-size:.72rem;border:2px solid var(--ink);border-radius:8px;padding:8px;background:#fffdf6}
+.achgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.achpill{font-size:.68rem;font-weight:800;border:2px solid var(--ink);border-radius:999px;padding:3px 9px;background:var(--gold)}
+.achpill.locked{background:#d8d2c2;opacity:.55}
+
+@media (max-width:840px){
+  #lh-beam{display:none}
+  #lighthouse{opacity:.5}
+  .rows{max-height:none}
+  #moneybar{top:4px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  #gull{animation:none}
+}
+button { touch-action: manipulation; }
+button:focus-visible, textarea:focus-visible { outline: 3px solid #bd372a; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .float, .flake, #buoy { animation: none !important; } }
+</style>
+</head>
+<body>
+<svg id="lighthouse" viewBox="0 0 74 190" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect x="20" y="52" width="34" height="118" fill="#f6eedc" stroke="#21323f" stroke-width="3"/>
+  <rect x="20" y="72" width="34" height="16" fill="#d2503c"/>
+  <rect x="20" y="112" width="34" height="16" fill="#d2503c"/>
+  <rect x="20" y="152" width="34" height="16" fill="#d2503c"/>
+  <rect x="14" y="166" width="46" height="10" fill="#21323f" rx="2"/>
+  <rect x="24" y="36" width="26" height="18" fill="#21323f" rx="2"/>
+  <rect x="28" y="39" width="18" height="12" fill="#f2c14e"/>
+  <path d="M22 36 L37 18 L52 36 Z" fill="#d2503c" stroke="#21323f" stroke-width="3"/>
+  <circle cx="37" cy="14" r="4" fill="#21323f"/>
+  <rect x="30" y="92" width="14" height="12" fill="#21323f" rx="2"/>
+</svg>
+<div id="lh-beam"></div>
+<div class="waves"><div class="wave"></div><div class="wave two"></div></div>
+<div id="snowbox"></div>
+<div id="fog"></div>
+
+<div id="app">
+  <header>
+    <h1>YES <span class="yb-red">B'Y!</span></h1>
+    <div class="tagline">The Great East Coast Clicker — from one busted trap to the whole shebang</div>
+  </header>
+
+  <div id="tickerbar"><span class="chip">THE LOCAL NEWS</span><span id="ticker">Loading the news, hold yer horses…</span></div>
+
+  <div class="cols">
+    <div>
+      <div class="panel" id="moneybar">
+        <div id="money">$0</div>
+        <div id="mps">$0 / second</div>
+        <div id="boostline"></div>
+      </div>
+
+      <div class="panel">
+        <h2>THE WHARF <span class="sub" id="weatherword">clear skies, for now</span></h2>
+        <div class="rope"></div>
+        <div id="wharf">
+          <button id="buoy" aria-label="Haul the trap">
+            <span class="shine"></span>
+            <span class="lob">🦞</span>
+          </button>
+          <div id="clickhint">Click the lobster. Haul the trap. Build the empire, b'y.</div>
+          <div id="clickval">$1 per haul</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:14px">
+        <h2>THE STAND <span class="sub">upgrades &amp; gear</span></h2>
+        <div class="rope"></div>
+        <div class="rows" id="upsList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>BUY IN <span class="sub">the operation</span> <button id="qtyToggle" aria-label="Toggle buy quantity">BUY ×1</button></h2>
+        <div class="rope"></div>
+        <div class="rows" id="bList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="evbanner" class="hidden"></div>
+<div id="dock">
+  <button class="dbtn" id="btnSound" title="Sound on/off">🔊 Sound</button>
+  <button class="dbtn" id="btnStats" title="Stats and achievements">📊 The Numbers</button>
+  <button class="dbtn" id="btnSave" title="Save now">💾 Save</button>
+  <button class="dbtn" id="btnExport" title="Export / import save code">🧾 Save Code</button>
+  <button class="dbtn truck hidden" id="btnPrestige" title="Prestige">🚚 Go Down the Road</button>
+  <button class="dbtn" id="btnReset" title="Wipe everything" aria-label="Reset all progress">🗑️</button>
+</div>
+
+<div id="overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Game menu"><div class="panel" id="modal"><div class="rope"></div><div class="mbody" id="mbody"></div></div></div>
+
+<script>
+"use strict";
+/* ============================================================
+   YES B'Y! — The Great East Coast Clicker
+   Built for the folks who know what storm chips are.
+   ============================================================ */
+
+/* ---------- data: the operation ---------- */
+const BUILDINGS=[
+ {id:"trap",   icon:"🪤", name:"Lobster Trap",          cost:15,     rate:0.1,
+  desc:"A busted old trap off the end of the wharf. The kitchen and the parlour are both open for business."},
+ {id:"dory",   icon:"🚣", name:"Leaky Dory",            cost:100,    rate:1,
+  desc:"Two oars, one bailer, zero complaints. She weeps a little. So do you."},
+ {id:"coffee", icon:"☕", name:"Drive-Thru Coffee Shack",cost:750,   rate:6,
+  desc:"Double-doubles by the tray. The line wraps the block twice and nobody's mad about it."},
+ {id:"cape",   icon:"🛥️", name:"Cape Islander",         cost:4400,   rate:33,
+  desc:"High bow, wide deck, your nan's name painted on the stern in Lunenburg script."},
+ {id:"spuds",  icon:"🥔", name:"Island Spud Field",     cost:26000,  rate:170,
+  desc:"Dirt so red it stains your sneakers and your soul. The Island provides."},
+ {id:"blue",   icon:"🫐", name:"Wild Blueberry Barren", cost:140000, rate:900,
+  desc:"Low bush, high effort. The giant roadside blueberry watches approvingly."},
+ {id:"donair", icon:"🥙", name:"Donair Shop",           cost:800000, rate:4700,
+  desc:"Shaved meat, sweet sauce, open til 4 a.m. as a public service. Official food of the city, b'y."},
+ {id:"party",  icon:"🎻", name:"Kitchen Party Hall",    cost:4.6e6,  rate:26000,
+  desc:"Chairs from five different kitchens. A man you've never met is playing the spoons."},
+ {id:"oyster", icon:"🦪", name:"Oyster Lease",          cost:26e6,   rate:140000,
+  desc:"Malpeque gold sittin' in the mud. Shuck responsibly."},
+ {id:"ferry",  icon:"⛴️", name:"Ferry Crossing",        cost:150e6,  rate:750000,
+  desc:"She's runnin' today. Probably. Check the website. The website is down."},
+ {id:"plant",  icon:"🏭", name:"Fish Plant",            cost:900e6,  rate:4.1e6,
+  desc:"Everyone you've ever met worked here for exactly one summer."},
+ {id:"brew",   icon:"🍺", name:"Craft Brewery",         cost:5.2e9,  rate:22e6,
+  desc:"A former hardware store. The flagship IPA is named after a fog bank."},
+ {id:"cousin", icon:"🛢️", name:"Cousin Out West",       cost:30e9,   rate:115e6,
+  desc:"Two weeks on, two weeks off. Sends money home and says the mountains get in the way of the view."},
+ {id:"tidal",  icon:"🌊", name:"Fundy Tidal Turbine",   cost:170e9,  rate:600e6,
+  desc:"A hundred billion tonnes of seawater, twice a day. You get a cut."},
+ {id:"space",  icon:"🚀", name:"Eastern Shore Spaceport",cost:1e12,  rate:3.3e9,
+  desc:"Rockets outta Canso. The lobsters are going interplanetary."}
+];
+
+const UPGRADES=[
+ // click power
+ {id:"boots",  icon:"🥾", name:"Rubber Boots",            cost:100,    kind:"click", desc:"Steel toes optional, strongly recommended. Clicks ×2.", unlock:s=>s.total>=50},
+ {id:"gloves", icon:"🧤", name:"The Good Gloves",         cost:2500,   kind:"click", desc:"Not the ones with the hole. The GOOD ones. Clicks ×2.", unlock:s=>s.total>=1000},
+ {id:"sou",    icon:"👒", name:"Sou'wester",              cost:60000,  kind:"click", desc:"Keeps the rain off yer neck. Fashion icon. Clicks ×2.", unlock:s=>s.total>=25000},
+ {id:"tarps",  icon:"💪", name:"Tarps Off, B'ys",         cost:1.5e6,  kind:"clickmps", desc:"Give'r. Clicks ×2 and gain +1% of yer $/s per haul.", unlock:s=>s.total>=5e5},
+ {id:"tunder", icon:"⚡", name:"Lord Tunderin' Thumbs",   cost:120e6,  kind:"clickmps", desc:"Clicks ×2 and another +1% of $/s per haul.", unlock:s=>s.total>=4e7},
+ // building upgrades
+ {id:"bait",   icon:"🐟", name:"Fresh Bait",              cost:200,    kind:"b", target:"trap",  desc:"Herring, mostly. Don't ask about the bucket. Traps ×2.", unlock:s=>s.b.trap>=5},
+ {id:"parlour",icon:"🛋️", name:"Extra Parlour",           cost:2500,   kind:"b", target:"trap",  desc:"The trap's got a kitchen and two parlours now. Fancier than your first apartment. Traps ×2.", unlock:s=>s.b.trap>=25},
+ {id:"bail",   icon:"🪣", name:"Faster Bailer",           cost:1400,   kind:"b", target:"dory",  desc:"She still leaks. It's character. Dories ×2.", unlock:s=>s.b.dory>=5},
+ {id:"kijiji", icon:"⚙️", name:"Second-Hand Outboard",    cost:18000,  kind:"b", target:"dory",  desc:"Online classifieds special. Starts on the third pull, every time. Dories ×2.", unlock:s=>s.b.dory>=25},
+ {id:"brim",   icon:"🥤", name:"Roll Up the Brim",        cost:9000,   kind:"b", target:"coffee",desc:"Please play again. PLEASE. Coffee ×2.", unlock:s=>s.b.coffee>=5},
+ {id:"forty",  icon:"🍩", name:"Box o' Forty",            cost:110000, kind:"b", target:"coffee",desc:"Forty little donut holes, gone before the meeting starts. Coffee ×2.", unlock:s=>s.b.coffee>=25},
+ {id:"hauler", icon:"🪝", name:"New Trap Hauler",         cost:55000,  kind:"b", target:"cape",  desc:"The old one owed ya nothing. Cape Islanders ×2.", unlock:s=>s.b.cape>=5},
+ {id:"paint",  icon:"🎨", name:"Buoy-Orange Paint Job",   cost:660000, kind:"b", target:"cape",  desc:"She's some pretty now. Cape Islanders ×2.", unlock:s=>s.b.cape>=25},
+ {id:"mud",    icon:"🟥", name:"More Red Mud",            cost:320000, kind:"b", target:"spuds", desc:"In the truck, on the porch, in your heart. Spuds ×2.", unlock:s=>s.b.spuds>=5},
+ {id:"rakes",  icon:"🧺", name:"Rake Crew",               cost:1.7e6,  kind:"b", target:"blue",  desc:"Backs sore, buckets full, August forever. Blueberries ×2.", unlock:s=>s.b.blue>=5},
+ {id:"sauce",  icon:"🥛", name:"Extra Sweet Sauce",       cost:9.6e6,  kind:"b", target:"donair",desc:"More condensed milk. No further questions, your honour. Donairs ×2.", unlock:s=>s.b.donair>=5},
+ {id:"garlic", icon:"🧄", name:"Garlic Fingers on the Menu",cost:120e6,kind:"b", target:"donair",desc:"With sauce for dippin'. Civilization peaks. Donairs ×2.", unlock:s=>s.b.donair>=25},
+ {id:"priv",   icon:"🏴‍☠️", name:"Fella Knows the Privateers One",cost:55e6,kind:"b",target:"party",desc:"Everybody hollers the loud part. The neighbours holler it too. Parties ×2.", unlock:s=>s.b.party>=5},
+ {id:"spoons", icon:"🥄", name:"Spoons Guy Arrives",      cost:700e6,  kind:"b", target:"party", desc:"Nobody invited him. He simply appears. He always does. Parties ×2.", unlock:s=>s.b.party>=25},
+ {id:"knife",  icon:"🔪", name:"Proper Shuckin' Knife",   cost:320e6,  kind:"b", target:"oyster",desc:"Your left hand says thank you. Oysters ×2.", unlock:s=>s.b.oyster>=5},
+ {id:"site",   icon:"🖥️", name:"The Website's Back Up",   cost:1.8e9,  kind:"b", target:"ferry", desc:"For now. Ferries ×2.", unlock:s=>s.b.ferry>=5},
+ {id:"break",  icon:"⏸️", name:"Second Coffee Break",     cost:11e9,   kind:"b", target:"plant", desc:"Somehow increases output. Don't question the system. Plant ×2.", unlock:s=>s.b.plant>=5},
+ {id:"sour",   icon:"🍋", name:"Seasonal Sour Nobody Asked For",cost:62e9,kind:"b",target:"brew",desc:"Tastes like a dare. Sells out by Friday. Brewery ×2.", unlock:s=>s.b.brew>=5},
+ {id:"nights", icon:"🌙", name:"Night Shift Premium",     cost:360e9,  kind:"b", target:"cousin",desc:"He's tired, b'y. But the truck's nearly paid off. Cousins ×2.", unlock:s=>s.b.cousin>=5},
+ {id:"turb2",  icon:"🌀", name:"Second Turbine",          cost:2e12,   kind:"b", target:"tidal", desc:"The tide didn't even notice. Turbines ×2.", unlock:s=>s.b.tidal>=5},
+ {id:"claw",   icon:"🌕", name:"Lobster Payload Bay",     cost:12e12,  kind:"b", target:"space", desc:"One giant leap for lobsterkind. Spaceport ×2.", unlock:s=>s.b.space>=5},
+ // global
+ {id:"bagmilk",icon:"🥛", name:"Bagged Milk Pitcher",     cost:75000,  kind:"g", mult:1.05, desc:"Snip the corner. You're one of us now. Everything +5%.", unlock:s=>s.total>=30000},
+ {id:"screech",icon:"🐠", name:"Get Screeched In",        cost:400000, kind:"gull", mult:1.05, desc:"Kiss the cod, say the words. Everything +5% and lucky gulls come round more often.", unlock:s=>s.total>=150000},
+ {id:"nan",    icon:"🍽️", name:"Nan's Sunday Dinner",     cost:5e6,    kind:"g", mult:1.10, desc:"You're too skinny. Sit. Eat. Take a plate home. Everything +10%.", unlock:s=>s.total>=2e6},
+ {id:"frenchys",icon:"🧥",name:"Frenchy's Luck",          cost:60e6,   kind:"g", mult:1.10, desc:"Mint Carhartt, four dollars. You are unstoppable. Everything +10%.", unlock:s=>s.total>=25e6},
+ {id:"wave",   icon:"👋", name:"Wave at Every Car",       cost:750e6,  kind:"g", mult:1.10, desc:"They all wave back. Consumer confidence soars. Everything +10%.", unlock:s=>s.total>=300e6},
+ {id:"gen",    icon:"🔌", name:"The Generator",           cost:4e9,    kind:"gen", desc:"When the power's out, your lights stay on and the whole road shows up with freezer meat. Outages become a BONUS.", unlock:s=>s.total>=1.5e9},
+ {id:"chips",  icon:"🥔", name:"Storm Chips Stockpile",   cost:25e9,   kind:"chips", mult:1.10, desc:"All Dressed, Ketchup, and one bag of plain for Dad. Everything +10%, and storm days boost ×3.", unlock:s=>s.total>=10e9},
+ {id:"soc",    icon:"🍻", name:"Sociable!",               cost:300e9,  kind:"g", mult:1.15, desc:"Everyone stands. Everyone hollers. Glassware everywhere. Everything +15%.", unlock:s=>s.total>=120e9}
+];
+
+const ACHS=[
+ {id:"a1", name:"How's She Goin'?",        desc:"Haul your first trap.",                cond:s=>s.clicks>=1},
+ {id:"a2", name:"Fill Yer Boots",          desc:"100 hauls.",                           cond:s=>s.clicks>=100},
+ {id:"a3", name:"Give'r",                  desc:"1,000 hauls.",                         cond:s=>s.clicks>=1000},
+ {id:"a4", name:"Right Give'r",            desc:"10,000 hauls. See a doctor about that wrist.", cond:s=>s.clicks>=10000},
+ {id:"a5", name:"Some Good",               desc:"Earn $1,000 all-time.",                cond:s=>s.total>=1000},
+ {id:"a6", name:"Right Some Good",         desc:"Earn $100K all-time.",                 cond:s=>s.total>=1e5},
+ {id:"a7", name:"Some Shockin' Good",      desc:"Earn $10M all-time.",                  cond:s=>s.total>=1e7},
+ {id:"a8", name:"Lord Tunderin'",          desc:"Earn $1B all-time.",                   cond:s=>s.total>=1e9},
+ {id:"a9", name:"Big Stop Money",          desc:"Earn $100B. Order the truckers' breakfast without checkin' the price.", cond:s=>s.total>=1e11},
+ {id:"a10",name:"Oh, She's LOADED",        desc:"Earn $1 trillion all-time.",           cond:s=>s.total>=1e12},
+ {id:"a11",name:"The Works",               desc:"Own at least one of everything. Just like a proper donair.", cond:s=>BUILDINGS.every(b=>s.b[b.id]>=1)},
+ {id:"a12",name:"Who's Yer Fadder?",       desc:"Own 100 buildings. Everyone knows ya now.", cond:s=>totalBuildings(s)>=100},
+ {id:"a13",name:"The Whole Shebang",       desc:"Own 300 buildings.",                   cond:s=>totalBuildings(s)>=300},
+ {id:"a14",name:"Bluenoser",               desc:"Own 10 Cape Islanders.",               cond:s=>s.b.cape>=10},
+ {id:"a15",name:"Spud Islander",           desc:"Own 10 spud fields.",                  cond:s=>s.b.spuds>=10},
+ {id:"a16",name:"Herring Choker",          desc:"Own 10 dories.",                       cond:s=>s.b.dory>=10},
+ {id:"a17",name:"Best Kind",               desc:"Own 10 kitchen party halls.",          cond:s=>s.b.party>=10},
+ {id:"a18",name:"Donairvana",              desc:"Own 25 donair shops. Sweet sauce nirvana.", cond:s=>s.b.donair>=25},
+ {id:"a19",name:"Screeched In Proper",     desc:"Catch 7 lucky gulls.",                 cond:s=>s.gulls>=7},
+ {id:"a20",name:"Gull Enemy No. 1",        desc:"Catch 25 lucky gulls.",                cond:s=>s.gulls>=25},
+ {id:"a21",name:"Storm Chips Veteran",     desc:"Weather 3 storm days.",                cond:s=>s.storms>=3},
+ {id:"a22",name:"Mauzy Out There",         desc:"Sit through 5 fogs. (That's Newfoundland for damp, grey, and somehow cozy.)", cond:s=>s.fogs>=5},
+ {id:"a23",name:"Stay Where Yer At",       desc:"Play for 20 minutes. I'll come where yer to.", cond:s=>s.playTime>=1200},
+ {id:"a24",name:"Long May Yer Big Jib Draw",desc:"Go down the road and come home once.", cond:s=>s.prestiges>=1},
+ {id:"a25",name:"Fly-In, Fly-Out",         desc:"Go down the road 3 times. They always come back.", cond:s=>s.prestiges>=3},
+ {id:"a26",name:"Truck Guy Now",           desc:"Own 5 trucks. Visible from space.",    cond:s=>s.trucks>=5},
+ {id:"a27",name:"Mainlander No More",      desc:"Buy 10 upgrades.",                     cond:s=>s.ups.length>=10},
+ {id:"a28",name:"Sunday Best",             desc:"Buy 25 upgrades.",                     cond:s=>s.ups.length>=25}
+];
+
+const TICKER=[
+ "Forecast: fog, followed by fog, with a brief chance of fog.",
+ "Wind warning in effect. So, a regular Tuesday.",
+ "Local man waves at 74 consecutive cars; wrist reportedly fine.",
+ "Grocery store parking lot chat enters third hour; both parties late for supper.",
+ "Storm chips officially declared an essential service.",
+ "Area nan insists you take a plate home. You take the plate.",
+ "Seagull makes off with an entire slice of pizza; police call it 'a civil matter.'",
+ "Kitchen party enters hour six. Fiddle player shows no signs of stopping.",
+ "Man says he's 'not too bad,' which experts confirm means 'thriving.'",
+ "'Some day on clothes,' announces every clothesline owner at once.",
+ "Tourist asks what time the fog machine shuts off.",
+ "Tourist attempts to pronounce 'Antigonish.' Locals wait respectfully.",
+ "Noon gun fires. Tourists dive for cover. Locals don't blink.",
+ "Bridge traffic delayed by everyone letting everyone else in.",
+ "Deer eats entire garden; homeowner calls him 'a real gentleman about it.'",
+ "Man finishes shovelling; plow returns instantly. He begins again, stronger.",
+ "Obituaries checked before the news, as is tradition.",
+ "'Who's yer fadder?' successfully identifies a total stranger in 11 seconds.",
+ "Pothole on Main Street given a name and a birthday card.",
+ "Ferry delayed; passengers spontaneously form a kitchen party.",
+ "Two flurries in the forecast; school boards already drafting the announcement.",
+ "Man spotted in shorts in February: 'she's mild out.'",
+ "Self-checkout confused by whole salt cod. Aren't we all.",
+ "Frenchy's bin restocked; local economy shudders.",
+ "Whale surfaces; entire boardwalk says 'ohhhh' in unison.",
+ "Lighthouse remains extremely photogenic, sources confirm.",
+ "Fog so thick this mornin' you could butter it and put it on a tea bun.",
+ "Local team wins; drive-thru erupts in celebratory honking.",
+ "Cape Breton once again voted prettier than wherever you're from.",
+ "Mainland relatives ask about 'all that weather.' We simply have it.",
+ "Bakery sells out of tea buns by 9 a.m.; town enters mourning.",
+ "Mummers spotted in December. Or very confused carollers. Hard to say.",
+ "Iceberg drifts into the bay; town immediately starts sellin' tickets.",
+ "Town of Dildo trends online again. Town of Dildo does not care.",
+ "Come By Chance, Heart's Content and Witless Bay defend the team naming title.",
+ "Moose on the highway. Everyone's cousin already texted about it.",
+ "Tide goes out a full kilometre, then comes back. As promised.",
+ "Tidal bore arrives exactly on schedule, unlike the ferry.",
+ "Man calls it 'a scattered time.' Reports indicate an excellent time was had.",
+ "'Best kind,' says man, meaning it with his whole chest.",
+ "Local dog rides in boat, achieves perfect happiness.",
+ "The wharf cats have unionized. Their demands: fish.",
+ "Radio plays the fiddle tune again. Nobody complains. Nobody ever will.",
+ "Gas station meet-up enters hour two; trucks idling out of respect.",
+ "Buddy got the wood in. Winter can do its worst now.",
+ "Every driveway goodbye ends with 'anyway—' and lasts 20 more minutes.",
+ "'It's not the cold, it's the damp,' says everyone, correctly.",
+ "Donair sauce spill downtown declared a sweet, sweet tragedy.",
+ "Pizza corner at 3 a.m.: a place of healing.",
+ "The old bridge or the new bridge? A house divided.",
+ "New roundabout installed; town enters fourth day of politely yielding.",
+ "50/50 jackpot hits $214; the rink loses its collective mind.",
+ "Chase the Ace line wraps around the legion twice.",
+ "Bingo dauber shortage rocks three counties.",
+ "Man returns from out west; truck visible from space.",
+ "'You can't get there from here,' confirms local giving directions.",
+ "Directions given entirely in landmarks that burned down in 1987.",
+ "'Stay where yer at till I comes where yer to,' says dispatch, correctly.",
+ "Mosquitoes elected official bird of June.",
+ "Blackflies file formal complaint over mosquito decision.",
+ "Garden gnome returned after three years with a photo album of his travels.",
+ "'Sociable!' hollered; entire hall stands as one.",
+ "Bagpiper on the hill at dawn. Cause: vibes.",
+ "Crib tournament ends a friendship for exactly one evening.",
+ "'She's blowin' a gale' upgraded to 'she's REALLY blowin' a gale.'",
+ "Rain, drizzle and fog issue joint statement: 'we're stayin'.'",
+ "Dulse aisle empty. Mainlanders suspected. Investigation ongoing.",
+ "Wild blueberry crop 'some good this year,' reports everyone's uncle.",
+ "World's Longest Covered Bridge remains covered, remains longest.",
+ "Cars roll uphill at Magnetic Hill; physics files a complaint.",
+ "Toutons with molasses declared 'a scoff and a half.'",
+ "Sunday Jiggs dinner smell detected three houses away. Neighbours circling.",
+ "Cole Harbour rink quietly produces another future legend, probably.",
+ "Tarabish game paused for supper; resumed with frightening intensity.",
+ "Fisherman retires, sells boat to a fella from town. Nothin' else changes.",
+ "Rink canteen fries with the works named regional cuisine of the year.",
+ "Man puts snow tires on in October. Man is mocked. Man is later a hero."
+];
+
+const QUIPS=["Yes b'y!","Best kind.","Give'r!","Some size to that one!","Right outta the trap!","Market size!","Berried female — back she goes.","A cull — one claw, still sweet.","Deadly.","She's a keeper.","Whadda y'at? Haulin'.","That's the stuff.","Fill yer boots!","Oh she's LOADED.","Long may yer big jib draw."];
+
+/* ---------- state ---------- */
+function freshState(){
+  const b={}; BUILDINGS.forEach(x=>b[x.id]=0);
+  return {money:0,total:0,clicks:0,b,ups:[],achs:[],trucks:0,prestiges:0,
+          gulls:0,storms:0,fogs:0,playTime:0,muted:false,lastTs:Date.now()};
+}
+let S=freshState();
+let qty=1;
+
+/* guarded storage: works when hosted (e.g. Netlify); quietly skips in sandboxed previews */
+const store=(()=>{try{const t="__yb";localStorage.setItem(t,t);localStorage.removeItem(t);return localStorage;}catch(e){return null;}})();
+const SAVEKEY="yesby_save_v1";
+function sanitizeState(data) {
+  if (!data || typeof data !== 'object' || !data.b || !Number.isFinite(data.money) || data.money < 0) throw new Error('Invalid save');
+  const fresh = freshState();
+  for (const key of ['money','total','clicks','trucks','prestiges','gulls','storms','fogs','playTime','lastTs']) {
+    if (data[key] === undefined) continue;
+    if (!Number.isFinite(data[key]) || data[key] < 0 || data[key] > 1e100) throw new Error('Invalid ' + key);
+    fresh[key] = data[key];
+  }
+  for (const b of BUILDINGS) {
+    const n = data.b[b.id] ?? 0;
+    if (!Number.isInteger(n) || n < 0 || n > 1000) throw new Error('Invalid building count');
+    fresh.b[b.id] = n;
+  }
+  if (data.ups !== undefined && !Array.isArray(data.ups)) throw new Error('Invalid upgrades');
+  if (data.achs !== undefined && !Array.isArray(data.achs)) throw new Error('Invalid achievements');
+  fresh.ups = [...new Set((data.ups || []).filter(id => UPGRADES.some(u => u.id === id)))];
+  fresh.achs = [...new Set((data.achs || []).filter(id => ACHS.some(a => a.id === id)))];
+  fresh.muted = data.muted === true;
+  fresh.lastTs = Math.min(Date.now(), fresh.lastTs);
+  return fresh;
+}
+function encodeSave(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))));}
+function decodeSave(str){return JSON.parse(decodeURIComponent(escape(atob(str.trim()))));}
+function save(){S.lastTs=Date.now(); if(store){try{store.setItem(SAVEKEY,encodeSave());}catch(e){}}}
+function load(){
+  if(!store)return false;
+  try{
+    const raw=store.getItem(SAVEKEY); if(!raw)return false;
+    S=sanitizeState(decodeSave(raw));
+    return true;
+  }catch(e){return false;}
+}
+
+/* ---------- math ---------- */
+function totalBuildings(s){return BUILDINGS.reduce((n,b)=>n+(s.b[b.id]||0),0);}
+function has(id){return S.ups.includes(id);}
+function fmt(n){
+  if(!isFinite(n))return "∞";
+  if(n<1000)return (n%1&&n<100)?n.toFixed(1):Math.floor(n).toLocaleString();
+  const u=["K","M","B","T","Qa","Qi","Sx","Sp"]; let i=-1;
+  while(n>=1000&&i<u.length-1){n/=1000;i++;}
+  return n.toFixed(n<10?2:n<100?1:0)+u[i];
+}
+function bldMult(id){let m=1;UPGRADES.forEach(u=>{if(u.kind==="b"&&u.target===id&&has(u.id))m*=2;});return m;}
+function globalMult(){
+  let m=1;
+  UPGRADES.forEach(u=>{if((u.kind==="g"||u.kind==="gull"||u.kind==="chips")&&has(u.id))m*=(u.mult||1);});
+  m*=1+0.01*S.achs.length;
+  m*=1+0.10*S.trucks;
+  return m;
+}
+let boost={mult:1,until:0,label:""};     // gull boosts
+let weather={mult:1,until:0,label:"",type:""};
+function eventMult(){
+  const now=Date.now(); let m=1;
+  if(boost.until>now)m*=boost.mult;
+  if(weather.until>now)m*=weather.mult;
+  return m;
+}
+function mps(){
+  let base=0;
+  BUILDINGS.forEach(b=>{base+=(S.b[b.id]||0)*b.rate*bldMult(b.id);});
+  return base*globalMult()*eventMult();
+}
+function clickValue(){
+  let v=1; UPGRADES.forEach(u=>{if((u.kind==="click"||u.kind==="clickmps")&&has(u.id))v*=2;});
+  let pct=0; if(has("tarps"))pct+=0.01; if(has("tunder"))pct+=0.01;
+  v=v*globalMult()*eventMult()+pct*mps();
+  return v;
+}
+function bCost(b,owned){return Math.ceil(b.cost*Math.pow(1.15,owned));}
+function bCostN(b,owned,n){let t=0;for(let i=0;i<n;i++)t+=bCost(b,owned+i);return t;}
+
+/* ---------- sound (tiny synth, no files) ---------- */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function tone(f,dur,type,vol,when){
+  if(S.muted)return; const c=ac(); if(!c)return;
+  const t=c.currentTime+(when||0);
+  const o=c.createOscillator(),g=c.createGain();
+  o.type=type||"triangle"; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(vol||0.06,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+}
+const sClick=()=>tone(520+Math.random()*80,0.07,"triangle",0.05);
+const sBuy=()=>{tone(392,0.08,"square",0.05);tone(587,0.1,"square",0.05,0.07);};
+const sAch=()=>{tone(523,0.1,"triangle",0.06);tone(659,0.1,"triangle",0.06,0.09);tone(784,0.16,"triangle",0.07,0.18);};
+const sGull=()=>{tone(1150,0.09,"sawtooth",0.05);tone(870,0.12,"sawtooth",0.05,0.09);};
+const sHorn=()=>{tone(98,0.9,"sine",0.12);tone(196,0.9,"sine",0.05);};
+
+/* ---------- dom helpers ---------- */
+const $=id=>document.getElementById(id);
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!==undefined)e.innerHTML=html;return e;}
+
+/* ---------- toasts / floats ---------- */
+function toast(title,descr){
+  const t=el("div","toast");
+  t.appendChild(el("div","tt",title)); t.appendChild(el("div","td",descr));
+  $("toasts").appendChild(t);
+  setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .5s";},4200);
+  setTimeout(()=>t.remove(),4800);
+}
+function floatText(x,y,txt,quip){
+  const f=el("div","float"+(quip?" quip":""),txt);
+  f.style.left=(x+(Math.random()*40-20))+"px"; f.style.top=(y-20)+"px";
+  document.body.appendChild(f); setTimeout(()=>f.remove(),1150);
+}
+
+/* ---------- render: store ---------- */
+const bRows={}, uBtns={};
+function buildStore(){
+  const list=$("bList"); list.innerHTML="";
+  BUILDINGS.forEach((b,i)=>{
+    const row=el("div","brow"); row.id="row_"+b.id;
+    row.appendChild(el("div","icon",b.icon));
+    const info=el("div","info");
+    info.appendChild(el("div","bname",'<span class="nm">'+b.name+'</span> <span class="owned" id="own_'+b.id+'">0</span>'));
+    info.appendChild(el("div","bdesc",b.desc));
+    info.appendChild(el("div","brate",'<span id="rate_'+b.id+'"></span>'));
+    row.appendChild(info);
+    const btn=el("button","buy"); btn.id="buy_"+b.id;
+    btn.addEventListener("click",()=>buyBuilding(b.id));
+    row.appendChild(btn);
+    list.appendChild(row);
+    bRows[b.id]=row;
+  });
+}
+function buyBuilding(id){
+  const b=BUILDINGS.find(x=>x.id===id); if (!b) return; const owned=S.b[id];
+  const n=qty, cost=bCostN(b,owned,n);
+  if(S.money<cost)return;
+  S.money-=cost; S.b[id]+=n; sBuy(); renderAll(true); save();
+}
+function updateStore(){
+  let shownTease=false;
+  BUILDINGS.forEach((b,i)=>{
+    const row=bRows[b.id]; const owned=S.b[b.id];
+    const prevOwned=i===0||S.b[BUILDINGS[i-1].id]>0;
+    const seen=owned>0||prevOwned||S.total>=b.cost*0.5;
+    if(!seen){
+      row.classList.add("tease");
+      row.querySelector(".nm").textContent="?????";
+      row.querySelector(".bdesc").textContent="Somethin' bigger down the shore. Keep at it.";
+      row.querySelector(".buy").disabled=true;
+      row.querySelector(".buy").innerHTML="???";
+      if(shownTease)row.style.display="none"; else row.style.display="";
+      shownTease=true; return;
+    }
+    row.style.display=""; row.classList.remove("tease");
+    row.querySelector(".nm").textContent=b.name;
+    row.querySelector(".bdesc").textContent=b.desc;
+    $("own_"+b.id).textContent=owned;
+    const each=b.rate*bldMult(b.id)*globalMult();
+    $("rate_"+b.id).textContent="+$"+fmt(each)+"/s each"+(owned?(" · $"+fmt(each*owned)+"/s total"):"");
+    const cost=bCostN(b,owned,qty);
+    const btn=$("buy_"+b.id);
+    btn.innerHTML="$"+fmt(cost)+"<small>buy ×"+qty+"</small>";
+    btn.disabled=S.money<cost;
+  });
+}
+function updateUpgrades(){
+  const list=$("upsList");
+  const avail=UPGRADES.filter(u=>!has(u.id)&&u.unlock(S)).sort((a,b)=>a.cost-b.cost).slice(0,7);
+  const key=avail.map(u=>u.id).join(",");
+  if(list.dataset.key!==key){
+    list.dataset.key=key; list.innerHTML="";
+    if(!avail.length){list.appendChild(el("div","", '<div id="upsEmpty">Nothin\u2019 on the shelf right now. Keep haulin\u2019 \u2014 more gear\u2019s comin\u2019.</div>'));}
+    avail.forEach(u=>{
+      const btn=el("button","upg"); btn.id="up_"+u.id;
+      btn.appendChild(el("div","icon",u.icon));
+      const info=el("div","info");
+      info.appendChild(el("div","uname",u.name));
+      info.appendChild(el("div","udesc",u.desc));
+      btn.appendChild(info);
+      btn.appendChild(el("div","ucost","$"+fmt(u.cost)));
+      btn.addEventListener("click",()=>buyUpgrade(u.id));
+      list.appendChild(btn); uBtns[u.id]=btn;
+    });
+  }
+  avail.forEach(u=>{const b=$("up_"+u.id); if(b)b.disabled=S.money<u.cost;});
+}
+function buyUpgrade(id){
+  const u=UPGRADES.find(x=>x.id===id);
+  if(!u||has(id)||!u.unlock(S)||S.money<u.cost)return;
+  S.money-=u.cost; S.ups.push(id); sBuy();
+  toast("🧰 "+u.name,"Bought. "+u.desc);
+  renderAll(true); save();
+}
+
+/* ---------- render: top ---------- */
+function renderMoney(){
+  $("money").textContent="$"+fmt(S.money);
+  $("mps").textContent="$"+fmt(mps())+" / second";
+  $("clickval").textContent="$"+fmt(clickValue())+" per haul";
+  const now=Date.now(); const bits=[];
+  if(boost.until>now)bits.push(boost.label+" ("+Math.ceil((boost.until-now)/1000)+"s)");
+  if(weather.until>now&&weather.mult!==1)bits.push(weather.label+" ("+Math.ceil((weather.until-now)/1000)+"s)");
+  $("boostline").textContent=bits.join("  ·  ");
+  document.title=(S.money>=1?"$"+fmt(S.money)+" — ":"")+"YES B'Y!";
+}
+function renderAll(storeToo){
+  renderMoney();
+  if(storeToo){updateStore();updateUpgrades();}
+  const pb=$("btnPrestige");
+  const t=trucksFor(S.total);
+  if(S.total>=1e9){pb.classList.remove("hidden");pb.textContent="🚚 Go Down the Road (+"+t+")";}
+  else pb.classList.add("hidden");
+}
+
+/* ---------- clicking ---------- */
+let lastQuip=0;
+$("buoy").addEventListener("click",e=>{
+  const v=clickValue();
+  S.money+=v; S.total+=v; S.clicks++;
+  sClick();
+  const r=$("buoy").getBoundingClientRect();
+  const x=(e.clientX||r.left+r.width/2), y=(e.clientY||r.top+r.height/2);
+  floatText(x,y,"+$"+fmt(v));
+  if(S.clicks-lastQuip>8+Math.random()*18){lastQuip=S.clicks;floatText(x,y-34,QUIPS[Math.floor(Math.random()*QUIPS.length)],true);}
+  renderMoney(); updateStore(); updateUpgrades();
+});
+
+/* ---------- ticker ---------- */
+let tickIdx=Math.floor(Math.random()*TICKER.length);
+function nextTick(){
+  const t=$("ticker"); t.classList.add("fade");
+  setTimeout(()=>{tickIdx=(tickIdx+1+Math.floor(Math.random()*3))%TICKER.length;
+    t.textContent=TICKER[tickIdx]; t.classList.remove("fade");},520);
+}
+setInterval(nextTick,9000); nextTick();
+
+/* ---------- lucky gull ---------- */
+let gullTimer=null;
+function scheduleGull(){
+  const base=has("screech")?[45,130]:[60,170];
+  const wait=(base[0]+Math.random()*(base[1]-base[0]))*1000;
+  gullTimer=setTimeout(spawnGull,wait);
+}
+function spawnGull(){
+  const g=el("button","","🕊️"); g.id="gull"; g.setAttribute("aria-label","A lucky gull! Click it!");
+  g.style.top=(8+Math.random()*34)+"vh"; g.style.left="102vw";
+  document.body.appendChild(g);
+  requestAnimationFrame(()=>{g.style.transition="left 9s linear"; g.style.left="-12vw";});
+  const die=setTimeout(()=>{g.remove();scheduleGull();},9300);
+  g.addEventListener("click",()=>{
+    clearTimeout(die); g.remove(); S.gulls++; sGull(); gullReward(); scheduleGull();
+  },{once:true});
+}
+function gullReward(){
+  const roll=Math.random();
+  if(roll<0.70){
+    boost={mult:7,until:Date.now()+30000,label:"⚓ TOURIST SEASON ×7"};
+    banner("🚢 CRUISE SHIP'S IN! Tourists everywhere askin' about the fog. Everything ×7 for 30s!");
+  }else if(roll<0.90){
+    const amt=Math.max(mps()*900,clickValue()*60,25);
+    S.money+=amt;S.total+=amt;
+    banner("🪙 LUCKY LOONIE in the parking lot! +$"+fmt(amt)+". Buy yourself somethin' nice.");
+  }else if(roll<0.98){
+    const amt=Math.max(mps()*1800,clickValue()*120,50);
+    S.money+=amt;S.total+=amt;
+    banner("🥙 The gull dropped a FULL DONAIR on ya. +$"+fmt(amt)+". Smells incredible.");
+  }else{
+    boost={mult:77,until:Date.now()+12000,label:"⚡ LORD TUNDERIN' ×77"};
+    banner("⚡ LORD TUNDERIN' B'Y!! Everything ×77 for 12 seconds!! GIVE'R!!");
+  }
+  renderAll(true);
+}
+
+/* ---------- weather ---------- */
+function scheduleWeather(){setTimeout(doWeather,(100+Math.random()*140)*1000);}
+function doWeather(){
+  const roll=Math.random(); const now=Date.now();
+  if(roll<0.28){ // fog
+    S.fogs++; $("fog").classList.add("on");
+    weather={mult:1.25,until:now+25000,label:"🌫️ Foggy Focus +25%",type:"fog"};
+    $("weatherword").textContent="mauzy out there";
+    banner("🌫️ FOG'S ROLLED IN. Can't see the wharf from the window. Nothin' to do but work: +25% for 25s.");
+    setTimeout(()=>{$("fog").classList.remove("on");$("weatherword").textContent="clear skies, for now";},25000);
+  }else if(roll<0.53){ // storm
+    S.storms++; const m=has("chips")?3:2;
+    weather={mult:m,until:now+45000,label:"🌨️ STORM DAY ×"+m,type:"storm"};
+    $("weatherword").textContent="she's blowin' a gale";
+    sHorn(); snow(45);
+    banner("🌨️ NOR'EASTER! School's cancelled, everyone's home and cozy"+(has("chips")?" with the storm chips stockpile":"")+". Everything ×"+m+" for 45s!");
+    setTimeout(()=>$("weatherword").textContent="clear skies, for now",45000);
+  }else if(roll<0.72){ // outage
+    if(has("gen")){
+      weather={mult:1.5,until:now+20000,label:"🔌 Generator Party +50%",type:"gen"};
+      banner("🔌 POWER'S OUT — but YOUR lights are on. The whole road's arrived with their freezer meat. +50% for 20s!");
+    }else{
+      weather={mult:0.5,until:now+20000,label:"🕯️ Power's Out −50%",type:"out"};
+      banner("🕯️ POWER'S OUT. The utility says restoration time: 'eventually.' −50% for 20s. (A generator would fix this…)");
+    }
+  }else{ // sunny
+    weather={mult:1.5,until:now+30000,label:"🌞 Some Day On Clothes +50%",type:"sun"};
+    banner("🌞 SOME DAY ON CLOTHES! Sheets on the line, breeze off the water. Everything +50% for 30s.");
+  }
+  renderAll(false); scheduleWeather();
+}
+function snow(n){
+  const box=$("snowbox");
+  for(let i=0;i<n;i++){
+    const f=el("span","flake","❄");
+    f.style.left=Math.random()*100+"vw";
+    f.style.fontSize=(9+Math.random()*13)+"px";
+    f.style.animationDuration=(4.5+Math.random()*5)+"s";
+    f.style.animationDelay=(Math.random()*3)+"s";
+    box.appendChild(f);
+    setTimeout(()=>f.remove(),13000);
+  }
+}
+let bannerT=null;
+function banner(msg){
+  const b=$("evbanner"); b.textContent=msg; b.classList.remove("hidden");
+  clearTimeout(bannerT); bannerT=setTimeout(()=>b.classList.add("hidden"),6500);
+}
+
+/* ---------- achievements ---------- */
+function checkAchs(){
+  ACHS.forEach(a=>{
+    if(!S.achs.includes(a.id)&&a.cond(S)){
+      S.achs.push(a.id); sAch();
+      toast("🏅 "+a.name,a.desc+" (+1% to everything)");
+    }
+  });
+}
+
+/* ---------- prestige ---------- */
+function trucksFor(total){return Math.max(0,Math.floor(Math.pow(total/1e9,0.5)));}
+$("btnPrestige").addEventListener("click",()=>{
+  const gain=trucksFor(S.total);
+  modal('<h3>🚚 Go Down the Road?</h3>'+
+    '<p>Ya sell the boat. Ya take the job out west. Two years of camp food, night shifts, and FaceTime Christmases. The money\u2019s good, b\u2019y, but the fog calls ya home.</p>'+
+    '<p><b>Everything resets</b> \u2014 buildings, upgrades, cash \u2014 but ya come home with:</p>'+
+    '<div class="big">'+gain+' New Truck'+(gain===1?"":"s")+' 🛻</div>'+
+    '<p style="text-align:center">Each truck = <b>+10% to everything, forever.</b> (Currently: '+S.trucks+' trucks.)</p>',
+    [{t:"Stay Home",fn:closeModal},{t:"Go On, B'y",p:1,fn:()=>{doPrestige(gain);}}]);
+});
+function doPrestige(gain){
+  if (!Number.isInteger(gain) || gain < 1 || gain > trucksFor(S.total)) return;
+  const keep={trucks:S.trucks+gain,prestiges:S.prestiges+1,achs:S.achs.slice(),
+              gulls:S.gulls,storms:S.storms,fogs:S.fogs,playTime:S.playTime,muted:S.muted,clicks:S.clicks};
+  S=Object.assign(freshState(),keep);
+  boost={mult:1,until:0,label:""}; weather={mult:1,until:0,label:"",type:""};
+  sHorn(); save(); closeModal(); renderAll(true); checkAchs();
+  banner("🏠 HOME AGAIN. The truck's massive, the air smells like salt, and everything earns +"+(keep.trucks*10)+"% forever. Welcome back, b'y.");
+}
+
+/* ---------- modal ---------- */
+let modalReturnFocus = null;
+function modal(html,btns){
+  modalReturnFocus = document.activeElement;
+  $("mbody").innerHTML=html;
+  const bar=el("div","mbtns");
+  (btns||[{t:"Right On",fn:closeModal}]).forEach(b=>{
+    const btn=el("button","mbtn"+(b.p?" primary":""),b.t);
+    btn.addEventListener("click",b.fn); bar.appendChild(btn);
+  });
+  $("mbody").appendChild(bar);
+  $("overlay").classList.remove("hidden");
+  bar.querySelector("button")?.focus();
+}
+function closeModal(){$("overlay").classList.add("hidden"); modalReturnFocus?.focus();}
+document.addEventListener('keydown', e => {
+  if ($('overlay').classList.contains('hidden')) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+  if (e.key !== 'Tab') return;
+  const buttons = [...$('overlay').querySelectorAll('button, textarea')].filter(el => !el.disabled);
+  if (!buttons.length) return;
+  const first=buttons[0], last=buttons.at(-1);
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+$("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal();});
+
+/* ---------- dock buttons ---------- */
+$("btnSound").addEventListener("click",()=>{
+  S.muted=!S.muted;
+  $("btnSound").textContent=S.muted?"🔇 Muted":"🔊 Sound";
+  if(!S.muted)sBuy();
+});
+$("btnSave").addEventListener("click",()=>{save();toast("💾 Saved","She's in the log book."+(store?"":" (This preview can't keep saves between visits — grab a Save Code!"+")"));});
+$("btnStats").addEventListener("click",()=>{
+  const rows=[
+    ["All-time earnings","$"+fmt(S.total)],
+    ["Hauls (clicks)",S.clicks.toLocaleString()],
+    ["Buildings owned",totalBuildings(S)],
+    ["Upgrades bought",S.ups.length],
+    ["Lucky gulls caught",S.gulls],
+    ["Storm days weathered",S.storms],
+    ["Fogs sat through",S.fogs],
+    ["Trucks (prestige)",S.trucks+" (+"+(S.trucks*10)+"%)"],
+    ["Times down the road",S.prestiges],
+    ["Time on the wharf",Math.floor(S.playTime/60)+" min"],
+    ["Achievement bonus","+"+S.achs.length+"%"]
+  ].map(r=>'<div class="mrow"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join("");
+  const pills=ACHS.map(a=>'<span class="achpill'+(S.achs.includes(a.id)?"":" locked")+'" title="'+a.desc.replace(/"/g,"&quot;")+'">'+a.name+'</span>').join("");
+  modal('<h3>📊 The Numbers</h3>'+rows+'<h3 style="margin-top:14px">🏅 Achievements ('+S.achs.length+'/'+ACHS.length+')</h3><div class="achgrid">'+pills+'</div>');
+});
+$("btnExport").addEventListener("click",()=>{
+  modal('<h3>🧾 Save Code</h3><p>Copy this code to back up yer empire, or paste one in and load \u2019er up. Works on any device \u2014 like keepin\u2019 the deed in the biscuit tin.</p>'+
+    '<textarea class="save" id="saveBox" aria-label="Save code">'+encodeSave()+'</textarea>',
+    [{t:"Close",fn:closeModal},{t:"Load This Code",p:1,fn:()=>{
+      try{const d=decodeSave(document.getElementById("saveBox").value);
+        const clean = sanitizeState(d);
+        S = clean;
+        boost={mult:1,until:0,label:""}; weather={mult:1,until:0,label:"",type:""};
+        $('fog').classList.remove('on'); $('snowbox').innerHTML='';
+        $('btnSound').textContent=S.muted?'🔇 Muted':'🔊 Sound';
+        lastFrame=Date.now(); lastQuip=S.clicks;
+        save(); closeModal(); renderAll(true); toast("📥 Loaded","Welcome back to the wharf.");
+      }catch(e){toast("⚠️ No good","That code's rotten, b'y. Double-check the paste.");}
+    }}]);
+  setTimeout(()=>{const tb=document.getElementById("saveBox"); if(tb){tb.focus();tb.select();}},60);
+});
+$("btnReset").addEventListener("click",()=>{
+  modal('<h3>🗑️ Sell it all?</h3><p>This wipes the whole works \u2014 money, boats, trucks, achievements, the lot. No comin\u2019 back from this one, b\u2019y.</p>',
+    [{t:"Never Mind",fn:closeModal},{t:"Wipe 'Er Clean",p:1,fn:()=>{
+      S=freshState(); if(store){try{store.removeItem(SAVEKEY);}catch(e){}}
+      boost={mult:1,until:0,label:""}; weather={mult:1,until:0,label:"",type:""};
+      $('fog').classList.remove('on'); $('snowbox').innerHTML='';
+      $('btnSound').textContent='🔊 Sound'; lastFrame=Date.now(); lastQuip=0; save();
+      closeModal(); renderAll(true); toast("🌊 Fresh start","Back to one busted trap. She's got potential.");
+    }}]);
+});
+$("qtyToggle").addEventListener("click",()=>{
+  qty=qty===1?10:1;
+  $("qtyToggle").textContent="BUY ×"+qty;
+  updateStore();
+});
+
+/* ---------- offline earnings ---------- */
+function offline(){
+  const away=(Date.now()-(S.lastTs||Date.now()))/1000;
+  if(away>90&&mps()>0){
+    const capped=Math.min(away,6*3600);
+    const gain=mps()/eventMult()*capped*0.5;
+    if(gain>=1){
+      S.money+=gain; S.total+=gain;
+      modal('<h3>⛵ While you were gone…</h3><p>The crew kept haulin\u2019. They kept half for \u201cexpenses.\u201d Fair enough \u2014 diesel\u2019s not free.</p>'+
+        '<div class="big">+$'+fmt(gain)+'</div>'+
+        '<p style="text-align:center;font-size:.85rem;opacity:.8">('+Math.floor(Math.min(away,21600)/60)+' minutes of work, capped at 6 hours)</p>');
+    }
+  }
+}
+
+/* ---------- main loop ---------- */
+let lastFrame=Date.now(), storeTick=0;
+setInterval(()=>{
+  const now=Date.now(), dt=Math.max(0,Math.min(21600,(now-lastFrame)/1000)); lastFrame=now;
+  const gain=mps()*dt;
+  S.money+=gain; S.total+=gain; S.playTime+=dt;
+  renderMoney();
+  storeTick+=dt;
+  if(storeTick>0.5){storeTick=0;updateStore();updateUpgrades();checkAchs();
+    const pb=$("btnPrestige");
+    if(S.total>=1e9){pb.classList.remove("hidden");pb.textContent="🚚 Go Down the Road (+"+trucksFor(S.total)+")";}
+  }
+},100);
+setInterval(save,15000);
+window.addEventListener("beforeunload",save);
+window.addEventListener("pagehide",save);
+window.addEventListener("pointerdown",()=>{if(AC&&AC.state==="suspended")AC.resume();else ac();},{passive:true});
+
+/* ---------- boot ---------- */
+const hadSave=load();
+buildStore(); renderAll(true); checkAchs();
+$("btnSound").textContent=S.muted?"🔇 Muted":"🔊 Sound";
+if(hadSave){offline();}
+else{
+  setTimeout(()=>toast("👋 Welcome to the wharf","Click the lobster to haul yer first trap. She's a long road from here to the spaceport, b'y."),700);
+}
+scheduleGull(); scheduleWeather();
+</script>
+</body>
+</html>

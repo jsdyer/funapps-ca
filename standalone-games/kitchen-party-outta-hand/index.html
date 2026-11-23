@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071a20" />
+  <meta name="description" content="A funny 3D Maritime kitchen-party arcade game. Keep the party alive, serve snacks, chase fiddle notes, and survive escalating Canadian chaos." />
+  <title>Kitchen Party: Outta Hand!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫖</text></svg>" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="game-root" aria-label="Kitchen Party: Outta Hand game">
+    <canvas id="game-canvas"></canvas>
+
+    <div id="loading" class="screen active">
+      <div class="loading-card">
+        <div class="loader-logo">🫖</div>
+        <h1>Warming up the kettle…</h1>
+        <p>Moving the good chairs into the kitchen.</p>
+        <div class="loading-track"><div id="loading-bar"></div></div>
+      </div>
+    </div>
+
+    <main id="menu" class="screen">
+      <section class="menu-panel glass">
+        <div class="eyebrow">A tiny game with a big kitchen</div>
+        <h1>KITCHEN PARTY<br><span>OUTTA HAND!</span></h1>
+        <p class="tagline">Keep the tunes going. Keep the snacks moving. Do not let the gull get the donair.</p>
+
+        <div class="mode-grid">
+          <button class="mode-card featured" data-mode="chaos">
+            <span class="mode-icon">🫖</span>
+            <span class="mode-copy"><b>Keep ’Er Goin’</b><small>Manage an endless party as it becomes a municipal incident.</small></span>
+            <span class="best" id="best-chaos">BEST 0</span>
+          </button>
+          <button class="mode-card" data-mode="snacks">
+            <span class="mode-icon">🥪</span>
+            <span class="mode-copy"><b>Snack Run</b><small>Read the room, fetch the goods, and serve everyone before they get dramatic.</small></span>
+            <span class="best" id="best-snacks">BEST 0</span>
+          </button>
+          <button class="mode-card" data-mode="fiddle">
+            <span class="mode-icon">🎻</span>
+            <span class="mode-copy"><b>Fiddle Frenzy</b><small>Collect notes on the beat and turn the kitchen floor into a ceilidh.</small></span>
+            <span class="best" id="best-fiddle">BEST 0</span>
+          </button>
+          <button class="mode-card" data-mode="dodge">
+            <span class="mode-icon">🦞</span>
+            <span class="mode-copy"><b>Last Chair Standing</b><small>Dodge rolling bottles, rogue lobsters, and increasingly bad decisions.</small></span>
+            <span class="best" id="best-dodge">BEST 0</span>
+          </button>
+        </div>
+
+        <div class="menu-row">
+          <button id="how-button" class="secondary">How to Play</button>
+          <button id="settings-button" class="secondary">Settings</button>
+          <div class="caps-pill" title="Earned across all modes"><span>♻</span> <b id="caps-total">0</b> bottle caps</div>
+        </div>
+      </section>
+
+      <aside class="menu-aside glass">
+        <div class="weather-chip">🌧 SIDEWAYS RAIN OUTSIDE</div>
+        <h2>Tonight’s Kitchen Lore</h2>
+        <p id="lore-text">The party officially begins when somebody says, “I’m only staying for one.”</p>
+        <div class="tiny-rule"></div>
+        <h3>Local legend status</h3>
+        <div id="achievement-list" class="achievement-list"></div>
+        <p class="local-note">Progress and high scores stay in this browser. No account. No nonsense.</p>
+      </aside>
+    </main>
+
+    <div id="hud" class="hud hidden">
+      <div class="hud-top">
+        <div class="score-card glass"><small>SCORE</small><b id="score">0</b><span id="multiplier">×1</span></div>
+        <div id="mode-title" class="mode-title glass">KEEP ’ER GOIN’</div>
+        <div class="hud-buttons">
+          <button id="pause-button" aria-label="Pause">Ⅱ</button>
+          <button id="mute-button" aria-label="Mute">♪</button>
+        </div>
+      </div>
+
+      <div id="chaos-hud" class="mode-hud glass hidden">
+        <div class="meter"><span>VIBE</span><div><i id="vibe-bar"></i></div><b id="vibe-value">65</b></div>
+        <div class="meter"><span>SNACKS</span><div><i id="snacks-bar"></i></div><b id="snacks-value">80</b></div>
+        <div class="meter"><span>TIDINESS</span><div><i id="mess-bar"></i></div><b id="mess-value">90</b></div>
+        <div class="meter"><span>NEIGHBOURS</span><div><i id="neighbour-bar"></i></div><b id="neighbour-value">90</b></div>
+        <div class="wave-badge">WAVE <b id="wave-value">1</b></div>
+      </div>
+
+      <div id="snacks-hud" class="mode-hud glass hidden">
+        <div class="big-stat"><small>TIME</small><b id="snack-time">2:00</b></div>
+        <div class="big-stat"><small>ORDERS</small><b id="orders-done">0</b></div>
+        <div class="big-stat"><small>PATIENCE</small><b id="snack-lives">♥ ♥ ♥</b></div>
+        <div class="carry-pill">CARRYING: <b id="carrying">NOTHING</b></div>
+      </div>
+
+      <div id="fiddle-hud" class="mode-hud glass hidden">
+        <div class="big-stat"><small>TIME</small><b id="fiddle-time">1:30</b></div>
+        <div class="big-stat"><small>STREAK</small><b id="fiddle-streak">0</b></div>
+        <div class="energy-wrap"><span>CROWD ENERGY</span><div><i id="energy-bar"></i></div></div>
+        <div id="beat-dot" class="beat-dot">♪</div>
+      </div>
+
+      <div id="dodge-hud" class="mode-hud glass hidden">
+        <div class="big-stat"><small>SURVIVED</small><b id="dodge-time">0:00</b></div>
+        <div class="big-stat"><small>HEARTS</small><b id="dodge-lives">♥ ♥ ♥</b></div>
+        <div class="big-stat"><small>STORM CHIPS</small><b id="chips-count">0</b></div>
+        <div class="danger-pill">CHAOS: <b id="danger-level">POLITE</b></div>
+      </div>
+
+      <div id="objective-card" class="objective-card glass">
+        <small id="objective-kicker">CURRENT CRISIS</small>
+        <b id="objective-title">Find something to fix</b>
+        <span id="objective-detail">Move near a glowing marker and hold E / SPACE.</span>
+        <div id="interact-progress"><i></i></div>
+      </div>
+
+      <div id="event-stack" class="event-stack"></div>
+      <div id="toast" class="toast"></div>
+    </div>
+
+    <div id="pause-screen" class="screen overlay">
+      <section class="dialog glass">
+        <div class="dialog-icon">🫖</div>
+        <h2>Kettle’s on pause</h2>
+        <p>The kitchen will remain exactly this chaotic.</p>
+        <button id="resume-button" class="primary">Back At ’Er</button>
+        <button id="restart-button" class="secondary">Restart Mode</button>
+        <button id="menu-button" class="secondary">Main Menu</button>
+      </section>
+    </div>
+
+    <div id="upgrade-screen" class="screen overlay">
+      <section class="upgrade-dialog glass">
+        <div class="eyebrow">THE PARTY SURVIVED ANOTHER WAVE</div>
+        <h2>Pick one deeply unofficial improvement</h2>
+        <div id="upgrade-cards" class="upgrade-cards"></div>
+      </section>
+    </div>
+
+    <div id="end-screen" class="screen overlay">
+      <section class="dialog end-dialog glass">
+        <div id="end-icon" class="dialog-icon">🏆</div>
+        <div id="end-kicker" class="eyebrow">THE KITCHEN HAS SPOKEN</div>
+        <h2 id="end-title">A respectable amount of chaos</h2>
+        <div class="final-score"><small>FINAL SCORE</small><b id="final-score">0</b></div>
+        <p id="end-summary">Nobody called the fire department. That counts.</p>
+        <div id="new-best" class="new-best hidden">NEW LOCAL BEST!</div>
+        <div class="reward-line">You rescued <b id="caps-earned">0</b> bottle caps from the recycling.</div>
+        <button id="again-button" class="primary">Go Again</button>
+        <button id="share-button" class="secondary">Copy Score</button>
+        <button id="end-menu-button" class="secondary">Main Menu</button>
+      </section>
+    </div>
+
+    <div id="how-screen" class="screen overlay">
+      <section class="wide-dialog glass">
+        <button class="close-x" data-close="how-screen">×</button>
+        <div class="eyebrow">NO PREVIOUS KITCHEN-PARTY EXPERIENCE REQUIRED</div>
+        <h2>How to survive the evening</h2>
+        <div class="how-grid">
+          <div><b>MOVE</b><span>WASD / arrow keys<br>or the touch joystick</span></div>
+          <div><b>INTERACT</b><span>Hold E or SPACE<br>near glowing objects</span></div>
+          <div><b>DASH</b><span>SHIFT or the boot button<br>for a quick burst</span></div>
+          <div><b>PAUSE</b><span>P or ESC<br>when the aunties arrive</span></div>
+        </div>
+        <p><strong>Keep ’Er Goin’:</strong> solve crises before the party’s four vital signs collapse. Every wave offers an upgrade.</p>
+        <p><strong>Snack Run:</strong> grab the pictured food from a labelled station, then deliver it to the guest asking for it.</p>
+        <p><strong>Fiddle Frenzy:</strong> collect glowing music notes. Catching them near the beat builds a much larger streak.</p>
+        <p><strong>Last Chair Standing:</strong> dodge everything red, collect storm chips, and cherish your three remaining hearts.</p>
+      </section>
+    </div>
+
+    <div id="settings-screen" class="screen overlay">
+      <section class="dialog glass">
+        <button class="close-x" data-close="settings-screen">×</button>
+        <div class="eyebrow">HOUSE RULES</div>
+        <h2>Settings</h2>
+        <label class="setting-row"><span>Music & sound</span><input id="setting-sound" type="checkbox" checked /></label>
+        <label class="setting-row"><span>Reduced motion</span><input id="setting-motion" type="checkbox" /></label>
+        <label class="setting-row"><span>Camera shake</span><input id="setting-shake" type="checkbox" checked /></label>
+        <label class="setting-row"><span>Quality</span><select id="setting-quality"><option value="auto">Auto</option><option value="high">High</option><option value="low">Low</option></select></label>
+        <button id="reset-progress" class="danger-text">Reset local progress</button>
+      </section>
+    </div>
+
+    <div id="touch-controls" class="touch-controls hidden">
+      <div id="joystick" class="joystick"><i></i></div>
+      <div class="touch-buttons">
+        <button id="touch-interact">E</button>
+        <button id="touch-dash">👢</button>
+      </div>
+    </div>
+
+    <div id="rotate-notice">Rotate your phone sideways for more kitchen.</div>
+    <div id="webgl-error" class="screen overlay">
+      <section class="dialog glass"><h2>This kitchen needs WebGL</h2><p>Try a current version of Chrome, Edge, Firefox, or Safari with hardware acceleration enabled.</p></section>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

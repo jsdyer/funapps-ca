@@ -2,6 +2,7 @@
 """Build the static FunApps hub from its editable catalogue. No dependencies."""
 
 import html
+from datetime import date
 import json
 from pathlib import Path
 import re
@@ -61,6 +62,10 @@ def validate_config(config):
             if not isinstance(game.get(field), str) or not game[field].strip():
                 raise ValueError(f"{slug}: {field} must be nonempty text")
         validate_url(game.get("url"), f"{slug}.url")
+        if game.get("audited_at"):
+            date.fromisoformat(game["audited_at"])
+        if game.get("custom_domain") and not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*\.funapps\.ca", game["custom_domain"]):
+            raise ValueError(f"{slug}: invalid custom domain")
         key = game["url"].rstrip("/").lower()
         if key in urls:
             raise ValueError(f"Duplicate game URL: {game['url']}")
@@ -198,6 +203,13 @@ def build():
     for url in sitemap_urls(config, games):
         element = ET.SubElement(sitemap, "url")
         ET.SubElement(element, "loc").text = url
+        modified = config.get("updated_at") if url in (base + "/", base + "/packet-trace/") else None
+        for game in games:
+            if url in (base + detail_path(game), game["url"]):
+                modified = game.get("audited_at")
+                break
+        if modified:
+            ET.SubElement(element, "lastmod").text = date.fromisoformat(modified).isoformat()
     ET.indent(sitemap)
     ET.ElementTree(sitemap).write(DIST / "sitemap.xml", encoding="utf-8", xml_declaration=True)
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n")

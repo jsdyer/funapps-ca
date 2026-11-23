@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#131c2f">
+  <meta name="description" content="Play Donair Dash, a free Halifax donair arcade game. Catch toppings in order, dodge the lettuce, and serve as many donairs as you can in 60 seconds. Keyboard and touch controls.">
+  <link rel="canonical" href="https://donair.funapps.ca/">
+  <meta property="og:title" content="Donair Dash · Free Halifax Donair Arcade Game">
+  <meta property="og:description" content="One pita. Sixty seconds. How many donairs can you make? A free keyboard and touch arcade game.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://donair.funapps.ca/">
+  <meta property="og:site_name" content="FunApps">
+  <meta property="og:locale" content="en_CA">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Donair Dash · Free Halifax Donair Arcade Game">
+  <meta name="twitter:description" content="One pita. Sixty seconds. Catch the right toppings and make Halifax proud.">
+  <meta name="application-name" content="Donair Dash">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <title>Donair Dash – Free Halifax Donair Arcade Game | FunApps</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["VideoGame", "WebApplication"],
+    "name": "Donair Dash",
+    "url": "https://donair.funapps.ca/",
+    "description": "A free 60-second Halifax donair arcade game. Catch toppings in order, avoid incorrect ingredients, and complete as many donairs as possible.",
+    "applicationCategory": "GameApplication",
+    "genre": "Arcade",
+    "gamePlatform": "Web browser",
+    "operatingSystem": "Any operating system with a modern web browser",
+    "playMode": "SinglePlayer",
+    "isAccessibleForFree": true,
+    "inLanguage": "en-CA",
+    "publisher": {"@type": "Organization", "name": "FunApps", "url": "https://funapps.ca/"}
+  }
+  </script>
+</head>
+<body>
+<main class="arcade">
+  <header class="masthead">
+    <a class="wordmark" href="https://funapps.ca/" aria-label="FunApps home"><span class="fun-icon">f.</span> FUNAPPS <span class="arcade-tag">ARCADE</span></a>
+    <div class="brand" aria-label="Donair Dash"><span>DONAIR</span><i>DASH</i><b>★</b></div>
+    <div class="utilities"><button id="sound" type="button" aria-pressed="false">Sound off</button><button id="pause" type="button" disabled aria-label="Pause game"><span class="pause-mark" aria-hidden="true"></span><span class="pause-word">Pause</span></button></div>
+  </header>
+
+  <div class="game-layout">
+    <aside class="order-panel" aria-label="Current order">
+      <div class="receipt">
+        <div class="receipt-head"><span>THE LATE SHIFT</span><span>HALIFAX, NS</span></div>
+        <h2>ORDER <span id="orderNumber">001</span></h2>
+        <p class="ticket-instruction">Catch these in order</p>
+        <ol id="recipe"></ol>
+        <div class="receipt-total"><span>Perfectly wrapped</span><b>+150<span id="bonus"> pts</span></b></div>
+        <p class="receipt-footer">THANKS, BUD.<br>SAUCE IS NOT OPTIONAL.</p>
+      </div>
+      <div class="streak"><span>ORDER STREAK</span><strong id="combo">×1</strong><p id="comboHint">Keep it clean. Earn more.</p></div>
+      <div class="local-note">A love letter to late nights<br>and extra donair sauce.</div>
+    </aside>
+
+    <section class="game-cabinet" aria-label="Donair Dash arcade game">
+      <div class="scoreboard">
+        <div><span>SCORE</span><strong id="score">0000</strong></div>
+        <div class="clock"><span>TIME LEFT</span><strong id="clock">60<span>s</span></strong></div>
+        <div><span>SERVED</span><strong id="orders">00</strong></div>
+      </div>
+      <div class="playfield" id="playfield">
+        <canvas id="canvas" width="900" height="600" tabindex="0" aria-label="Move the pita left and right with arrow keys, A and D, or drag on the game. Catch only the next topping on your order ticket."></canvas>
+        <div class="next-catch" id="nextCatch" hidden>Catch next: <b id="nextName">Beef</b></div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <section class="overlay" id="overlay" aria-labelledby="overlayTitle">
+          <div class="start-badge" id="overlayBadge">FRESHLY WRAPPED. SLIGHTLY UNHINGED.</div>
+          <h1 id="overlayTitle">One pita.<br><em>Big donair energy.</em></h1>
+          <p id="overlayCopy">Catch the right toppings. Dodge the extras.<br>Make as many donairs as you can in 60 seconds.</p>
+          <div class="result-stats" id="resultStats" hidden></div>
+          <button class="primary" id="start" type="button">LET’S ROLL</button>
+          <button class="secondary" id="copy" type="button" hidden>Copy my score</button>
+          <div class="start-controls" id="startControls"><span><kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd></span><span class="control-divider">/</span><span>Touch & drag</span></div>
+          <p class="best-intro" id="bestIntro">No sign-up. All sauce.</p>
+        </section>
+        <noscript><p class="noscript">This game needs JavaScript enabled to play.</p></noscript>
+      </div>
+      <div class="counter-controls"><button type="button" id="left" aria-label="Move pita left">‹</button><span id="controlHint">SLIDE THE PITA · FOLLOW THE TICKET</span><button type="button" id="right" aria-label="Move pita right">›</button></div>
+    </section>
+
+    <aside class="guide-panel">
+      <div class="record"><span>YOUR PERSONAL BEST</span><strong id="best">0</strong><span class="record-caption">A legend in this browser.</span></div>
+      <div class="how-to"><h2>How to roll</h2><p><b>Move your pita</b><br>Arrow keys, A / D, or drag.</p><p><b>Follow the ticket</b><br>Catch the next topping.<br>A full donair earns a bonus.</p><p><b>Mind the extras</b><br>A wrong catch costs 2 seconds and breaks your streak.</p></div>
+      <div class="lettuce-sticker"><span>✕</span><p>NO LETTUCE.<br><b>WE DON’T MAKE<br>THE RULES.</b></p></div>
+      <label class="motion"><input id="reduceMotion" type="checkbox"> Less motion</label>
+    </aside>
+  </div>
+  <footer><span>MADE FOR THE LATE-NIGHT APPETITE.</span><a href="https://coolcode.ca/donairafterdark/">Find your real donair · Donair After Dark</a><a href="https://clams-funapps.netlify.app/">Play Clams &amp; Chips</a></footer>
+  <p id="announce" class="sr-only" aria-live="polite"></p>
+</main>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

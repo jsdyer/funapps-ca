@@ -3,3 +3,4 @@ dist/
 .openai/
 *.zip
 __pycache__/
+standalone-dist/

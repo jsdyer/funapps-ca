@@ -115,7 +115,18 @@
     byId('node-title').textContent = node.label;
     byId('node-description').textContent = [node.role, NODE_STATES[node.status], evidence.description].filter(Boolean).join(' · ');
     byId('node-lines').replaceChildren(...evidence.lines.map(listItem));
-    for (const button of Object.values(actionButtons)) button.disabled = state.status !== 'active';
+    const active = state.status === 'active';
+    actionButtons.scan.disabled = !active || node.scanned;
+    actionButtons.isolate.disabled = !active || node.status !== 'online';
+    actionButtons.rotate.disabled = !active || node.status !== 'isolated' || !node.scanned || !node.alert;
+    actionButtons.restore.disabled = !active || node.status === 'online' || !node.scanned || node.alert;
+    byId('action-advice').textContent = !active ? 'Start another mission or restart to play again.'
+      : !node.scanned ? 'Scan to read the logs and confirm whether this device needs attention.'
+      : node.status === 'contained' ? 'Remediation is complete. Restore this device to reconnect it.'
+      : node.alert && node.status === 'online' ? 'Compromise confirmed. Isolate this device before rotating its credentials.'
+      : node.alert ? 'This device is isolated. Rotate its credentials to remediate the compromise.'
+      : node.status === 'isolated' ? 'No compromise was found. Restore this device to reconnect it.'
+      : 'No compromise found. Continue investigating the other devices.';
   }
 
   function updateScene() {
@@ -178,12 +189,22 @@
   }
 
   function runAction(action, id = selectedId) {
+    const wasActive = state.status === 'active';
+    const focusedAction = Object.values(actionButtons).find(button => button === document.activeElement);
     const result = action === 'wait' ? engine.advance(state) : engine.act(state, action, id);
     render();
     feedback.textContent = result.text;
     feedback.dataset.result = result.ok ? 'ok' : 'error';
     if (state.status !== 'active' && result.ok) {
       feedback.textContent += ' ' + engine.report(state).summary;
+      if (wasActive) byId('report').focus();
+    } else if (focusedAction?.disabled) {
+      const node = nodeById(selectedId);
+      const next = !node.scanned ? actionButtons.scan
+        : node.status === 'contained' || (node.status === 'isolated' && !node.alert) ? actionButtons.restore
+        : node.alert ? (node.status === 'online' ? actionButtons.isolate : actionButtons.rotate)
+        : byId('action-advice');
+      next.focus();
     }
     return result.text;
   }

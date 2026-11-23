@@ -19,7 +19,8 @@ class CatalogueBuildTests(unittest.TestCase):
         self.assertIn("https://clams.funapps.ca/", urls)
         self.assertIn("https://funapps.ca/packet-trace/", urls)
         self.assertTrue(all("netlify.app" not in url for url in urls))
-        self.assertEqual(len(games) + 4, len(urls))
+        expected_play = sum(bool(game.get("include_play_url_in_sitemap")) for game in games)
+        self.assertEqual(len(games) + 2 + expected_play, len(urls))
 
     def test_duplicate_game_rejected(self):
         self.config["games"].append(copy.deepcopy(self.config["games"][0]))

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4e7ca" />
+  <meta name="description" content="True North Turbo — a rapid-fire Canadian microgame gauntlet." />
+  <title>True North Turbo</title>
+  <style>
+    :root {
+      --ink: #18302b;
+      --paper: #f4e7ca;
+      --red: #d74435;
+      --gold: #f2b84b;
+      --blue: #4b86a8;
+      --green: #2f6b57;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,.8), transparent 25%),
+        repeating-linear-gradient(135deg, #f2e4c4 0 18px, #ecdab6 18px 36px);
+      color: var(--ink);
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      overflow: hidden;
+      touch-action: none;
+    }
+    .shell {
+      width: min(100vw, 1180px);
+      padding: 14px;
+      position: relative;
+    }
+    .frame {
+      background: #17362f;
+      border: 5px solid #17362f;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(35, 34, 25, .28), inset 0 0 0 3px rgba(255,255,255,.08);
+      overflow: hidden;
+      position: relative;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      display: block;
+      background: var(--paper);
+      cursor: crosshair;
+    }
+    #pause-control { position:fixed; right:12px; top:12px; z-index:5; padding:10px 15px; min-height:44px; border:2px solid #18302b; border-radius:12px; background:#fffaf0; color:#18302b; font:700 16px system-ui; cursor:pointer; }
+    #pause-control[hidden] { display:none; }
+    .tiny {
+      position: absolute;
+      right: 24px;
+      bottom: 21px;
+      z-index: 3;
+      color: rgba(255,255,255,.65);
+      font-size: 11px;
+      letter-spacing: .08em;
+      pointer-events: none;
+    }
+    @media (max-width: 700px) {
+      .shell { padding: 0; width: 100vw; }
+      .frame { border-radius: 0; border-width: 0; }
+      .tiny { display:none; }
+      canvas { height: 100vh; width: 100vw; object-fit: contain; background: #17362f; }
+    }
+  </style>
+</head>
+<body>
+  <button id="pause-control" type="button" hidden>Pause</button>
+  <main class="shell">
+    <div class="frame">
+      <canvas id="game" width="960" height="540" aria-label="True North Turbo game canvas"></canvas>
+      <div class="tiny">NO SERVER • NO TRACKING • 100% BROWSER-BORN</div>
+    </div>
+  </main>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = 960, H = 540;
+  const TAU = Math.PI * 2;
+
+  const C = {
+    ink: '#18302b', paper: '#f4e7ca', red: '#d74435', red2: '#a92e27',
+    gold: '#f2b84b', blue: '#4b86a8', paleBlue: '#cfe4e8', green: '#2f6b57',
+    darkGreen: '#17362f', white: '#fffaf0', grey: '#7a857e', snow: '#eff7f5',
+    asphalt: '#4f5553', gravy: '#8b5a32', curd: '#fff7ca'
+  };
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randi = (a, b) => Math.floor(rand(a, b + 1));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const dist = (a,b,c,d) => Math.hypot(a-c,b-d);
+  const shuffle = arr => [...arr].sort(() => Math.random() - .5);
+
+  function rr(x, y, w, h, r, fill, stroke, lw=2) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+  }
+  function txt(text, x, y, size, color=C.ink, align='center', weight=800, font='ui-rounded, Trebuchet MS, system-ui') {
+    ctx.save();
+    ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.font = `${weight} ${size}px ${font}`;
+    ctx.fillText(text, x, y); ctx.restore();
+  }
+  function wrap(text, x, y, maxWidth, lineHeight, size, color=C.ink, weight=700) {
+    const words = text.split(' '); let line = ''; const lines=[];
+    ctx.save(); ctx.font = `${weight} ${size}px ui-rounded, Trebuchet MS, system-ui`;
+    for (const word of words) {
+      const test = line + word + ' ';
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line.trim()); line = word + ' '; }
+      else line = test;
+    }
+    lines.push(line.trim());
+    lines.forEach((l,i)=>txt(l,x,y+i*lineHeight,size,color,'center',weight));
+    ctx.restore();
+  }
+  function mapleLeaf(x,y,s,color=C.red,rot=0) {
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.scale(s,s);
+    ctx.fillStyle=color; ctx.beginPath();
+    const pts = [[0,-24],[5,-12],[13,-17],[10,-7],[22,-9],[15,1],[25,7],[12,9],[14,22],[3,15],[0,28],[-3,15],[-14,22],[-12,9],[-25,7],[-15,1],[-22,-9],[-10,-7],[-13,-17],[-5,-12]];
+    pts.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function hillBackground(t=0) {
+    ctx.fillStyle = C.paper; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = C.paleBlue; ctx.fillRect(0,0,W,250);
+    ctx.fillStyle = '#a8c9c4';
+    ctx.beginPath(); ctx.moveTo(0,270);
+    for(let x=0;x<=W;x+=80) ctx.lineTo(x, 220 + Math.sin(x*.013+t*.15)*35);
+    ctx.lineTo(W,360);ctx.lineTo(0,360);ctx.closePath();ctx.fill();
+    ctx.fillStyle = '#6f9a7c';
+    ctx.beginPath();ctx.moveTo(0,310);
+    for(let x=0;x<=W;x+=60) ctx.lineTo(x, 280 + Math.sin(x*.018+1.3)*28);
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+    ctx.fillStyle = '#e7d4aa'; ctx.fillRect(0,410,W,130);
+  }
+  function button(x,y,w,h,label,sub='') {
+    rr(x,y,w,h,16,C.white,C.ink,4);
+    txt(label,x+w/2,y+h/2-(sub?9:0),24,C.ink);
+    if(sub) txt(sub,x+w/2,y+h/2+19,11,C.grey,'center',800);
+  }
+  function hitRect(x,y,w,h) { return input.x>=x && input.x<=x+w && input.y>=y && input.y<=y+h; }
+
+  const storage = {
+    get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+    set(key, value) { try { localStorage.setItem(key, String(value)); } catch { /* Play still works without storage. */ } }
+  };
+  function loadStats() {
+    const defaults = {runs:0,wins:0,gooseWins:0,bestStreak:0};
+    try { const saved=JSON.parse(storage.get('tnt-stats')); for(const key of Object.keys(defaults)) if(Number.isFinite(saved?.[key]) && saved[key]>=0) defaults[key]=saved[key]; } catch {}
+    return defaults;
+  }
+  const input = { x: W/2, y:H/2, mode:'pointer', pointerId:null, down:false, pressed:false, released:false, keys:new Set(), keyPressed:new Set() };
+  function clearInput() { input.keys.clear();input.keyPressed.clear();input.down=false;input.pressed=false;input.released=false;input.pointerId=null; }
+  function pointerPos(e) {
+    const r = canvas.getBoundingClientRect();
+    // object-fit:contain letterboxes the canvas on narrow screens.
+    const scale=Math.min(r.width/W,r.height/H);
+    const left=r.left+(r.width-W*scale)/2, top=r.top+(r.height-H*scale)/2;
+    input.x=(e.clientX-left)/scale; input.y=(e.clientY-top)/scale;
+    input.mode='pointer';
+  }
+  canvas.addEventListener('pointerdown', e => {
+    if(input.pointerId!==null)return; input.pointerId=e.pointerId; pointerPos(e); input.down=true; input.pressed=true; canvas.setPointerCapture?.(e.pointerId);
+    unlockAudio(); handlePointerDown();
+  });
+  canvas.addEventListener('pointermove', e => { if(input.pointerId!==null&&input.pointerId!==e.pointerId)return; pointerPos(e); if(scene==='playing' && game?.pointerMove) game.pointerMove(input.x,input.y); });
+  canvas.addEventListener('pointerup', e => { if(input.pointerId!==e.pointerId)return; pointerPos(e); input.pointerId=null; input.down=false; input.released=true; if(scene==='playing'&&game?.pointerUp)game.pointerUp(input.x,input.y); });
+  canvas.addEventListener('pointercancel', clearInput);
+  canvas.addEventListener('lostpointercapture', () => { input.pointerId=null;input.down=false; });
+  window.addEventListener('keydown', e => {
+    if(e.target?.closest?.('input,select,textarea') || (e.target?.closest?.('button')&&['Enter',' '].includes(e.key)))return;
+    if(e.repeat)return;
+    const k=e.key.toLowerCase(); if(!input.keys.has(k)) input.keyPressed.add(k); input.keys.add(k);
+    if(['arrowleft','arrowright','arrowup','arrowdown',' ','enter'].includes(k)) e.preventDefault();
+    unlockAudio();
+    if(['arrowleft','arrowright','a','d'].includes(k))input.mode='keyboard';
+    if(k==='p' || k==='escape') { togglePause(); return; }
+    if(scene==='upgrade'&&['1','2','3'].includes(k)){takeUpgrade(selectedUpgradeChoices[Number(k)-1]);return;}
+    if(scene==='gameover'&&(k==='enter'||k===' ')){startRun();return;}
+    if(scene==='playing' && game?.keyDown) game.keyDown(k);
+    if(scene==='menu' && (k==='enter'||k===' ')) startRun();
+  }, {passive:false});
+  window.addEventListener('keyup', e => input.keys.delete(e.key.toLowerCase()));
+  function pauseForFocus() { clearInput(); if(scene==='playing')scene='paused'; }
+  window.addEventListener('blur',pauseForFocus);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseForFocus();});
+  document.getElementById('pause-control').addEventListener('click',togglePause);
+
+  let audioCtx=null, muted=storage.get('tnt-muted')==='1';
+  function unlockAudio(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});}catch{audioCtx=null;}}
+  function tone(freq=440,dur=.08,type='square',vol=.04,slide=0){
+    if(muted || !audioCtx) return;
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),audioCtx.currentTime+dur);
+    g.gain.setValueAtTime(vol,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+  }
+  function winSound(){ tone(523,.08,'square',.045,130);setTimeout(()=>tone(659,.1,'square',.04,160),70); }
+  function loseSound(){ tone(180,.16,'sawtooth',.04,-70); }
+
+  const STOPS = ['Vancouver','The Rockies','The Prairies','Winnipeg','Northern Ontario','Toronto','Ottawa','Montréal','Québec City','New Brunswick','P.E.I.','Nova Scotia','Newfoundland & Labrador','The North'];
+  const QUIPS_WIN = [
+    'Beauty. Absolutely no notes.', 'That’ll do, bud.', 'Certified coast-to-coast competence.',
+    'Polite, efficient, mildly overprepared.', 'A strong showing for the home crowd.',
+    'You have honoured the emergency snack reserve.', 'No committee was required. Remarkable.'
+  ];
+  const QUIPS_LOSE = [
+    'A learning experience, which is Canadian for “rough.”', 'The weather would like some credit.',
+    'That goose had prior intelligence.', 'File this under: seemed fine at the time.',
+    'A municipal-grade setback.', 'You can still blame the wind.', 'The committee will review the footage.'
+  ];
+
+  let scene='menu', previousScene='menu', game=null, round=0, score=0, lives=3, streak=0, best=Math.max(0,Number(storage.get('tnt-best'))||0);
+  let timer=0, duration=7, resultTimer=0, success=false, resultHeadline='', resultQuip='', lastGame='', routeIndex=0;
+  let menuT=0, selectedUpgradeChoices=[], stats=loadStats();
+  let mods={timerRounds:0, shield:0, slowRounds:0, scoreRounds:0};
+  let completedGames=[];
+
+  function saveStats(){ storage.set('tnt-stats',JSON.stringify(stats)); }
+  function togglePause(){ clearInput(); if(scene==='playing'){previousScene=scene;scene='paused';} else if(scene==='paused')scene='playing'; }
+  function startRun(){
+    clearInput(); input.x=W/2;input.y=H/2; round=0; score=0; lives=3; streak=0; routeIndex=0; game=null; lastGame='';
+    mods={timerRounds:0, shield:0, slowRounds:0, scoreRounds:0}; completedGames=[];
+    stats.runs++; saveStats(); scene='playing'; nextRound(); tone(330,.07); tone(440,.07);
+  }
+
+  function chooseGame(){
+    const pool = MICROGAMES.filter(g=>g.id!==lastGame);
+    const def = pool[randi(0,pool.length-1)]; lastGame=def.id;
+    return def.create();
+  }
+  function nextRound(skipUpgrade=false){
+    if(!skipUpgrade && round>0 && round%6===0){ showUpgrade(); return; }
+    round++; routeIndex=Math.min(STOPS.length-1,Math.floor((round-1)/3));
+    const base=clamp(7.3-Math.floor((round-1)/5)*.32,4.1,7.3);
+    duration=base*(mods.timerRounds>0?1.22:1); timer=duration;
+    game=chooseGame(); game.status='playing'; game.init?.(); scene='playing';
+  }
+  function finishRound(ok, special=''){
+    if(scene!=='playing')return;
+    if(!ok && mods.shield>0){ mods.shield--; ok=true; special='SORRY CARD!'; tone(260,.07); }
+    success=ok; scene='result'; resultTimer=.92;
+    if(ok){
+      streak++; stats.wins++; stats.bestStreak=Math.max(stats.bestStreak,streak);
+      const mult=mods.scoreRounds>0?1.5:1;
+      score += Math.round((100 + round*12 + Math.max(0,timer)*18 + streak*8)*mult);
+      resultHeadline=special||'NICE!'; resultQuip=QUIPS_WIN[randi(0,QUIPS_WIN.length-1)]; winSound();
+      if(game.id==='goose'){ stats.gooseWins++; }
+      completedGames.push(game.id);
+    } else {
+      lives--; streak=0; resultHeadline='OPE.'; resultQuip=QUIPS_LOSE[randi(0,QUIPS_LOSE.length-1)]; loseSound();
+    }
+    if(mods.timerRounds>0)mods.timerRounds--;
+    if(mods.slowRounds>0)mods.slowRounds--;
+    if(mods.scoreRounds>0)mods.scoreRounds--;
+    saveStats();
+  }
+  function showUpgrade(){
+    const upgrades=[
+      {id:'mitten',name:'SPARE MITTEN',desc:'+1 life. It was in the coat pocket.',icon:'🧤'},
+      {id:'coffee',name:'DOUBLE-DOUBLE',desc:'22% more time for the next 4 games.',icon:'☕'},
+      {id:'sorry',name:'SORRY CARD',desc:'Automatically forgive one failure.',icon:'💌'},
+      {id:'tires',name:'WINTER TIRES',desc:'Hazards move slower for 4 games.',icon:'❄'},
+      {id:'loonie',name:'LUCKY LOONIE',desc:'1.5× points for the next 5 games.',icon:'🪙'}
+    ];
+    selectedUpgradeChoices=shuffle(upgrades).slice(0,3); scene='upgrade';
+  }
+  function takeUpgrade(u){
+    if(scene!=='upgrade'||!u)return;
+    if(u.id==='mitten')lives=Math.min(5,lives+1);
+    if(u.id==='coffee')mods.timerRounds+=4;
+    if(u.id==='sorry')mods.shield++;
+    if(u.id==='tires')mods.slowRounds+=4;
+    if(u.id==='loonie')mods.scoreRounds+=5;
+    tone(740,.12,'triangle',.05,220); nextRound(true);
+  }
+  function gameOver(){
+    scene='gameover'; if(score>best){best=score;storage.set('tnt-best',best);} saveStats();
+  }
+
+  function handlePointerDown(){
+    if(scene==='menu'){
+      if(hitRect(350,330,260,68))startRun();
+      else if(hitRect(350,410,125,52))scene='help';
+      else if(hitRect(485,410,125,52)){muted=!muted;storage.set('tnt-muted',muted?'1':'0');tone(440,.06);}
+    } else if(scene==='help'){
+      if(hitRect(360,454,240,52))scene='menu';
+    } else if(scene==='gameover'){
+      if(hitRect(330,407,300,62))startRun();
+      else if(hitRect(400,478,160,40))scene='menu';
+    } else if(scene==='upgrade'){
+      selectedUpgradeChoices.forEach((u,i)=>{const x=85+i*270;if(hitRect(x,178,250,250))takeUpgrade(u);});
+    } else if(scene==='paused'){
+      if(hitRect(360,310,240,58))scene='playing';
+      else if(hitRect(400,384,160,44))scene='menu';
+    } else if(scene==='playing' && game?.pointerDown){ game.pointerDown(input.x,input.y); }
+  }
+
+  function drawHUD(){
+    rr(20,16,920,72,18,'rgba(255,250,240,.94)',C.ink,3);
+    txt(`ROUND ${round}`,46,40,15,C.grey,'left',900);
+    txt(game?.region||STOPS[routeIndex],46,64,22,C.ink,'left',900);
+    txt(score.toLocaleString(),480,46,30,C.ink,'center',900);
+    txt('SCORE',480,72,11,C.grey,'center',900);
+    for(let i=0;i<Math.max(0,lives);i++) txt('🧤',760+i*34,52,25,C.ink);
+    if(mods.shield>0) txt(`SORRY ×${mods.shield}`,915,72,11,C.red,'right',900);
+    const pct=clamp(timer/duration,0,1);
+    rr(210,96,540,16,8,'rgba(24,48,43,.18)');
+    rr(210,96,540*pct,16,8,pct<.25?C.red:(pct<.5?C.gold:C.green));
+    txt(game?.title||'',480,140,34,C.ink);
+    txt(game?.instruction||'',480,174,17,C.grey);
+    if(streak>=2) {
+      rr(784,99,148,38,12,C.gold,C.ink,2); txt(`${streak}× POLITE STREAK`,858,119,12,C.ink);
+    }
+  }
+
+  // --- Microgames ---------------------------------------------------------
+  function drawGoose(x,y,s=1,flip=1){
+    ctx.save();ctx.translate(x,y);ctx.scale(s*flip,s);
+    ctx.fillStyle='#f5f1df';ctx.beginPath();ctx.ellipse(0,8,27,15,0,0,TAU);ctx.fill();
+    ctx.fillStyle=C.ink;ctx.beginPath();ctx.moveTo(14,2);ctx.quadraticCurveTo(22,-17,12,-29);ctx.lineWidth=9;ctx.strokeStyle=C.ink;ctx.stroke();
+    ctx.beginPath();ctx.arc(10,-31,8,0,TAU);ctx.fill();
+    ctx.fillStyle=C.white;ctx.fillRect(2,-35,10,8);ctx.fillStyle='#df8c34';ctx.beginPath();ctx.moveTo(17,-31);ctx.lineTo(31,-27);ctx.lineTo(17,-24);ctx.fill();
+    ctx.fillStyle=C.ink;ctx.beginPath();ctx.moveTo(-5,3);ctx.lineTo(-30,-10);ctx.lineTo(-20,10);ctx.fill();
+    ctx.restore();
+  }
+
+  const MICROGAMES = [
+    {
+      id:'scrape', create:()=>({id:'scrape',title:'SCRAPE!',region:'A frost advisory somewhere, obviously',instruction:'Drag across the windshield. Find the concept of visibility.',
+        init(){this.spots=[];for(let i=0;i<40;i++)this.spots.push({x:rand(170,790),y:rand(220,455),r:rand(22,48),a:1});this.cleared=0;},
+        pointerMove(x,y){if(!input.down)return;for(const s of this.spots){if(s.a>0&&dist(x,y,s.x,s.y)<s.r+22){s.a=0;this.cleared++;tone(310,.025,'triangle',.008);}}if(this.cleared>=30)this.status='won';},
+        pointerDown(x,y){this.pointerMove(x,y);},
+        update(){if(this.status==='won')finishRound(true);},
+        draw(){
+          ctx.fillStyle='#688a92';rr(115,194,730,302,30,'#324f57',C.ink,6);rr(150,215,660,245,16,'#9ac5cf');
+          ctx.fillStyle='#214044';ctx.fillRect(465,215,12,245);ctx.fillStyle='#566869';ctx.fillRect(115,459,730,37);
+          for(const s of this.spots){if(!s.a)continue;ctx.globalAlpha=.72;ctx.fillStyle=C.snow;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,TAU);ctx.fill();ctx.globalAlpha=1;}
+          txt(`${this.cleared}/30 clear patches`,480,490,15,C.white);
+        }
+      })
+    },
+    {
+      id:'goose', create:()=>({id:'goose',title:'GOOSE!',region:'Any park with confidence',instruction:'Move left and right. The geese have formed a committee.',winAtEnd:true,
+        init(){this.px=480;this.geese=[];this.spawn=0;this.hit=false;},
+        update(dt){
+          const slow=mods.slowRounds>0?.78:1; const key=(input.keys.has('arrowleft')||input.keys.has('a')?-1:0)+(input.keys.has('arrowright')||input.keys.has('d')?1:0);
+          if(key)this.px+=key*360*dt;else if(input.mode==='pointer')this.px=lerp(this.px,input.x,1-Math.exp(-7*dt));this.px=clamp(this.px,120,840);
+          this.spawn-=dt;if(this.spawn<=0){this.spawn=rand(.3,.62)/Math.min(1.8,1+round*.025);this.geese.push({x:rand(100,860),y:190,v:rand(170,260)*(1+round*.018)*slow,s:rand(.72,1.1)});}
+          for(const g of this.geese){g.y+=g.v*dt;if(dist(g.x,g.y,this.px,450)<35){this.hit=true;this.status='lost';}}
+          this.geese=this.geese.filter(g=>g.y<560);
+          if(this.status==='lost')finishRound(false);
+        },
+        draw(){
+          ctx.fillStyle='#88aa72';ctx.fillRect(0,190,W,350);ctx.strokeStyle='#d6e8c7';ctx.lineWidth=5;for(let y=220;y<540;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+          for(const g of this.geese)drawGoose(g.x,g.y,g.s,Math.sin(g.y*.03)>0?1:-1);
+          ctx.fillStyle=C.red;ctx.beginPath();ctx.arc(this.px,460,27,0,TAU);ctx.fill();txt('YOU',this.px,461,11,C.white);
+        }
+      })
+    },
+    {
+      id:'curl', create:()=>({id:'curl',title:'HURRY HARD!',region:'A curling club with excellent soup',instruction:'Tap when the slider lands in the house.',
+        init(){this.t=rand(0,1);this.dir=Math.random()<.5?-1:1;this.target=rand(.25,.75);this.used=false;},
+        pointerDown(){if(this.used)return;this.used=true;const ok=Math.abs(this.t-this.target)<.105;this.status=ok?'won':'lost';}, keyDown(k){if(k===' '||k==='enter')this.pointerDown();},
+        update(dt){if(!this.used){this.t+=this.dir*dt*(.75+round*.012);if(this.t>1){this.t=1;this.dir=-1;}if(this.t<0){this.t=0;this.dir=1;}}else finishRound(this.status==='won');},
+        draw(){
+          ctx.fillStyle='#dbe9e8';ctx.fillRect(0,190,W,350);
+          ctx.fillStyle=C.white;ctx.beginPath();ctx.arc(480,330,110,0,TAU);ctx.fill();ctx.fillStyle=C.blue;ctx.beginPath();ctx.arc(480,330,76,0,TAU);ctx.fill();ctx.fillStyle=C.white;ctx.beginPath();ctx.arc(480,330,43,0,TAU);ctx.fill();ctx.fillStyle=C.red;ctx.beginPath();ctx.arc(480,330,20,0,TAU);ctx.fill();
+          rr(160,466,640,28,14,'rgba(24,48,43,.18)');
+          rr(160+640*(this.target-.105),466,640*.21,28,14,C.green);
+          const x=160+640*this.t;ctx.fillStyle=C.gold;ctx.beginPath();ctx.arc(x,480,19,0,TAU);ctx.fill();ctx.strokeStyle=C.ink;ctx.lineWidth=4;ctx.stroke();
+          txt('TAP / SPACE',480,520,14,C.ink);
+        }
+      })
+    },
+    {
+      id:'poutine', create:()=>({id:'poutine',title:'ASSEMBLE!',region:'Québec, with national consequences',instruction:'Fries. Curds. Gravy. Civilization depends on the order.',
+        init(){this.step=0;this.labels=shuffle(['FRIES','CURDS','GRAVY']);},
+        pointerDown(x,y){for(let i=0;i<3;i++){const bx=170+i*220;if(x>=bx&&x<=bx+180&&y>=300&&y<=420){const expected=['FRIES','CURDS','GRAVY'][this.step];if(this.labels[i]===expected){this.step++;tone(420+this.step*90,.05);if(this.step===3)this.status='won';}else this.status='lost';}}},
+        update(){if(this.status!=='playing')finishRound(this.status==='won');},
+        draw(){
+          ctx.fillStyle='#f6dfad';ctx.fillRect(0,190,W,350);
+          const icons={FRIES:'🍟',CURDS:'🧀',GRAVY:'🥣'};
+          for(let i=0;i<3;i++){const x=170+i*220;rr(x,300,180,120,18,C.white,C.ink,4);txt(icons[this.labels[i]],x+90,340,46);txt(this.labels[i],x+90,390,18,C.ink);}
+          const steps=['FRIES','CURDS','GRAVY'];steps.forEach((s,i)=>{rr(325+i*110,230,100,38,11,i<this.step?C.green:C.white,C.ink,2);txt(s,375+i*110,249,12,i<this.step?C.white:C.ink);});
+        }
+      })
+    },
+    {
+      id:'fourway', create:()=>({id:'fourway',title:'FOUR-WAY!',region:'Every residential intersection',instruction:'Wait for the tiny wave. Then go before everyone apologizes again.',
+        init(){this.delay=rand(1.15,2.5);this.ready=false;this.clicked=false;},
+        pointerDown(){if(this.clicked)return;this.clicked=true;this.status=this.ready?'won':'lost';}, keyDown(k){if(k===' '||k==='enter')this.pointerDown();},
+        update(dt){this.delay-=dt;if(this.delay<=0&&!this.ready){this.ready=true;tone(660,.04);}if(this.clicked)finishRound(this.status==='won');},
+        draw(){
+          ctx.fillStyle='#89a978';ctx.fillRect(0,190,W,350);ctx.fillStyle=C.asphalt;ctx.fillRect(0,330,W,120);ctx.fillRect(420,190,120,350);
+          ctx.strokeStyle=C.white;ctx.lineWidth=5;ctx.setLineDash([20,18]);ctx.beginPath();ctx.moveTo(0,390);ctx.lineTo(W,390);ctx.moveTo(480,190);ctx.lineTo(480,540);ctx.stroke();ctx.setLineDash([]);
+          const car=(x,y,a,col)=>{ctx.save();ctx.translate(x,y);ctx.rotate(a);rr(-38,-22,76,44,10,col,C.ink,3);ctx.fillStyle='#b9dce1';ctx.fillRect(-18,-15,36,30);ctx.restore();};
+          car(350,390,0,C.red);car(480,275,Math.PI/2,C.blue);car(610,390,Math.PI,C.gold);car(480,500,-Math.PI/2,C.green);
+          if(this.ready){txt('👋',520,250,42);rr(350,465,260,54,14,C.gold,C.ink,3);txt('GO!  TAP / SPACE',480,492,20,C.ink);} else {rr(390,465,180,54,14,C.white,C.ink,3);txt('...WAIT...',480,492,20,C.grey);}
+        }
+      })
+    },
+    {
+      id:'chips', create:()=>({id:'chips',title:'STORM CHIPS!',region:'Weather-advisory snack logistics',instruction:'Catch 7 chip bags. Avoid the suspicious kale.',
+        init(){this.x=480;this.items=[];this.spawn=0;this.caught=0;},
+        update(dt){
+          const key=(input.keys.has('arrowleft')||input.keys.has('a')?-1:0)+(input.keys.has('arrowright')||input.keys.has('d')?1:0);if(key)this.x+=key*380*dt;else if(input.mode==='pointer')this.x=lerp(this.x,input.x,1-Math.exp(-9*dt));this.x=clamp(this.x,90,870);
+          this.spawn-=dt;if(this.spawn<=0){this.spawn=rand(.28,.55);this.items.push({x:rand(70,890),y:190,v:rand(145,225)*(mods.slowRounds>0?.8:1),bad:Math.random()<.18,rot:rand(-1,1)});}
+          for(const it of this.items){it.y+=it.v*dt;it.rot+=dt*2;if(it.y>430&&it.y<485&&Math.abs(it.x-this.x)<65&&!it.done){it.done=true;if(it.bad){this.status='lost';}else{this.caught++;tone(500,.04);if(this.caught>=7)this.status='won';}}}
+          this.items=this.items.filter(i=>i.y<560&&!i.done);
+          if(this.status!=='playing')finishRound(this.status==='won');
+        },
+        draw(){
+          ctx.fillStyle='#536b72';ctx.fillRect(0,190,W,350);for(let i=0;i<90;i++){ctx.fillStyle='rgba(255,255,255,.45)';ctx.fillRect((i*107+menuT*230)%W,(i*53+menuT*370)%350+190,3,13);}
+          for(const it of this.items){ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rot);rr(-25,-31,50,62,9,it.bad?'#659c5d':C.red,C.white,3);txt(it.bad?'KALE':'CHIPS',0,0,it.bad?10:9,C.white);ctx.restore();}
+          rr(this.x-72,446,144,45,14,C.gold,C.ink,4);txt('EMERGENCY',this.x,462,11,C.ink);txt(`${this.caught}/7`,this.x,482,14,C.ink);
+        }
+      })
+    },
+    {
+      id:'mosquito', create:()=>({id:'mosquito',title:'SLAP!',region:'The North, in bug season',instruction:'Tap 8 mosquitoes before they start paying rent.',
+        init(){this.bugs=[];for(let i=0;i<8;i++)this.bugs.push({x:rand(100,860),y:rand(220,480),vx:rand(-100,100),vy:rand(-80,80),p:rand(0,TAU)});this.got=0;},
+        pointerDown(x,y){let best=null,bd=35;for(const b of this.bugs){const d=dist(x,y,b.x,b.y);if(d<bd){best=b;bd=d;}}if(best){this.bugs.splice(this.bugs.indexOf(best),1);this.got++;tone(760,.025,'square',.02,-300);if(this.got>=8)this.status='won';}},
+        update(dt){for(const b of this.bugs){b.p+=dt*8;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x<60||b.x>900)b.vx*=-1;if(b.y<205||b.y>500)b.vy*=-1;}if(this.status==='won')finishRound(true);},
+        draw(){
+          ctx.fillStyle='#d7c98d';ctx.fillRect(0,190,W,350);ctx.fillStyle='#8fa56d';for(let i=0;i<14;i++){ctx.beginPath();ctx.arc(i*80,530,90,Math.PI,TAU);ctx.fill();}
+          for(const b of this.bugs){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(Math.atan2(b.vy,b.vx));ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(14,0);ctx.stroke();ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(0,0,5,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.ellipse(-4,-8,10,4,-.5,0,TAU);ctx.ellipse(-4,8,10,4,.5,0,TAU);ctx.stroke();ctx.restore();}
+          txt(`${this.got}/8 relocated`,480,510,15,C.ink);
+        }
+      })
+    },
+    {
+      id:'pothole', create:()=>({id:'pothole',title:'POTHOLES!',region:'A road listed as “mostly fine”',instruction:'Steer around them. One now has heritage status.',winAtEnd:true,
+        init(){this.x=480;this.holes=[];this.spawn=0;},
+        update(dt){
+          const key=(input.keys.has('arrowleft')||input.keys.has('a')?-1:0)+(input.keys.has('arrowright')||input.keys.has('d')?1:0);if(key)this.x+=key*370*dt;else if(input.mode==='pointer')this.x=lerp(this.x,input.x,1-Math.exp(-6*dt));this.x=clamp(this.x,280,680);
+          this.spawn-=dt;if(this.spawn<=0){this.spawn=rand(.27,.55);this.holes.push({x:rand(285,675),y:190,r:rand(22,38),v:rand(170,240)*(1+round*.012)*(mods.slowRounds>0?.78:1)});}
+          for(const h of this.holes){h.y+=h.v*dt;if(dist(this.x,458,h.x,h.y)<h.r+21)this.status='lost';}
+          this.holes=this.holes.filter(h=>h.y<560);if(this.status==='lost')finishRound(false);
+        },
+        draw(){
+          ctx.fillStyle='#73935f';ctx.fillRect(0,190,W,350);ctx.fillStyle=C.asphalt;ctx.beginPath();ctx.moveTo(260,540);ctx.lineTo(335,190);ctx.lineTo(625,190);ctx.lineTo(700,540);ctx.fill();
+          ctx.strokeStyle=C.gold;ctx.lineWidth=6;ctx.setLineDash([30,25]);ctx.beginPath();ctx.moveTo(480,190);ctx.lineTo(480,540);ctx.stroke();ctx.setLineDash([]);
+          for(const h of this.holes){ctx.fillStyle='#252b2a';ctx.beginPath();ctx.ellipse(h.x,h.y,h.r,h.r*.55,0,0,TAU);ctx.fill();ctx.strokeStyle='#707574';ctx.lineWidth=5;ctx.stroke();}
+          rr(this.x-27,430,54,58,12,C.red,C.ink,4);ctx.fillStyle='#bde0e5';ctx.fillRect(this.x-17,440,34,18);ctx.fillStyle=C.ink;ctx.fillRect(this.x-34,442,8,22);ctx.fillRect(this.x+26,442,8,22);
+        }
+      })
+    },
+    {
+      id:'layers', create:()=>({id:'layers',title:'LAYER UP!',region:'A forecast with trust issues',instruction:'Pick the outfit that respects the wind.',
+        init(){
+          const scenarios=[
+            {line:'−24°C • wind chill −37',answer:2,note:'The air is personally offended.'},
+            {line:'+4°C • rain sideways',answer:1,note:'Spring, technically.'},
+            {line:'+28°C • humidex 36',answer:0,note:'The one week everyone talks about.'},
+            {line:'−3°C • sunny • “feels nice”',answer:1,note:'A trap with excellent lighting.'}
+          ]; this.s=scenarios[randi(0,scenarios.length-1)];
+        },
+        pointerDown(x,y){for(let i=0;i<3;i++){const bx=145+i*235;if(x>=bx&&x<=bx+200&&y>=300&&y<=440)this.status=i===this.s.answer?'won':'lost';}},
+        update(){if(this.status!=='playing')finishRound(this.status==='won');},
+        draw(){
+          ctx.fillStyle='#b8d8df';ctx.fillRect(0,190,W,350);txt(this.s.line,480,228,30,C.ink);txt(this.s.note,480,265,16,C.grey);
+          const cards=[['🩳','OPTIMISM'],['🧥','LAYERS'],['🧣','FULL DEFENCE']];
+          cards.forEach((a,i)=>{const x=145+i*235;rr(x,300,200,140,20,C.white,C.ink,4);txt(a[0],x+100,346,51);txt(a[1],x+100,407,15,C.ink);});
+        }
+      })
+    },
+    {
+      id:'hockey', create:()=>({id:'hockey',title:'TOP SHELF!',region:'A frozen surface of disputed quality',instruction:'Tap a corner away from the goalie. No deke committee.',
+        init(){this.gx=480;this.dir=Math.random()<.5?-1:1;this.shot=false;this.sx=480;},
+        pointerDown(x,y){if(this.shot)return;this.shot=true;this.sx=clamp(x,300,660);const inGoal=this.sx>=315&&this.sx<=645;this.status=inGoal&&Math.abs(this.sx-this.gx)>88?'won':'lost';}, keyDown(k){if(k===' '||k==='enter')this.pointerDown(input.x,input.y);},
+        update(dt){if(!this.shot){this.gx+=this.dir*220*dt*(mods.slowRounds>0?.8:1);if(this.gx<350||this.gx>610)this.dir*=-1;}else finishRound(this.status==='won');},
+        draw(){
+          ctx.fillStyle='#dcebed';ctx.fillRect(0,190,W,350);ctx.strokeStyle='#a8cbd2';ctx.lineWidth=3;for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,190);ctx.lineTo(x,540);ctx.stroke();}
+          ctx.strokeStyle=C.red;ctx.lineWidth=10;ctx.strokeRect(300,220,360,155);ctx.fillStyle='rgba(255,255,255,.65)';ctx.fillRect(310,230,340,135);
+          ctx.fillStyle=C.blue;ctx.beginPath();ctx.arc(this.gx,330,42,0,TAU);ctx.fill();txt('GOALIE',this.gx,330,11,C.white);
+          ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(input.x,455,12,0,TAU);ctx.fill();ctx.strokeStyle=C.red;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(input.x-18,455);ctx.lineTo(input.x+18,455);ctx.moveTo(input.x,437);ctx.lineTo(input.x,473);ctx.stroke();
+          txt('TAP TO SHOOT',480,510,15,C.ink);
+        }
+      })
+    }
+  ];
+
+  function update(dt){
+    menuT+=dt;
+    if(scene==='playing'){
+      timer-=dt;
+      game?.update?.(dt);
+      if(scene==='playing' && timer<=0) finishRound(!!game?.winAtEnd);
+    } else if(scene==='result'){
+      resultTimer-=dt;
+      if(resultTimer<=0){ if(lives<=0)gameOver(); else nextRound(); }
+    }
+    input.pressed=false;input.released=false;input.keyPressed.clear();
+  }
+
+  function drawMenu(){
+    hillBackground(menuT);
+    ctx.fillStyle='rgba(244,231,202,.88)';ctx.fillRect(0,0,W,H);
+    mapleLeaf(118,98,1.55,C.red,-.08);mapleLeaf(850,122,1.15,C.gold,.12);
+    txt('TRUE NORTH',480,112,64,C.ink,'center',950);
+    txt('TURBO',480,178,92,C.red,'center',950);
+    rr(205,235,550,58,18,C.darkGreen,C.ink,3);
+    txt('COAST-TO-COAST MICROGAME MAYHEM',480,264,21,C.white);
+    wrap('Rapid-fire Canadian survival skills. One thumb. Three mittens. Increasingly unreasonable weather.',480,313,620,25,17,C.ink,750);
+    button(350,330,260,68,'START THE RUN','ENTER / TAP');
+    button(350,410,125,52,'HOW TO');button(485,410,125,52,muted?'SOUND OFF':'SOUND ON');
+    txt(`BEST ${best.toLocaleString()}  •  ${MICROGAMES.length} MICROGAMES  •  SAVES LOCALLY`,480,492,13,C.grey);
+    drawGoose(82,470,.85,1);txt('HONK',120,440,11,C.red);
+  }
+  function drawHelp(){
+    ctx.fillStyle=C.paper;ctx.fillRect(0,0,W,H);txt('HOW TO SURVIVE CANADA',480,58,40,C.red);
+    const items=[
+      ['1','READ THE COMMAND','Each microgame gives you one very simple job. The country then complicates it.'],
+      ['2','TAP, DRAG, OR STEER','Mouse, touch, arrows, A/D, Space and Enter all work where sensible.'],
+      ['3','KEEP YOUR MITTENS','Fail three times and the run ends. Every six rounds, choose a ridiculous upgrade.'],
+      ['4','CHASE THE STREAK','Wins build a Polite Streak and bigger scores. Speed climbs every few rounds.']
+    ];
+    items.forEach((it,i)=>{const y=118+i*82;rr(105,y,750,66,16,i%2?C.white:'#ead7ae',C.ink,3);rr(122,y+12,42,42,12,C.red);txt(it[0],143,y+34,20,C.white);txt(it[1],185,y+24,17,C.ink,'left');txt(it[2],185,y+47,13,C.grey,'left',700);});
+    button(360,454,240,52,'BACK TO THE MAP');
+  }
+  function drawGame(){
+    ctx.fillStyle=C.paper;ctx.fillRect(0,0,W,H);game?.draw?.();drawHUD();
+    // tiny route strip
+    const n=STOPS.length;for(let i=0;i<n;i++){const x=80+i*(800/(n-1));ctx.fillStyle=i<=routeIndex?C.red:'rgba(24,48,43,.2)';ctx.beginPath();ctx.arc(x,526,i===routeIndex?7:4,0,TAU);ctx.fill();if(i<n-1){ctx.strokeStyle=i<routeIndex?C.red:'rgba(24,48,43,.16)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+6,526);ctx.lineTo(x+800/(n-1)-6,526);ctx.stroke();}}
+  }
+  function drawResult(){
+    drawGame();ctx.fillStyle='rgba(23,54,47,.76)';ctx.fillRect(0,0,W,H);
+    rr(210,160,540,240,26,C.white,C.ink,6);
+    txt(resultHeadline,480,228,62,success?C.green:C.red);
+    wrap(resultQuip,480,297,440,27,18,C.ink,750);
+    txt(success?`+ SCORE • STREAK ${streak}`:`${lives} MITTEN${lives===1?'':'S'} LEFT`,480,360,16,success?C.green:C.red);
+  }
+  function drawUpgrade(){
+    ctx.fillStyle=C.paper;ctx.fillRect(0,0,W,H);txt('ROADSIDE UPGRADE',480,70,44,C.red);txt('Pick one. The receipt is somewhere in the glove box.',480,110,17,C.grey);
+    selectedUpgradeChoices.forEach((u,i)=>{const x=85+i*270;rr(x,178,250,250,24,C.white,C.ink,5);txt(u.icon,x+125,235,58);txt(u.name,x+125,305,20,C.ink);wrap(u.desc,x+125,345,190,23,15,C.grey,700);rr(x+45,389,160,30,10,C.gold);txt(`TAKE IT · ${i+1}`,x+125,405,13,C.ink);});
+    txt(`ROUND ${round} CLEARED • SCORE ${score.toLocaleString()}`,480,475,15,C.ink);
+  }
+  function drawPaused(){
+    drawGame();ctx.fillStyle='rgba(23,54,47,.82)';ctx.fillRect(0,0,W,H);rr(280,190,400,250,26,C.white,C.ink,6);txt('PARKED',480,245,50,C.red);txt('The hazards are respectfully waiting.',480,286,16,C.grey);button(360,310,240,58,'RESUME');button(400,384,160,44,'QUIT RUN');
+  }
+  function drawGameOver(){
+    hillBackground(menuT);ctx.fillStyle='rgba(244,231,202,.9)';ctx.fillRect(0,0,W,H);
+    txt(lives<=0?'MITTENS: DEPLETED':'RUN COMPLETE',480,64,22,C.red);
+    txt(score.toLocaleString(),480,142,76,C.ink);txt(score>=best?'PERSONAL BEST':'FINAL SCORE',480,194,15,C.grey);
+    const distance=Math.min(STOPS.length,routeIndex+1);rr(160,235,640,130,24,C.white,C.ink,4);
+    txt(`MADE IT TO: ${STOPS[routeIndex].toUpperCase()}`,480,270,22,C.ink);
+    txt(`${round} microgames • best streak ${stats.bestStreak} • ${distance}/${STOPS.length} route stops`,480,310,15,C.grey);
+    let badge='LOCAL LEGEND IN TRAINING';
+    if(score>9000)badge='ORDER OF THE SNOWBRUSH';else if(score>5000)badge='COAST-TO-COAST-ISH';else if(score>2500)badge='WEATHER-RESISTANT CITIZEN';
+    rr(285,330,390,32,10,C.gold);txt(badge,480,347,13,C.ink);
+    button(330,407,300,62,'ANOTHER RUN','THE WEATHER CHANGED');button(400,478,160,40,'MAIN MENU');
+  }
+
+  function draw(){
+    const pauseControl=document.getElementById('pause-control');pauseControl.hidden=!['playing','paused'].includes(scene);pauseControl.textContent=scene==='paused'?'Resume':'Pause';
+    ctx.clearRect(0,0,W,H);
+    if(scene==='menu')drawMenu();
+    else if(scene==='help')drawHelp();
+    else if(scene==='playing')drawGame();
+    else if(scene==='result')drawResult();
+    else if(scene==='upgrade')drawUpgrade();
+    else if(scene==='paused')drawPaused();
+    else if(scene==='gameover')drawGameOver();
+  }
+
+  let last=performance.now();
+  function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

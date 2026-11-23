@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Trans-Canada Trek</title>
+    <style>
+        :root {
+            --maple-red: #D80621;
+            --dark-gray: #1a1a1a;
+            --panel-bg: #2d2d2d;
+            --text-main: #f0f0f0;
+            --accent: #ffcc00;
+            --success: #4caf50;
+            --danger: #ff5252;
+            --highway: #555;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-gray);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: var(--maple-red);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px black;
+        }
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        .panel {
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            border-top: 4px solid var(--maple-red);
+        }
+        .panel h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Map & Progress */
+        .map-container {
+            margin-bottom: 20px;
+        }
+        .progress-track {
+            height: 20px;
+            background: var(--highway);
+            border-radius: 10px;
+            position: relative;
+            margin-top: 10px;
+            border: 2px dashed #999;
+        }
+        .car-marker {
+            position: absolute;
+            top: -10px;
+            left: 0%;
+            font-size: 24px;
+            transition: left 0.5s ease;
+            transform: translateX(-50%);
+        }
+        .cities {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        button {
+            padding: 12px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover:not(:disabled) { background: #555; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-drive { background: var(--maple-red); }
+        .btn-drive:hover:not(:disabled) { background: #ff1a1a; }
+        .btn-pace { background: #2196f3; }
+
+        /* Event Log */
+        .event-log {
+            height: 350px;
+            overflow-y: auto;
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .log-good { color: var(--success); }
+        .log-bad { color: var(--danger); }
+        .log-neutral { color: #ccc; }
+        .log-system { color: var(--accent); }
+
+        /* Town Modal */
+        #town-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            z-index: 100;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        .town-buttons {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container { grid-template-columns: 1fr; }
+        }
+        * { box-sizing: border-box; }
+        .panel, .stat-box { min-width: 0; }
+        h1, .subtitle { text-align: center; }
+        @media (max-width: 420px) { body { padding: 12px; } .panel { padding: 12px; } .panel h2 { flex-wrap: wrap; gap: 8px; } .stats-grid { gap: 8px; } }
+        button { min-height: 44px; touch-action: manipulation; }
+        button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+        #town-modal { max-height: 85vh; overflow-y: auto; max-width: min(500px, calc(100vw - 32px)); box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <h1>The Trans-Canada Trek</h1>
+    <div class="subtitle">St. John's to Vancouver. Don't hit a Moose.</div>
+
+    <div class="game-container">
+        <!-- Main Game Area -->
+        <div class="panel">
+            <div class="map-container">
+                <h2>Road Trip Progress <span id="weather-display">☀️ Clear</span></h2>
+                <div class="progress-track">
+                    <div class="car-marker" id="car-marker">🚗</div>
+                </div>
+                <div class="cities">
+                    <span>St. John's</span>
+                    <span>Hali</span>
+                    <span>Mtl</span>
+                    <span>Tor</span>
+                    <span>Wpg</span>
+                    <span>Cal</span>
+                    <span>Van</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Distance to Van</div>
+                    <div class="stat-value"><span id="distance">7000</span> km</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Toonies (Cash)</div>
+                    <div class="stat-value" style="color: var(--success);">$<span id="cash">1500</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Gas Tank</div>
+                    <div class="stat-value" id="gas">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Car Health (AWD Turbo)</div>
+                    <div class="stat-value" id="car-health">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Timbits (Morale)</div>
+                    <div class="stat-value" id="timbits">50</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Current Pace</div>
+                    <div class="stat-value" id="pace-display" style="color: var(--accent);">Givin' er</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-drive" id="btn-drive" onclick="drive()">Drive (Next Day)</button>
+                <button class="btn-pace" id="btn-pace" onclick="togglePace()">Change Pace</button>
+                <button id="btn-rest" onclick="rest()">Rest (Heal & Forage)</button>
+                <button onclick="restartGame()">Tow to Start (Restart)</button>
+            </div>
+        </div>
+
+        <!-- Narrative Log Area -->
+        <div class="panel">
+            <h2>Travel Log <span style="font-size: 0.9rem; color: #888;">Day <span id="day-counter">1</span></span></h2>
+            <div class="event-log" id="event-log" role="log" aria-live="polite">
+                <div class="log-entry log-system">Packed up the AWD Hatchback. The ferry out of Newfoundland was rough, but you're on the mainland. Next stop: The Pacific Ocean.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Town Modal -->
+    <div id="town-modal" role="dialog" aria-modal="true" aria-labelledby="town-name">
+        <h2 id="town-name" style="color: var(--accent);">Welcome to Town</h2>
+        <p>You hit a major city. Stock up before heading back out onto the highway.</p>
+        <div class="town-buttons">
+            <button id="buy-gas" onclick="buyGas()">Fill Gas Tank ($50)</button>
+            <button id="buy-timbits" onclick="buyTimbits()">Buy 20 Timbits ($20)</button>
+            <button id="fix-car" onclick="fixCar()">Mechanic: Fix Car ($200)</button>
+            <button id="leave-town" onclick="leaveTown()" style="background: var(--maple-red);">Hit the Road</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA & CONSTANTS ---
+        const TOTAL_DISTANCE = 7000;
+        const CITIES = [
+            { name: "Halifax, NS", km: 6000 },
+            { name: "Montreal, QC", km: 4800 },
+            { name: "Toronto, ON", km: 4300 },
+            { name: "Thunder Bay, ON", km: 2900 },
+            { name: "Winnipeg, MB", km: 2200 },
+            { name: "Calgary, AB", km: 900 },
+            { name: "Vancouver, BC", km: 0 }
+        ];
+
+        const PACES = [
+            { id: 0, name: "Sunday Drive", speedMult: 0.6, gasMult: 0.5, damageMult: 0.2 },
+            { id: 1, name: "Cruisin'", speedMult: 1.0, gasMult: 1.0, damageMult: 1.0 },
+            { id: 2, name: "Givin' er", speedMult: 1.5, gasMult: 1.8, damageMult: 2.5 }
+        ];
+
+        const WEATHER = [
+            { name: "☀️ Clear", probability: 0.6, risk: 0 },
+            { name: "🌧️ Freezing Rain", probability: 0.2, risk: 1.5 },
+            { name: "❄️ Whiteout Snowstorm", probability: 0.2, risk: 2.5 }
+        ];
+
+        // --- STATE ---
+        let state = {
+            distanceLeft: TOTAL_DISTANCE,
+            day: 1,
+            cash: 1500,
+            gas: 100,
+            carHealth: 100,
+            timbits: 50,
+            paceIndex: 1,
+            weatherIndex: 0,
+            nextCityIndex: 0,
+            gameOver: false,
+            inTown: false
+        };
+
+        // --- CORE LOGIC ---
+        function log(msg, type = 'log-neutral') {
+            const logEl = document.getElementById('event-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<strong>Day ${state.day}:</strong> ${msg}`;
+            logEl.prepend(entry);
+        }
+
+        function togglePace() {
+            if (state.gameOver || state.inTown) return;
+            state.paceIndex = (state.paceIndex + 1) % PACES.length;
+            updateUI();
+        }
+
+        function updateWeather() {
+            const roll = Math.random();
+            let cumProb = 0;
+            for (let i = 0; i < WEATHER.length; i++) {
+                cumProb += WEATHER[i].probability;
+                if (roll <= cumProb) {
+                    state.weatherIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function drive() {
+            if (state.gameOver || state.inTown) return;
+
+            state.day++;
+            const pace = PACES[state.paceIndex];
+            const weather = WEATHER[state.weatherIndex];
+
+            // Base calculations
+            let distTraveled = Math.floor((Math.random() * 100 + 300) * pace.speedMult);
+            let gasUsed = Math.floor(15 * pace.gasMult * (weather.risk > 0 ? 1.2 : 1));
+            let timbitsEaten = Math.floor(Math.random() * 4) + 2;
+            let carDamage = Math.floor((Math.random() * 5) * pace.damageMult);
+
+            // AWD Turbo Snow Bonus
+            if (weather.name.includes("Snowstorm")) {
+                log("Your AWD Turbo cuts through the snowstorm, keeping you on the road.", "log-good");
+                carDamage = Math.floor(carDamage / 2); // Less damage than a normal car
+            } else if (weather.risk > 0) {
+                carDamage = Math.floor(carDamage * weather.risk);
+            }
+
+            // Stop at the next town; charge only for the distance actually covered.
+            const plannedDistance = distTraveled;
+            const toTown = state.distanceLeft - (CITIES[state.nextCityIndex]?.km ?? 0);
+            distTraveled = Math.min(distTraveled, toTown, Math.floor(plannedDistance * Math.min(1, state.gas / gasUsed)));
+            const tripFraction = distTraveled / plannedDistance;
+            gasUsed = Math.min(state.gas, Math.max(1, Math.ceil(gasUsed * tripFraction)));
+            carDamage = Math.ceil(carDamage * tripFraction);
+
+            // Apply changes
+            state.gas -= gasUsed;
+            state.timbits -= timbitsEaten;
+            state.carHealth -= carDamage;
+            state.distanceLeft -= distTraveled;
+
+            // Check if passed a city
+            let hitTown = false;
+            if (state.nextCityIndex < CITIES.length && state.distanceLeft <= CITIES[state.nextCityIndex].km) {
+                state.distanceLeft = CITIES[state.nextCityIndex].km; // Snap to town
+                hitTown = true;
+            }
+
+            // Boundary checks
+            if (state.gas <= 0) state.gas = 0;
+            if (state.carHealth <= 0) state.carHealth = 0;
+            if (state.timbits <= 0) state.timbits = 0;
+            if (state.distanceLeft <= 0) state.distanceLeft = 0;
+
+            log(`Drove ${distTraveled}km. Used ${gasUsed}% gas and ate ${timbitsEaten} Timbits.`);
+
+            if (!hitTown) {
+                triggerRandomEvent();
+            }
+
+            state.carHealth = Math.max(0, state.carHealth);
+            state.timbits = Math.max(0, state.timbits);
+            updateWeather();
+            checkGameState(hitTown);
+            updateUI();
+        }
+
+        function rest() {
+            if (state.gameOver || state.inTown) return;
+            state.day++;
+
+            let healthGained = Math.floor(Math.random() * 10) + 5;
+            let timbitsFound = Math.floor(Math.random() * 5); // "Foraging" in Canada means finding stale timbits in the glovebox
+
+            state.carHealth = Math.min(100, state.carHealth + healthGained);
+            state.timbits += timbitsFound;
+
+            log(`Pulled over at a rest stop. Did some minor repairs (+${healthGained}% Health) and found ${timbitsFound} stale Timbits.`, "log-good");
+
+            updateWeather();
+            updateUI();
+        }
+
+        function triggerRandomEvent() {
+            const roll = Math.random();
+
+            if (roll < 0.05) {
+                log("Spotted a Moose on the Trans-Canada! Slammed the brakes. Car took a beating.", "log-bad");
+                state.carHealth -= 15;
+            } else if (roll < 0.10) {
+                log("Pulled over away from city lights to do some long-exposure Astrophotography. Got an amazing shot of the Milky Way! Morale boosted.", "log-good");
+                state.timbits += 15;
+            } else if (roll < 0.15) {
+                log("Attacked by a flock of Canada Geese at a gas station. Dropped some Timbits fleeing.", "log-bad");
+                state.timbits -= 10;
+            } else if (roll < 0.20) {
+                log("RCMP Speed Trap! Got a ticket for givin' er too hard.", "log-bad");
+                state.cash = Math.max(0, state.cash - 150);
+            } else if (roll < 0.25) {
+                log("Found a stack of Canadian Tire Money in the center console! It's basically legal tender.", "log-good");
+                state.cash += 50;
+            } else if (roll < 0.30 && state.distanceLeft < 4000 && state.distanceLeft > 1000) {
+                log("Driving through the Prairies... Literally nothing happened. So flat. So straight.", "log-neutral");
+            } else if (roll < 0.35) {
+                log("Extremely polite local gave you directions and a jerry can of gas.", "log-good");
+                state.gas = Math.min(100, state.gas + 20);
+            }
+        }
+
+        function checkGameState(hitTown) {
+            if (state.distanceLeft <= 0) {
+                log("🎉 YOU MADE IT TO VANCOUVER! You survived the Trans-Canada Trek!", "log-system");
+                document.getElementById('weather-display').innerText = "🏔️ Arrived";
+                endGame();
+            } else if (state.carHealth <= 0) {
+                log("💀 The AWD Turbo finally gave out. You're stranded on the highway.", "log-bad");
+                endGame();
+            } else if (hitTown) {
+                const town = CITIES[state.nextCityIndex++];
+                log(`Arrived in ${town.name}!`, "log-system");
+                state.inTown = true;
+                document.getElementById('town-name').innerText = town.name;
+                document.getElementById('town-modal').style.display = 'block';
+                document.querySelector('.game-container').inert = true;
+                document.getElementById('leave-town').focus();
+            } else if (state.gas <= 0) {
+                log("💀 Out of gas. You're stranded on the highway.", "log-bad");
+                endGame();
+            } else if (state.timbits <= 0) {
+                log("💀 Zero Morale. You gave up, bought a cabin in the woods, and became a hermit.", "log-bad");
+                endGame();
+            }
+        }
+
+        // --- TOWN ACTIONS ---
+        function buyGas() {
+            if (state.inTown && !state.gameOver && state.cash >= 50 && state.gas < 100) {
+                state.cash -= 50;
+                state.gas = 100;
+                log("Filled the gas tank.", "log-good");
+                updateUI();
+            }
+        }
+        function buyTimbits() {
+            if (state.inTown && !state.gameOver && state.cash >= 20) {
+                state.cash -= 20;
+                state.timbits += 20;
+                log("Bought a 20-pack of Timbits.", "log-good");
+                updateUI();
+            }
+        }
+        function fixCar() {
+            if (state.inTown && !state.gameOver && state.cash >= 200 && state.carHealth < 100) {
+                state.cash -= 200;
+                state.carHealth = 100;
+                log("Mechanic patched up the suspension.", "log-good");
+                updateUI();
+            }
+        }
+        function leaveTown() {
+            if (!state.inTown) return;
+            state.inTown = false;
+            document.getElementById('town-modal').style.display = 'none';
+            document.querySelector('.game-container').inert = false;
+            checkGameState(false); updateUI();
+            document.getElementById('btn-drive').focus();
+            log("Hit the road again.", "log-neutral");
+        }
+
+        // --- UI & UTILS ---
+        function endGame() {
+            state.gameOver = true;
+            state.inTown = false;
+            document.getElementById('town-modal').style.display = 'none';
+            document.querySelector('.game-container').inert = false;
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function updateUI() {
+            document.getElementById('distance').innerText = state.distanceLeft;
+            document.getElementById('cash').innerText = state.cash;
+
+            const gasEl = document.getElementById('gas');
+            gasEl.innerText = `${state.gas}%`;
+            gasEl.style.color = state.gas < 25 ? 'var(--danger)' : 'var(--text-main)';
+
+            const healthEl = document.getElementById('car-health');
+            healthEl.innerText = `${state.carHealth}%`;
+            healthEl.style.color = state.carHealth < 30 ? 'var(--danger)' : 'var(--text-main)';
+
+            const timbitsEl = document.getElementById('timbits');
+            timbitsEl.innerText = state.timbits;
+            timbitsEl.style.color = state.timbits < 15 ? 'var(--danger)' : 'var(--text-main)';
+
+            document.getElementById('pace-display').innerText = PACES[state.paceIndex].name;
+            document.getElementById('weather-display').innerText = state.distanceLeft === 0 ? '🏔️ Arrived' : WEATHER[state.weatherIndex].name;
+            document.getElementById('day-counter').innerText = state.day;
+
+            for (const id of ['btn-drive', 'btn-pace', 'btn-rest']) document.getElementById(id).disabled = state.gameOver || state.inTown;
+            document.getElementById('buy-gas').disabled = state.cash < 50 || state.gas >= 100;
+            document.getElementById('buy-timbits').disabled = state.cash < 20;
+            document.getElementById('fix-car').disabled = state.cash < 200 || state.carHealth >= 100;
+
+            // Map Marker logic
+            const progressPercent = ((TOTAL_DISTANCE - state.distanceLeft) / TOTAL_DISTANCE) * 100;
+            document.getElementById('car-marker').style.left = `${progressPercent}%`;
+        }
+
+        document.addEventListener('keydown', event => {
+            if (!state.inTown) return;
+            if (event.key === 'Escape') { event.preventDefault(); leaveTown(); }
+            if (event.key === 'Tab') {
+                const buttons = [...document.querySelectorAll('#town-modal button:not(:disabled)')];
+                const first = buttons[0], last = buttons[buttons.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+        });
+
+        // Init
+        updateUI();
+    </script>
+</body>
+</html>

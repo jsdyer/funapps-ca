@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clams &amp; Chips — Fryday Rush | Free Maritime Fry-Shack Game</title>
+  <meta name="description" content="Play Clams & Chips: Fryday Rush, a free Maritime cooking game. Deep-fry breaded clam meat and thick-cut chips, lift golden batches and race through a 90-second shift.">
+  <meta name="theme-color" content="#124c4b">
+  <link rel="canonical" href="https://clams.funapps.ca/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Clams & Chips — Fryday Rush">
+  <meta property="og:description" content="Two fryers. One hungry lineup. A free 90-second Maritime fry-shack game.">
+  <meta property="og:url" content="https://clams.funapps.ca/">
+  <meta property="og:site_name" content="FunApps">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Clams & Chips — Fryday Rush","url":"https://clams.funapps.ca/","description":"A free browser cooking game about deep-fried Maritime clam meat and thick-cut potato chips. Time two fryers and serve orders during a 90-second shift.","genre":["Arcade","Cooking","Time management"],"gamePlatform":"Web browser","applicationCategory":"GameApplication","operatingSystem":"Any operating system with a modern web browser","inLanguage":"en-CA","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"publisher":{"@type":"Organization","name":"FunApps","url":"https://funapps.ca/"}}</script>
+</head>
+<body>
+  <header class="masthead"><a href="https://funapps.ca/" class="brand">FUNAPPS <span>ARCADE</span></a><nav aria-label="Game controls"><button id="sound" aria-pressed="false">Sound off</button><button id="pause" disabled>Pause <kbd>P</kbd></button></nav></header>
+  <div class="awning" aria-hidden="true"></div>
+  <main>
+    <div class="title-row"><div><p class="eyebrow">THE MARITIME FRY SHACK</p><h1>Clams <i>&amp;</i> Chips<span>FRYDAY RUSH</span></h1></div><div class="stamp" aria-hidden="true">HOT.<br>GOLDEN.<br>GONE.</div></div>
+    <section class="hud" aria-label="Shift scoreboard"><div><span>SHIFT LEFT</span><strong id="clock">1:30</strong></div><div><span>YOUR SCORE</span><strong id="score">0</strong></div><div><span>ORDER STREAK</span><strong id="combo">×1</strong></div><div><span>PERSONAL BEST</span><strong id="best">0</strong></div></section>
+    <section class="game" aria-label="Fry-shack game">
+      <div class="ticket"><div class="ticket-title"><span class="eyebrow">ORDER UP</span><strong id="order-number">#001</strong></div><div class="ticket-food"><span><b id="order-clams">1</b> clams</span><span class="plus">+</span><span><b id="order-chips">1</b> chips</span></div><div class="patience"><span id="patience-label">Customer patience</span><progress id="patience" max="22" value="22" aria-label="Customer patience"></progress></div></div>
+      <div class="fryers">
+        <button class="fryer" id="clams" type="button" disabled><span class="fryer-heading"><strong>DEEP-FRIED CLAMS</strong><kbd>1</kbd></span><span class="food-note">Breaded Maritime clam meat</span><canvas id="clams-art" aria-hidden="true"></canvas><span class="heat-track" aria-hidden="true"><span class="gold-zone"></span><span class="heat-marker"></span></span><span class="fryer-action">Tap to start a batch</span><span class="fryer-note">3 portions per batch</span></button>
+        <button class="fryer" id="chips" type="button" disabled><span class="fryer-heading"><strong>THICK-CUT CHIPS</strong><kbd>2</kbd></span><span class="food-note">Golden fried potatoes</span><canvas id="chips-art" aria-hidden="true"></canvas><span class="heat-track" aria-hidden="true"><span class="gold-zone"></span><span class="heat-marker"></span></span><span class="fryer-action">Tap to start a batch</span><span class="fryer-note">3 portions per batch</span></button>
+      </div>
+      <div class="counter"><div class="tray"><canvas id="tray-art" aria-hidden="true"></canvas><div class="stock"><span>ON THE COUNTER</span><strong><b id="stock-clams">0</b> clams <em>·</em> <b id="stock-chips">0</b> chips</strong></div></div><button id="serve" disabled><span>SERVE ORDER</span><small>Tap or press Space</small></button></div>
+      <p id="message" role="status" aria-live="polite">A hot little shift at the seaside.</p>
+    </section>
+    <details class="instructions"><summary>How to play Clams &amp; Chips</summary><div><p>Run a Maritime fry shack for 90 seconds. Tap a fryer to lower a batch of breaded clam meat or thick-cut chips. Wait until its label says <strong>Golden! Lift now</strong>, then tap again to lift three cooked portions onto the counter.</p><p>Match the quantities on the order ticket, then press <strong>Serve order</strong>. Serve quickly for a bonus and keep customers happy to build a streak worth up to 3× points. Lifting too early wastes a batch; leave it too long and it burns. Clear a burnt basket before starting again.</p><p><strong>Keyboard:</strong> 1 for clams, 2 for chips, Space to serve, P or Escape to pause. Sound is optional. Your best score stays in this browser. The game pauses when you leave the tab.</p></div></details>
+  </main>
+  <footer><span>Made for the last chip in the tray.</span><a href="https://donair.funapps.ca/">Next shift: Donair Dash</a><a href="https://coolcode.ca/">Explore CoolCode</a></footer>
+  <dialog id="panel" aria-labelledby="panel-title"><div class="dialog-stripe"></div><p class="eyebrow" id="panel-kicker">FRESH FROM THE FRYER</p><h2 id="panel-title">Your shack.<br>Your rush.</h2><p id="panel-copy">Deep-fried clams. Thick-cut chips.<br>Keep them golden and keep the orders moving.</p><div id="results" hidden></div><ol id="quick-rules"><li><b>1</b><span>Tap each fryer to load a batch.</span></li><li><b>2</b><span>Tap again when it turns golden.</span></li><li><b>3</b><span>Serve the ticket. Chase your best.</span></li></ol><button id="start" class="start">OPEN THE SHACK <span>90-second shift</span></button><p class="dialog-foot">Touch, mouse or keyboard · No account needed</p></dialog>
+  <noscript><p class="no-script">Enable JavaScript to play this free browser game. You can still read the rules above.</p></noscript>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>

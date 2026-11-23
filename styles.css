@@ -87,5 +87,10 @@
 .hero{min-height:610px}.hero-copy{padding-top:72px}.hero-art{min-height:570px}
 .hero h1{font-size:clamp(62px,6.9vw,104px)}
 input:focus-visible,select:focus-visible{outline:3px solid #b35640;outline-offset:3px}
+body:has(#game-dialog[open]){overflow:hidden}
+#game-dialog{max-height:min(90dvh,900px);overscroll-behavior:contain}
+#game-dialog .dialog-header{position:sticky;top:-30px;z-index:2;background:#fffdf5;padding-top:12px}
+#game-dialog .close-button{flex-shrink:0;min-width:44px;min-height:44px}
+@media(max-width:640px){#game-dialog .dialog-header{top:-22px}.dialog-header h2{overflow-wrap:anywhere}}
 @media(max-width:1000px){.arcade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero h1{font-size:72px}.hero-note{white-space:normal}.site-header nav{gap:20px}}
 @media(max-width:640px){.arcade-section{padding:60px 6%}.arcade-grid{grid-template-columns:1fr}.catalogue-controls{flex-wrap:wrap;gap:12px}.catalogue-controls label:first-child{flex-basis:100%}.catalogue-controls label{min-width:180px}.arcade-art{height:160px}.arcade-body{padding:22px}.hero-copy{padding:50px 6%}.hero h1{font-size:clamp(61px,14.5vw,83px)}.hero-art{min-height:350px}.site-header nav a{font-size:13px}.eyebrow{flex-wrap:wrap}.hero-note{font-size:11px}.about-copy p{font-size:16px}}

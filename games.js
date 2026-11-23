@@ -55,17 +55,22 @@
     let deck = shuffle(questions).slice(0, 8), index = 0, score = 0;
     heading(root, 'A LITTLE BIT OF EVERYTHING', 'The Canada Quiz', 'Eight questions, no timer. See what you know and learn a little along the way.');
     const area = el('div', 'fg-panel'); root.append(area);
-    function draw() {
+    function draw(focus = false) {
       area.replaceChildren();
       if (index === deck.length) {
-        area.append(el('p', 'fg-eyebrow', 'THAT’S A WRAP'), el('h3', 'fg-question', `${score} out of ${deck.length}`), el('p', 'fg-copy', 'Nice work! There’s always another corner of Canada to discover.'), button('Play again', () => { deck = shuffle(questions).slice(0, 8); index = 0; score = 0; draw(); }));
+        const result = el('h3', 'fg-question', `${score} out of ${deck.length}`);
+        result.tabIndex = -1;
+        area.append(el('p', 'fg-eyebrow', 'THAT’S A WRAP'), result, el('p', 'fg-copy', 'Nice work! There’s always another corner of Canada to discover.'), button('Play again', () => { deck = shuffle(questions).slice(0, 8); index = 0; score = 0; draw(true); }));
+        if (focus) result.focus();
         return;
       }
       const item = deck[index];
-      area.append(el('p', 'fg-counter', `Question ${index + 1} of ${deck.length} · ${score} correct`), el('h3', 'fg-question', item.q));
+      const question = el('h3', 'fg-question', item.q);
+      question.tabIndex = -1;
+      area.append(el('p', 'fg-counter', `Question ${index + 1} of ${deck.length} · ${score} correct`), question);
       const choices = el('div', 'fg-choices');
       const feedback = status();
-      const next = button(index === deck.length - 1 ? 'See results' : 'Next question', () => { index++; draw(); });
+      const next = button(index === deck.length - 1 ? 'See results' : 'Next question', () => { index++; draw(true); });
       next.hidden = true;
       shuffle(item.a).forEach(answer => {
         const b = button(answer, () => {
@@ -73,10 +78,12 @@
           if (answer === item.a[0]) { score++; feedback.textContent = `You got it!${item.note ? ' ' + item.note : ''}`; }
           else { b.classList.add('is-wrong'); feedback.textContent = `Good try! The answer is ${item.a[0]}.${item.note ? ' ' + item.note : ''}`; }
           next.hidden = false;
+          next.focus();
         }, 'fg-choice');
         choices.append(b);
       });
       area.append(choices, feedback, next);
+      if (focus) question.focus();
     }
     draw();
   }
@@ -117,12 +124,12 @@
       form.append(label, submit);
       const feedback = status();
       const next = button('Next word', () => { round++; draw(); area.querySelector('input').focus(); }, 'fg-button fg-button-secondary');
-      const reveal = button('Reveal answer', () => { feedback.textContent = `The answer is ${item.word}. Try another when you’re ready.`; input.disabled = true; submit.disabled = true; reveal.disabled = true; }, 'fg-link');
+      const reveal = button('Reveal answer', () => { feedback.textContent = `The answer is ${item.word}. Try another when you’re ready.`; input.disabled = true; submit.disabled = true; reveal.disabled = true; next.focus(); }, 'fg-link');
       form.addEventListener('submit', event => {
         event.preventDefault();
         const guess = input.value.normalize('NFD').replace(/[\u0300-\u036f\s-]/g, '').toUpperCase();
         if (!guess) { feedback.textContent = 'Type a guess first.'; return; }
-        if (guess === item.word) { solved++; progress.textContent = `${solved} solved · Word ${round + 1}`; feedback.textContent = 'You got it! Ready for another?'; input.disabled = true; submit.disabled = true; reveal.disabled = true; }
+        if (guess === item.word) { solved++; progress.textContent = `${solved} solved · Word ${round + 1}`; feedback.textContent = 'You got it! Ready for another?'; input.disabled = true; submit.disabled = true; reveal.disabled = true; next.focus(); }
         else feedback.textContent = 'Not quite. Try again, or reveal the answer.';
       });
       area.append(progress, letters, hint, form, feedback, el('div', 'fg-actions'));
@@ -139,7 +146,7 @@
     const info = el('p', 'fg-counter'); const board = el('div', 'fg-memory');
     board.setAttribute('aria-label', 'Memory card board');
     const feedback = status();
-    const restart = button('Shuffle & start again', start, 'fg-button fg-button-secondary');
+    const restart = button('Shuffle & start again', () => { start(); board.firstElementChild.focus(); }, 'fg-button fg-button-secondary');
     root.append(info, board, feedback, restart);
     let cards, first, locked, moves, matches, timer;
     function start() {
@@ -165,6 +172,7 @@
         [...board.children].forEach((cell, i) => { if (cards[i].matched) { cell.classList.add('is-matched'); cell.disabled = true; cell.setAttribute('aria-label', `Card ${i + 1}, ${cards[i].name}, matched`); } });
         first = null;
         feedback.textContent = matches === 6 ? `All pairs found in ${moves} moves. Nicely done!` : 'A match!';
+        (board.querySelector('button:not(:disabled)') || restart).focus();
       } else {
         const previous = first; first = null; locked = true;
         feedback.textContent = 'Not a match. Take another look.';

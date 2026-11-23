@@ -13,7 +13,15 @@
       "color": "#efcb9c",
       "featured": true,
       "include_play_url_in_sitemap": true,
-      "controls": ["Follow the order and catch its toppings in sequence.", "Dodge unwanted extras and serve before the 60-second shift ends."]
+      "controls": [
+        "Follow the order and catch its toppings in sequence.",
+        "Dodge unwanted extras and serve before the 60-second shift ends."
+      ],
+      "custom_domain": "donair.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": true,
+      "netlify_host": "soft-khapse-6eba6b.netlify.app",
+      "domain_configured": true
     },
     {
       "slug": "clams-and-chips",
@@ -25,7 +33,15 @@
       "color": "#d9e2c5",
       "featured": true,
       "include_play_url_in_sitemap": true,
-      "controls": ["Manage the clam fryer and chip fryer separately.", "Time each batch and serve the orders during the 90-second rush."]
+      "controls": [
+        "Manage the clam fryer and chip fryer separately.",
+        "Time each batch and serve the orders during the 90-second rush."
+      ],
+      "custom_domain": "clams.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": true,
+      "netlify_host": "clams-funapps.netlify.app",
+      "domain_configured": true
     },
     {
       "slug": "kitchen-party-outta-hand",
@@ -34,7 +50,12 @@
       "description": "The kitchen party has taken on a life of its own. Serve snacks, collect fiddle notes, and dodge hazards across four ways to play.",
       "category": "Kitchen parties",
       "icon": "🎻",
-      "color": "#d9d2e4"
+      "color": "#d9d2e4",
+      "custom_domain": "outta-hand.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "polite-flan-9cfec6.netlify.app",
+      "domain_configured": true
     },
     {
       "slug": "souwester-survival",
@@ -43,7 +64,12 @@
       "description": "A very Maritime forecast: donairs, bottles, and fiddles coming your way. Catch the good stuff while steering clear of geese and snowballs.",
       "category": "Quick challenges",
       "icon": "🌧️",
-      "color": "#c8dce1"
+      "color": "#c8dce1",
+      "custom_domain": "souwester.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "grand-mermaid-96fb8f.netlify.app",
+      "domain_configured": true
     },
     {
       "slug": "true-north-turbo",
@@ -52,7 +78,12 @@
       "description": "A rapid-fire gauntlet of Canadian microgames. Read the next challenge, react quickly, and keep the run going.",
       "category": "Quick challenges",
       "icon": "🍁",
-      "color": "#edc4b2"
+      "color": "#edc4b2",
+      "custom_domain": "turbo.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "startling-sunburst-a54d03.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "coast-to-coast-chaos",
@@ -61,7 +92,12 @@
       "description": "The guests are getting impatient. Carry supplies through a lively kitchen party, avoid hazards, and keep everyone looked after.",
       "category": "Kitchen parties",
       "icon": "🎉",
-      "color": "#f0d8a0"
+      "color": "#f0d8a0",
+      "custom_domain": "coast-to-coast.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "deluxe-crepe-96ca99.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "one-more-tune",
@@ -70,7 +106,12 @@
       "description": "There is always room for one more tune. Match guests to their stations, tap along to the beat, and keep the party moving.",
       "category": "Kitchen parties",
       "icon": "🎶",
-      "color": "#d9d2e4"
+      "color": "#d9d2e4",
+      "custom_domain": "one-more-tune.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "earnest-licorice-5a7566.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "double-double-empire",
@@ -79,7 +120,12 @@
       "description": "Start with coffee and think bigger. Build income, buy upgrades, and collect achievements as your double-double business grows.",
       "category": "Clickers & tycoons",
       "icon": "☕",
-      "color": "#e0c7ad"
+      "color": "#e0c7ad",
+      "custom_domain": "double-double.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "delightful-basbousa-d3a469.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "great-maritime-gauntlet",
@@ -88,7 +134,12 @@
       "description": "Eight fast East Coast challenges, three mittens, and no time to dawdle. See how long you can hang on through the gauntlet.",
       "category": "Quick challenges",
       "icon": "🧤",
-      "color": "#c5d6cf"
+      "color": "#c5d6cf",
+      "custom_domain": "gauntlet.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "zesty-strudel-74c18c.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "some-good-kitchen-party",
@@ -97,7 +148,12 @@
       "description": "Step into a 3D kitchen party, keep the guests fed, and find the fiddle tunes that keep the good times going.",
       "category": "Kitchen parties",
       "icon": "🪗",
-      "color": "#eac5a4"
+      "color": "#eac5a4",
+      "custom_domain": "kitchen-party.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "tourmaline-vacherin-14601c.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "trans-canada-trek",
@@ -106,7 +162,12 @@
       "description": "Set out from St. John’s for Vancouver. Balance fuel, money, car health, and morale on a road trip across Canada.",
       "category": "Roads & adventures",
       "icon": "🚙",
-      "color": "#c9d9c3"
+      "color": "#c9d9c3",
+      "custom_domain": "trek.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "teal-puffpuff-416dc8.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "keep-er-goin",
@@ -115,7 +176,12 @@
       "description": "The kettle, the food, the music—somebody has to keep track of it all. Deal with party emergencies and keep this gathering going.",
       "category": "Kitchen parties",
       "icon": "🫖",
-      "color": "#e2d6b4"
+      "color": "#e2d6b4",
+      "custom_domain": "keep-er-goin.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "superlative-valkyrie-a47571.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "yes-by",
@@ -124,7 +190,12 @@
       "description": "Haul traps, earn your next upgrade, and build an Atlantic business one click at a time.",
       "category": "Clickers & tycoons",
       "icon": "🦞",
-      "color": "#e9c4b4"
+      "color": "#e9c4b4",
+      "custom_domain": "yesby.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "super-malasada-822d82.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "out-for-a-rip",
@@ -133,7 +204,12 @@
       "description": "Head out on an Atlantic delivery run. Get the errands done while the weather does its best to complicate your day.",
       "category": "Roads & adventures",
       "icon": "🛻",
-      "color": "#cbd7dd"
+      "color": "#cbd7dd",
+      "custom_domain": "rip.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "loquacious-kashata-3d2d49.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "maritime-merchant",
@@ -142,7 +218,12 @@
       "description": "Trade between ports and put your earnings into a better vessel. Make your way through a Maritime merchant’s life.",
       "category": "Roads & adventures",
       "icon": "⛵",
-      "color": "#c2d7d4"
+      "color": "#c2d7d4",
+      "custom_domain": "merchant.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "stirring-capybara-79a5a5.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "kitchen-party-tycoon",
@@ -151,7 +232,12 @@
       "description": "Turn a kitchen party into a growing operation. Earn Sociables, spend them on upgrades, and keep the gathering getting bigger.",
       "category": "Clickers & tycoons",
       "icon": "🥳",
-      "color": "#e5c9cc"
+      "color": "#e5c9cc",
+      "custom_domain": "party-tycoon.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "bucolic-starship-966249.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "east-coast-mayhem",
@@ -160,7 +246,12 @@
       "description": "Take on rapid-fire tasks as the timers shrink. You have three lobster lives to see you through the East Coast mayhem.",
       "category": "Quick challenges",
       "icon": "⚡",
-      "color": "#edda9d"
+      "color": "#edda9d",
+      "custom_domain": "mayhem.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "golden-blancmange-09bd5c.netlify.app",
+      "domain_configured": false
     },
     {
       "slug": "fog-over-fundy",
@@ -169,7 +260,13 @@
       "description": "Pilot a boat through the fog, use signal flares, and make upgrades while keeping an eye out for the creatures in the mist.",
       "category": "Roads & adventures",
       "icon": "🚤",
-      "color": "#c6d2cd"
+      "color": "#c6d2cd",
+      "custom_domain": "fundy.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "kaleidoscopic-mochi-6070f2.netlify.app",
+      "domain_configured": false
     }
-  ]
+  ],
+  "updated_at": "2026-11-23"
 }

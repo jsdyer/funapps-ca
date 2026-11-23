@@ -64,7 +64,7 @@
           if (guessed) return;
           attempts++;
           if (option === current.province) { if (attempts === 1) firstTry++; finish(true); }
-          else { b.disabled = true; b.classList.add('pc-miss'); feedback.textContent = 'Not this time. Try another place or open a hint.'; }
+          else { b.disabled = true; b.classList.add('pc-miss'); feedback.textContent = 'Not this time. Try another place or open a hint.'; choices.querySelector('button:not(:disabled)')?.focus(); }
         }, 'fg-choice');
         choices.append(b);
       });
@@ -73,6 +73,7 @@
         choices.querySelectorAll('button').forEach(b => { b.disabled = true; if (b.textContent === current.province) b.classList.add('is-correct'); });
         feedback.textContent = correct ? (attempts === 1 ? 'You found it on your first try! A stamp for your collection.' : 'You found it!') : `This postcard came from ${current.province}.`;
         details.hidden = false; hintButton.hidden = true; revealButton.hidden = true; nextButton.hidden = false;
+        nextButton.focus();
         counter.textContent = `Postcard ${index + 1} of ${deck.length} · ${firstTry} first-try ${firstTry === 1 ? 'stamp' : 'stamps'}`;
       }
       actions.append(hintButton, revealButton, nextButton);

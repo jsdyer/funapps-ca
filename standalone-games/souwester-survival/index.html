@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sou'wester Survival: The Great Kitchen Party</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #2c1a0f; /* Dark wood vibe */
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+            touch-action: none;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        #slang-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+            opacity: 0;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+        #menu {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 26, 15, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            text-align: center;
+        }
+        h1 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        button:hover { background-color: #45a049; }
+        #pause-btn { position:fixed;right:20px;top:52px;z-index:5;padding:10px 16px;font-size:16px;margin:0;min-height:44px; }
+        #pause-btn[hidden] {display:none;}
+        #menu { padding:20px;box-sizing:border-box;overflow:auto; }
+        @media(max-width:600px){.header{font-size:18px}p{font-size:16px}h1{font-size:28px}.controls-hint{margin-top:12px}}
+        .controls-hint { margin-top: 30px; font-size: 14px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<button id="pause-btn" type="button" hidden>Pause</button>
+<div id="ui-layer">
+    <div class="header">
+        <div id="score-display">Score: 0</div>
+        <div id="lives-display">Lives: ❤️❤️❤️</div>
+    </div>
+    <div id="slang-box">Right on b'y!</div>
+</div>
+
+<div id="menu">
+    <h1>Sou'wester Survival</h1>
+    <h2>The Great Kitchen Party</h2>
+    <p>Grab yer Sou'wester and catch the Donairs, Green Bottles, and Fiddles to keep the party goin'! Watch out for the Cobra Chickens (Geese) and rogue Snowballs—they'll ruin the vibe.</p>
+    <button id="start-btn">Giv'r! (Start Game)</button>
+    <p class="controls-hint">Desktop: Left/Right Arrows or A/D<br>Mobile: Hold either side of the screen; slide to change direction<br>Pause: P / Escape or the Pause button</p>
+</div>
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+try {
+    // --- GAME STATE ---
+    let score = 0;
+    let lives = 3;
+    let isPlaying = false;
+    let speedMultiplier = 1.0;
+    let items = [];
+    let paused=false, spawnCountdown=0, flashRemaining=0, slangTimer;
+    const pauseBtn=document.getElementById('pause-btn');
+
+    // Slang arrays for that East Coast / Canadian flavor
+    const goodSlang = ["Right on b'y!", "Some good!", "Fill yer boots!", "Beauty!", "Oh fuck yeah bud!", "Mighty fine donair!", "Giv'r!", "Yes b'y!"];
+    const badSlang = ["Lord tunderin' Jesus!", "Cobra Chicken!", "Watch the ice!", "Who knit ya?", "Frig off!", "That's a two-two!", "Hoser!"];
+
+    // --- DOM ELEMENTS ---
+    const scoreEl = document.getElementById('score-display');
+    const livesEl = document.getElementById('lives-display');
+    const slangBox = document.getElementById('slang-box');
+    const menu = document.getElementById('menu');
+    const startBtn = document.getElementById('start-btn');
+
+    // --- THREE.JS SETUP ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x3a2318); // Wood cabin background
+    scene.fog = new THREE.Fog(0x3a2318, 10, 50);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    function framePlayfield(){
+        const distance=Math.max(19,13/(Math.tan(camera.fov*Math.PI/360)*camera.aspect));
+        camera.position.set(0,6,distance);camera.lookAt(0,6,0);
+    }
+    framePlayfield();
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffddaa, 0.8);
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight);
+
+    // Floor (Kitchen Floor)
+    const floorGeo = new THREE.PlaneGeometry(40, 40);
+    const floorMat = new THREE.MeshLambertMaterial({ color: 0x5c3a21 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -2;
+    scene.add(floor);
+
+    // Player (The Yellow Sou'wester Hat)
+    const playerGeo = new THREE.ConeGeometry(1.5, 2, 4);
+    const playerMat = new THREE.MeshLambertMaterial({ color: 0xffd700 }); // Yellow
+    const player = new THREE.Mesh(playerGeo, playerMat);
+    player.position.y = 0;
+    scene.add(player);
+
+    // --- INPUT HANDLING ---
+    let keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false };
+    let touchX = null;
+
+    function clearInput(){Object.keys(keys).forEach(k=>keys[k]=false);touchX=null;}
+    function togglePause(force){
+        if(!isPlaying)return;
+        paused=typeof force==='boolean'?force:!paused;clearInput();
+        pauseBtn.textContent=paused?'Resume':'Pause';
+        slangBox.textContent=paused?'Paused — tap Resume':'';slangBox.style.opacity=paused?1:0;
+        clearTimeout(slangTimer);
+    }
+    pauseBtn.addEventListener('click',()=>togglePause());
+    window.addEventListener('keydown',e=>{
+        if(e.target?.closest?.('button')&&['Enter',' '].includes(e.key))return;
+        const key=e.key.length===1?e.key.toLowerCase():e.key;
+        if(Object.hasOwn(keys,key)){e.preventDefault();keys[key]=true;}
+        if(!e.repeat&&['p','Escape'].includes(key))togglePause();
+    });
+    window.addEventListener('keyup',e=>{const key=e.key.length===1?e.key.toLowerCase():e.key;if(Object.hasOwn(keys,key))keys[key]=false;});
+    renderer.domElement.addEventListener('pointerdown',e=>{if(!isPlaying||paused)return;touchX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId);});
+    renderer.domElement.addEventListener('pointermove',e=>{if(touchX!==null)touchX=e.clientX;});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(event=>renderer.domElement.addEventListener(event,()=>touchX=null));
+    window.addEventListener('blur',()=>togglePause(true));
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
+
+    // --- GAME MECHANICS ---
+    const itemTypes = [
+        { type: 'donair', color: 0x8b4513, geo: new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), good: true, points: 10 },
+        { type: 'beer', color: 0x00ff00, geo: new THREE.CylinderGeometry(0.4, 0.4, 1.5, 8), good: true, points: 5 },
+        { type: 'fiddle', color: 0xd2691e, geo: new THREE.BoxGeometry(0.8, 2, 0.2), good: true, points: 15 },
+        { type: 'goose', color: 0xffffff, geo: new THREE.SphereGeometry(1, 16, 16), good: false }, // Cobra Chicken
+        { type: 'snowball', color: 0xadd8e6, geo: new THREE.DodecahedronGeometry(0.8), good: false }
+    ];
+
+    function spawnItem() {
+        if (!isPlaying) return;
+
+        const typeData = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+        const material = new THREE.MeshLambertMaterial({ color: typeData.color });
+        const mesh = new THREE.Mesh(typeData.geo, material);
+
+        // Random start position at top
+        mesh.position.x = (Math.random() - 0.5) * 20;
+        mesh.position.y = 15;
+        mesh.position.z = 0;
+
+        // Add random rotation speed
+        mesh.userData = {
+            type: typeData.type,
+            good: typeData.good,
+            points: typeData.points,
+            rotX: (Math.random() - 0.5) * 0.1,
+            rotY: (Math.random() - 0.5) * 0.1
+        };
+
+        scene.add(mesh);
+        items.push(mesh);
+
+        // Schedule next spawn (gets faster as score goes up)
+        spawnCountdown = Math.max(.3, 1.5 - score * .002);
+    }
+
+    function showSlang(isGood) {
+        const dictionary = isGood ? goodSlang : badSlang;
+        const phrase = dictionary[Math.floor(Math.random() * dictionary.length)];
+        slangBox.innerText = phrase;
+        slangBox.style.color = isGood ? '#ffd700' : '#ff4444';
+        slangBox.style.opacity = 1;
+
+        // Jiggle effect
+        slangBox.style.transform = `translate(-50%, -50%) rotate(${(Math.random()-0.5)*20}deg) scale(1.2)`;
+
+        clearTimeout(slangTimer);
+        slangTimer=setTimeout(() => {
+            slangBox.style.opacity = 0;
+            slangBox.style.transform = 'translate(-50%, -50%) rotate(0deg) scale(1)';
+        }, 1000);
+    }
+
+    function updateUI() {
+        scoreEl.innerText = `Score: ${score}`;
+        let hearts = '';
+        for(let i=0; i<lives; i++) hearts += '❤️';
+        livesEl.innerText = `Lives: ${hearts}`;
+    }
+
+    function gameOver() {
+        isPlaying = false;paused=false;clearInput();pauseBtn.hidden=true;
+        menu.style.display = 'flex';
+        menu.querySelector('h1').innerText = "Party's Over, B'y!";
+        menu.querySelector('p').innerText = `You scored ${score} before the Cobra Chickens ruined it.\nReady to giv'r again?`;
+        startBtn.innerText = "Play Again";
+
+        // Clean up scene
+        items.forEach(item => {scene.remove(item);item.material.dispose();});
+        items = [];
+    }
+
+    function startGame() {
+        if(isPlaying)return;
+        clearInput();paused=false;spawnCountdown=0;flashRemaining=0;pauseBtn.hidden=false;pauseBtn.textContent='Pause';clearTimeout(slangTimer);slangBox.style.opacity=0;scene.background.setHex(0x3a2318);
+        score = 0;
+        lives = 3;
+        speedMultiplier = 1.0;
+        player.position.x = 0;
+        updateUI();
+        menu.style.display = 'none';
+        isPlaying = true;
+        spawnItem();
+    }
+
+    startBtn.addEventListener('click', startGame);
+
+    // --- MAIN GAME LOOP ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = Math.min(.05,clock.getDelta());
+
+        if (isPlaying && !paused) {
+            spawnCountdown-=delta;if(spawnCountdown<=0)spawnItem();
+            if(flashRemaining>0){flashRemaining-=delta;if(flashRemaining<=0)scene.background.setHex(0x3a2318);}
+            // Player Movement
+            const moveSpeed = 15 * delta;
+            if (keys.ArrowLeft || keys.a) player.position.x -= moveSpeed;
+            if (keys.ArrowRight || keys.d) player.position.x += moveSpeed;
+
+            // Touch movement
+            if (touchX !== null) {
+                if (touchX < window.innerWidth / 2) player.position.x -= moveSpeed;
+                else player.position.x += moveSpeed;
+            }
+
+            // Clamp player to screen bounds
+            player.position.x = Math.max(-10, Math.min(10, player.position.x));
+
+            // Update Items
+            speedMultiplier = 1.0 + (score * 0.005); // Slowly gets harder
+            const fallSpeed = 8 * delta * speedMultiplier;
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.position.y -= fallSpeed;
+                item.rotation.x += item.userData.rotX * delta * 60;
+                item.rotation.y += item.userData.rotY * delta * 60;
+
+                // Collision Detection (Simple distance check)
+                let dx = player.position.x - item.position.x;
+                let dy = player.position.y - item.position.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+
+                if (distance < 2.0) { // Hit!
+                    if (item.userData.good) {
+                        score += item.userData.points;
+                        showSlang(true);
+                    } else {
+                        lives -= 1;
+                        showSlang(false);
+                        // Flash screen red
+                        scene.background.setHex(0xff0000);
+                        flashRemaining=.1;
+                    }
+
+                    updateUI();
+                    scene.remove(item);item.material.dispose();
+                    items.splice(i, 1);
+
+                    if (lives <= 0) {gameOver();break;}
+                    continue;
+                }
+
+                // Missed item (hit floor)
+                if (item.position.y < -3) {
+                    scene.remove(item);item.material.dispose();
+                    items.splice(i, 1);
+                }
+            }
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();framePlayfield();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+} catch (error) {
+    console.error(error);
+    const menu=document.getElementById('menu');menu.style.display='flex';
+    menu.querySelector('h1').textContent='3D graphics unavailable';
+    menu.querySelector('h2').textContent="Sou’wester Survival needs WebGL";
+    menu.querySelector('p').textContent='This browser could not start the 3D game. Enable hardware acceleration or try a browser with WebGL support, then reload. If the game library did not load, check your connection and reload.';
+    document.getElementById('start-btn').hidden=true;
+    document.getElementById('pause-btn').hidden=true;
+}
+</script>
+</body>
+</html>

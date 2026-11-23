@@ -447,6 +447,7 @@ h1 {
 .feedback[data-result="ok"] { color: var(--mint); }
 .feedback[data-result="error"] { color: var(--danger); }
 .feedback { min-height: 1.25em; padding-top: 5px; overflow-wrap: anywhere; }
+.action-advice { color: var(--muted); font-size: .9rem; line-height: 1.5; }
 .timeline [data-kind="warning"], .timeline [data-kind="alert"] { color: var(--amber); }
 .timeline [data-kind="danger"], .timeline [data-kind="error"] { color: var(--danger); }
 .timeline [data-kind="success"], .timeline [data-kind="containment"] { color: var(--mint); }

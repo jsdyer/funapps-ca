@@ -118,3 +118,9 @@ Keep `/api/rooms/*/events` responses unbuffered and uncompressed through the pro
 ## Add another activity
 
 The original activities and their registry live in `games.js`; individual activities use `fg-*` styles from `games.css`. `postcards.js` registers itself, while `extensions.js` registers standalone modules such as `roadtrip.js` and `rain-window.js`. New activities can follow either pattern: expose metadata with a unique ID and a `mount(container)` function, then register it before `app.js` runs. Return a cleanup function from `mount` when an activity uses timers, audio, or other resources. The launcher calls it when the activity closes. Main site layout and browsing controls are in `index.html`, `app.js` and `styles.css`.
+
+## Standalone game maintenance
+
+The 18 Netlify games are maintained in `standalone-games/`, with per-game audit notes and regression checks. The hub build excludes this directory. Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matching ZIP to the existing project. These games remain Netlify Drop projects, so a hub Git push does not deploy their code.
+
+See [the November 2026 audit and domain setup guide](docs/FUNAPPS-AUDIT-2026-11-23.md) and [DNS mapping](docs/funapps-dns.csv). The hub keeps working Netlify launch URLs while new domains await setup. Once DNS and HTTPS are ready, `python scripts/activate_domains.py --apply` verifies each game identity, changes ready links and rebuilds the sitemap; commit and push afterward.
