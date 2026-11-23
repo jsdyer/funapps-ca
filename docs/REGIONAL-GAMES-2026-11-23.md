@@ -27,4 +27,15 @@ These games use the existing funapps.ca domain, so the earlier Netlify hostname 
 
 All 52 game-rule tests and all 7 hub tests pass. All six releases build successfully; Svelte reports no errors or warnings and the ferry build includes a TypeScript check. Entry-point scripts and styles resolve locally, all six play URLs appear in the 34-URL sitemap, and standalone packaging preserves nested assets. The catalogue now contains 24 games.
 
-The managed local preview service timed out during startup. Browser interaction checks will therefore be performed against the published games, with fixes included if needed.
+The managed local preview service timed out during startup, so browser interaction checks used the published games.
+
+| Game | Live browser check |
+| --- | --- |
+| Fundy Tidekeeper | First round completed in six turns for three lanterns; tide progression and deliveries worked. Fixed a misleading map label after completion. |
+| Newfoundland Ferry | Loaded all five first-crossing vehicles, sailed, arrived, and earned three stars. |
+| PEI Potato Harvest | Played a complete twelve-turn season; all three orders delivered, nineteen premium crates grown, surplus settled, and final score 383. |
+| Postcards from Canada | Completed Vancouver to St. John’s with nine postcards, three days left, $370, twelve fuel and 1,878 points. Collection gallery showed all nine postcards. Fixed singular/plural labels. |
+| Cabot Trail | Canvas scenery rendered; start, steering input, pause and resume controls exercised. Full four-photo completion is covered by engine tests. |
+| Kouchibouguac | Phaser Canvas map rendered; start, trail selection and pause controls exercised. Complete loop and optional detour are covered by engine tests. |
+
+No game-origin JavaScript errors were observed. Full real-time browser play-throughs of the driving and cycling games remain unverified: animation frames advanced unusually slowly in this cloud browser. Their timing and complete winning paths pass automated engine tests; source review found no concrete update-loop stall. Mobile layouts were reviewed in responsive CSS, not on physical touch devices.
