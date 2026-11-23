@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cabot Trail — The Scenic Route · FunApps</title>
+  <meta name="description" content="Take the long way around Cape Breton. Steer a scenic highland drive, slow down for four coastal postcards, and bring home a full photo album.">
+  <meta name="theme-color" content="#173b37">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="site-header"><a href="https://funapps.ca" class="home">FUNAPPS <span>/ FIELD TRIPS</span></a><span class="edition">NOVA SCOTIA · No. 02</span></header>
+  <main>
+    <section class="title-row"><div><p class="eyebrow">CAPE BRETON, AT YOUR OWN PACE</p><h1>Cabot Trail<span>The scenic route.</span></h1></div><p class="lead">Some roads are worth slowing down for.<br>Four lookoffs. One little car. A whole lot of coast.</p></section>
+    <div class="game-grid">
+      <section class="drive-panel" aria-label="Driving game">
+        <div class="drive-toolbar"><div class="route-label"><span class="live-dot"></span><span id="leg-name">YOUR COASTAL ESCAPE</span></div><button id="pause" class="text-button" disabled>Pause <kbd>P</kbd></button></div>
+        <div class="viewport" id="viewport">
+          <canvas id="road" width="960" height="610" aria-label="A winding road through Cape Breton scenery. Driving status is available in the dashboard below."></canvas>
+          <div class="road-sign" id="road-sign" hidden><span>SCENIC LOOKOFF</span><strong id="sign-name"></strong><small id="sign-distance"></small></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+          <div class="overlay" id="overlay" role="dialog" aria-label="Tour status">
+            <div class="start-card" id="start-card"><span class="stamp">THE LONG WAY HOME</span><h2>Good views.<br>Easy does it.</h2><p>Keep your little red car on the road. At each lookoff, <b>slow below 35</b> and <b>pull right</b> to take a photo.</p><div class="start-keys"><span><kbd>A</kbd><kbd>D</kbd> steer</span><span><kbd>S</kbd> brake</span><span><kbd>W</kbd> accelerate</span></div><p class="small-note">Cruise control keeps you moving. Arrows work too.<br>Touch controls are below the road.</p><button id="start" class="primary">Start the scenic drive</button><span class="duration">A 4-minute escape · no traffic · no rush</span></div>
+          </div>
+        </div>
+        <div class="dashboard">
+          <div class="speed"><strong id="speed">0</strong><span>GAME SPEED</span></div>
+          <div class="comfort"><div><span>RIDE COMFORT</span><strong id="comfort-label">100%</strong></div><meter id="comfort" min="0" max="100" value="100">100%</meter></div>
+          <div class="daylight"><strong id="daylight">5:30</strong><span>DAYLIGHT LEFT</span></div>
+          <button id="camera" class="camera" disabled><span class="camera-icon" aria-hidden="true"></span><span id="camera-label">Photo stop ahead</span><kbd>Space</kbd></button>
+        </div>
+        <div class="controls" aria-label="Driving controls"><div class="steering"><button data-control="left" aria-label="Hold to steer left"><span>A</span>Left</button><button data-control="right" aria-label="Hold to steer right"><span>D</span>Right</button></div><div class="pedals"><button data-control="brake" class="brake" aria-label="Hold to brake"><span>S</span>Brake</button><button data-control="accelerate" aria-label="Hold to accelerate"><span>W</span>Accelerate</button></div></div>
+        <p class="control-note" id="control-note">Cruise control: on. Hold to steer or brake. <b>Space</b> takes a photo when ready.</p>
+      </section>
+      <aside class="travel-journal"><div class="journal-head"><span class="eyebrow">YOUR LITTLE ALBUM</span><strong><span id="photo-count">0</span><small>/ 4</small></strong></div><p class="journal-intro">The best souvenir is a reason to stop.</p><ol id="album"></ol><div class="route-progress"><div><span>COASTAL LOOP</span><strong id="progress-label">0%</strong></div><div class="progress-track"><i id="progress"></i></div><p id="route-note">Ingonish · Neils Harbour<br>Pleasant Bay · Chéticamp</p></div><div class="journal-footer"><span class="sun-icon" aria-hidden="true">✳</span><p>Let the bends come to you.<br>Brake before the curve.</p></div></aside>
+    </div>
+    <details class="field-notes"><summary>Field notes & how to play</summary><div><p><b>The aim:</b> complete the tour with all four postcards and a comfortable ride. Your score rewards photos, comfort, and daylight. Missing a lookoff still lets you finish; replay for a full album.</p><p><b>Driving:</b> A/D or left/right steer. S/down brakes. W/up accelerates above the gentle cruising speed. P or Escape pauses. At a lookoff, slow below 35 and move onto the right shoulder; press Space or the camera button. Going off the road reduces comfort. Running out of comfort or daylight lets you retry from your most recent photo stop.</p><p>This is a playful, compressed route inspired by Cape Breton, with fictional road geometry and travel times. It is not a driving simulator or navigation guide. Learn about the real <a href="https://novascotia.com/get-inspired/top-25/explore-the-cabot-trail/" target="_blank" rel="noopener">Cabot Trail</a> and <a href="https://parks.canada.ca/pn-np/ns/cbreton/visit/directions" target="_blank" rel="noopener">Cape Breton Highlands National Park</a>.</p><p id="best-score">Your best tour will be saved on this device.</p></div></details>
+  </main>
+  <footer>MADE FOR TAKING THE LONG WAY. <span>Canvas 2D · No downloads · No account</span></footer>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

@@ -4,3 +4,5 @@ dist/
 *.zip
 __pycache__/
 standalone-dist/
+node_modules/
+*.tsbuildinfo

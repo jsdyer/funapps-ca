@@ -1,0 +1,7 @@
+{
+  "name": "funapps-cabot-trail",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test", "build": "node --check web/game.js && node --check web/engine.js" }
+}

@@ -16,10 +16,13 @@ def package(game, output):
     if target.exists():
         shutil.rmtree(target)
     target.mkdir(parents=True)
-    for path in source.iterdir():
-        if path.is_file() and (path.suffix in ('.html', '.js', '.mjs', '.css', '.svg', '.png', '.webp', '.jpg') or path.name == '_headers') and not path.name.startswith(('audit-', 'test_')) and '-regression.' not in path.name:
-            shutil.copy2(path, target / path.name)
-    canonical = 'https://' + game['custom_domain'] + '/'
+    if game.get('local_bundle'):
+        shutil.copytree(source / 'web', target, dirs_exist_ok=True)
+    else:
+        for path in source.iterdir():
+            if path.is_file() and (path.suffix in ('.html', '.js', '.mjs', '.css', '.svg', '.png', '.webp', '.jpg') or path.name == '_headers') and not path.name.startswith(('audit-', 'test_')) and '-regression.' not in path.name:
+                shutil.copy2(path, target / path.name)
+    canonical = 'https://' + game['custom_domain'] + '/' if game.get('custom_domain') else game['url']
     page = (target / 'index.html').read_text()
     page = re.sub(r'<link\b[^>]*rel=[\"\']canonical[\"\'][^>]*>\s*', '', page, flags=re.I)
     if not re.search(r'<meta\b[^>]*name=[\"\']description[\"\']', page, re.I):
@@ -32,8 +35,9 @@ def package(game, output):
         (target / '_headers').write_text('/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n')
     archive = output / (game['slug'] + '.zip')
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
-        for path in sorted(target.iterdir()):
-            z.write(path, path.name)
+        for path in sorted(target.rglob('*')):
+            if path.is_file():
+                z.write(path, path.relative_to(target))
     print(archive)
 
 if __name__ == '__main__':

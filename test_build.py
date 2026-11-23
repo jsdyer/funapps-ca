@@ -28,6 +28,7 @@ class CatalogueBuildTests(unittest.TestCase):
             build.validate_config(self.config)
 
     def test_duplicate_play_url_rejected(self):
+        self.config["games"][1]["local_bundle"] = False
         self.config["games"][1]["url"] = self.config["games"][0]["url"]
         with self.assertRaisesRegex(ValueError, "Duplicate game URL"):
             build.validate_config(self.config)
@@ -52,7 +53,16 @@ class CatalogueBuildTests(unittest.TestCase):
     def test_draft_game_excluded(self):
         self.config["games"][0]["published"] = False
         games = build.validate_config(self.config)
-        self.assertNotIn("donair-dash", [game["slug"] for game in games])
+        self.assertNotIn(self.config["games"][0]["slug"], [game["slug"] for game in games])
+
+    def test_local_bundle_url_matches_its_published_route(self):
+        game = self.config["games"][0]
+        game["local_bundle"] = True
+        game["url"] = "https://example.com/"
+        with self.assertRaisesRegex(ValueError, "local bundle must use"):
+            build.validate_config(self.config)
+        game["url"] = f"https://funapps.ca/play/{game['slug']}/"
+        self.assertTrue(build.validate_config(self.config))
 
 
 if __name__ == "__main__":

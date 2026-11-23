@@ -1,0 +1,30 @@
+# Six new Canadian games — 23 November 2026
+
+The new games play directly on funapps.ca. They require no new DNS records and are included in the catalogue, individual game pages, search, category filters, and sitemap. The existing hostname setup is still left for the owner; no automation was created and no remaining hostname changes were retried.
+
+| Game | Technology | Source directory under standalone-games/ |
+| --- | --- | --- |
+| [Fundy Tidekeeper](https://funapps.ca/play/fundy-tidekeeper/) | SVG + Web Components | `fundy-tidekeeper` |
+| [Cabot Trail: Scenic Drive](https://funapps.ca/play/cabot-trail/) | Canvas 2D | `cabot-trail` |
+| [Kouchibouguac: Trail Ride](https://funapps.ca/play/kouchibouguac-cycle/) | Phaser 3 | `kouchibouguac-cycle` |
+| [PEI Potato Harvest](https://funapps.ca/play/pei-potato-harvest/) | Svelte + TypeScript | `pei-potato-harvest` |
+| [Newfoundland Ferry](https://funapps.ca/play/newfoundland-ferry/) | React + TypeScript + SVG | `newfoundland-ferry` |
+| [Postcards from Canada](https://funapps.ca/play/canada-roadtrip/) | Vue + TypeScript + SVG | `canada-roadtrip` |
+
+## Maintenance
+
+Each game includes a README with its rules, control scheme, build instructions and relevant geographic references. Framework runtimes are bundled with the game. No game needs accounts, API keys, or a third-party runtime CDN. Fictional route geometry, simplified travel times and game rules are identified as such.
+
+All six release directories are under `standalone-games/<slug>/web/`. Their source and lockfiles live alongside them. The main deployment remains a Python static build; it copies these already-built releases to `/play/<slug>/` and adds canonical and game-identity metadata.
+
+Run `python3 scripts/build_new_games.py --install --test` when rebuilding from a fresh checkout, then `python3 build.py` and `python3 -m unittest test_build.py`. Commit source and rebuilt releases together. `scripts/build_standalone.py --slug <slug>` can also package a game's complete release, including nested bundle assets, for a future independent static host.
+
+## Domain setup
+
+These games use the existing funapps.ca domain, so the earlier Netlify hostname rate limit does not block playing them. The remaining original-game setup instructions are in [the audit report](FUNAPPS-AUDIT-2026-11-23.md) and [DNS CSV](funapps-dns.csv). No additional Netlify sites or custom domains were created for this batch.
+
+## Verification
+
+All 52 game-rule tests and all 7 hub tests pass. All six releases build successfully; Svelte reports no errors or warnings and the ferry build includes a TypeScript check. Entry-point scripts and styles resolve locally, all six play URLs appear in the 34-URL sitemap, and standalone packaging preserves nested assets. The catalogue now contains 24 games.
+
+The managed local preview service timed out during startup. Browser interaction checks will therefore be performed against the published games, with fixes included if needed.

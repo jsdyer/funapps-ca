@@ -4,6 +4,120 @@
   "description": "A little Canadian arcade: Maritime food games, curious adventures, clickers, puzzles and creative escapes. Pick something and play.",
   "games": [
     {
+      "slug": "fundy-tidekeeper",
+      "name": "Fundy Tidekeeper",
+      "url": "https://funapps.ca/play/fundy-tidekeeper/",
+      "description": "Read the tide, cross the causeways, and bring everyone home in six coastal route puzzles.",
+      "category": "Puzzles & planning",
+      "icon": "🌊",
+      "color": "#b7d8db",
+      "technology": "SVG + Web Components",
+      "controls": [
+        "Choose a reachable island to move one step and advance the tide.",
+        "Watch the tide forecast, collect supplies, and return to the harbour.",
+        "Wait, undo, or restart to try another route."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "cabot-trail",
+      "name": "Cabot Trail: Scenic Drive",
+      "url": "https://funapps.ca/play/cabot-trail/",
+      "description": "Take the curves, ease off for the views, and collect coastal photographs on a Cape Breton driving tour.",
+      "category": "Roads & trails",
+      "icon": "🚙",
+      "color": "#c3d3b5",
+      "technology": "Canvas 2D",
+      "controls": [
+        "Steer with arrow keys or WASD, or use the on-screen driving controls.",
+        "Slow down at the scenic pullouts to collect photographs.",
+        "Pause when you need a break and finish your coastal tour."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "kouchibouguac-cycle",
+      "name": "Kouchibouguac: Trail Ride",
+      "url": "https://funapps.ca/play/kouchibouguac-cycle/",
+      "description": "Ride through a colourful park-inspired trail network, find the checkpoints, and take time for the scenery.",
+      "category": "Roads & trails",
+      "icon": "🚲",
+      "color": "#bcd6bc",
+      "technology": "Phaser 3",
+      "controls": [
+        "Choose a connected trail using the map, destination buttons, or arrow keys/WASD. Your bike rides to the next junction automatically.",
+        "Photograph four landscapes, manage your energy, and rest along the way.",
+        "Return to the trailhead and finish within the simulated afternoon. P or Escape pauses the ride."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "pei-potato-harvest",
+      "name": "PEI Potato Harvest",
+      "url": "https://funapps.ca/play/pei-potato-harvest/",
+      "description": "Plan a season in the red soil: choose crops, watch the weather, and harvest the right potatoes for your orders.",
+      "category": "Puzzles & planning",
+      "icon": "🥔",
+      "color": "#dfb59c",
+      "technology": "Svelte + TypeScript",
+      "controls": [
+        "Choose a field and plant, water, or tend its crop.",
+        "Advance the turn when your work is done and watch the forecast.",
+        "Harvest mature potatoes and fill market orders before the season ends."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "newfoundland-ferry",
+      "name": "Newfoundland Ferry",
+      "url": "https://funapps.ca/play/newfoundland-ferry/",
+      "description": "Fit the vehicles, balance your lanes, and sail for Newfoundland in a series of ferry-loading puzzles.",
+      "category": "Puzzles & planning",
+      "icon": "⛴️",
+      "color": "#b8cfdf",
+      "technology": "React + TypeScript + SVG",
+      "controls": [
+        "Select a waiting vehicle, then choose a lane on the deck.",
+        "Check capacity and balance; unload or undo to rearrange.",
+        "Complete the manifest and sail to the next harbour."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
+      "slug": "canada-roadtrip",
+      "name": "Postcards from Canada",
+      "url": "https://funapps.ca/play/canada-roadtrip/",
+      "description": "Plan a branching road trip from Vancouver to St. John’s. Choose scenic detours, keep the tank filled, and bring home a journal of postcards.",
+      "category": "Roads & trails",
+      "icon": "🗺️",
+      "color": "#e5c58d",
+      "technology": "Vue + TypeScript + SVG",
+      "controls": [
+        "Choose your next connected stop on the map.",
+        "Balance fuel, budget, travel days, and vehicle condition.",
+        "Collect experiences on the way to St. John’s, then compare your trip score."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-23"
+    },
+    {
       "slug": "donair-dash",
       "name": "Donair Dash",
       "url": "https://donair.funapps.ca/",

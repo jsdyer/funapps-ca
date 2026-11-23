@@ -1,0 +1,8 @@
+{
+  "name": "fundy-tidekeeper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A Fundy-inspired tidal causeway puzzle built with native SVG and Web Components.",
+  "scripts": { "test": "node --test test/engine.test.js" }
+}

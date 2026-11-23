@@ -2,7 +2,7 @@
 
 A little corner of the internet for casual games, curious detours, and feel-good fun. Built for funapps.ca with Canada in mind.
 
-The public Netlify hub includes a configurable directory of standalone games, the original local activities below, and a central sitemap. Each standalone game keeps its own hosting and gets a descriptive page here.
+The public Netlify hub includes a configurable directory of standalone games, the original local activities below, and a central sitemap. The original games retain their own hosting; six new games are bundled into this hub at `/play/<slug>/`. Every catalogue game also gets a descriptive page.
 
 ## Publish the FunApps hub on Netlify
 
@@ -19,6 +19,7 @@ Open <http://localhost:8080/>. Python 3 is the only build dependency. The build 
 
 - the homepage catalogue, available without JavaScript;
 - `/games/<slug>/` pages with descriptions, launch links, canonical URLs and structured data;
+- `/play/<slug>/` for games with `local_bundle: true`, copied from their maintained `standalone-games/<slug>/web/` release;
 - `/sitemap.xml`, `/robots.txt`, and a proper `404.html`;
 - a redirect from `/games-sitemap.xml` and `/sitemap.php` to the central sitemap;
 - an HTTPS `www.funapps.ca` redirect to the canonical apex domain.
@@ -27,7 +28,7 @@ The Netlify output does not include the optional multiplayer Node server or its 
 
 Add **funapps.ca** and **www.funapps.ca** as domains on this Netlify project before changing DNS. With external DNS, use the target Netlify recommends for the apex; if your DNS provider only supports an A record, the fallback is `@ A 75.2.60.5`. Use `www CNAME funapps-hub.netlify.app`. Keep existing game subdomains pointed at their own projects. In particular, do not point Donair or Clams at this hub.
 
-Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, Packet Trace, and the verified Donair/Clams custom URLs. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
+Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, the bundled games, Packet Trace, and the verified Donair/Clams custom URLs. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
 
 ## Add or edit a standalone game
 
@@ -51,6 +52,29 @@ Use a unique lowercase slug and an HTTPS play URL. `controls` is optional. Set `
 The builder rejects duplicate slugs, duplicate play URLs, unsafe URLs and malformed colours. Text is escaped in HTML and structured data. `catalogue.js` enhances the generated cards with search/category filters; the cards and links still work when JavaScript is unavailable.
 
 Run the focused build checks with `python3 -m unittest test_build.py`.
+
+## Six regional games
+
+| Game | Browser technology | Play path |
+| --- | --- | --- |
+| Fundy Tidekeeper | Native Web Components and SVG | `/play/fundy-tidekeeper/` |
+| Cabot Trail | Canvas 2D and JavaScript | `/play/cabot-trail/` |
+| Kouchibouguac Trail Ride | Phaser 3, Canvas renderer | `/play/kouchibouguac-cycle/` |
+| PEI Potato Harvest | Svelte and TypeScript | `/play/pei-potato-harvest/` |
+| Newfoundland Ferry | React, TypeScript and SVG | `/play/newfoundland-ferry/` |
+| Postcards from Canada | Vue, TypeScript and SVG | `/play/canada-roadtrip/` |
+
+Each game's source, tests, reference notes, and build instructions are in its `standalone-games/<slug>/` directory. The generated `web/` releases are committed, including framework code, so the production Python build needs no npm downloads. There are no runtime CDN dependencies or API keys. Rebuild a game's release after changing its source; commit both source and release.
+
+To install locked dependencies, run all six rule-test suites, and rebuild the framework releases:
+
+```sh
+python3 scripts/build_new_games.py --install --test
+python3 build.py
+python3 -m unittest test_build.py
+```
+
+Without `--install`, the script uses existing local dependencies. Buildless games skip the build step. New bundled entries must use `https://funapps.ca/play/<slug>/` as their URL. These routes work without new DNS records; the previous custom-domain setup list remains in `docs/FUNAPPS-AUDIT-2026-11-23.md`.
 
 ## Activities
 

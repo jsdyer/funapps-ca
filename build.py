@@ -62,6 +62,8 @@ def validate_config(config):
             if not isinstance(game.get(field), str) or not game[field].strip():
                 raise ValueError(f"{slug}: {field} must be nonempty text")
         validate_url(game.get("url"), f"{slug}.url")
+        if game.get("local_bundle") and game["url"] != config["base_url"].rstrip("/") + f"/play/{slug}/":
+            raise ValueError(f"{slug}: a local bundle must use its /play/{slug}/ URL")
         if game.get("audited_at"):
             date.fromisoformat(game["audited_at"])
         if game.get("custom_domain") and not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*\.funapps\.ca", game["custom_domain"]):
@@ -164,6 +166,13 @@ def sitemap_urls(config, games):
 def build():
     config = json.loads((ROOT / "site.config.json").read_text())
     games = validate_config(config)
+    # Framework bundles are committed alongside their source, keeping the hub's
+    # deployment dependency-free. Never publish a catalogue link to a missing game.
+    for game in games:
+        if game.get("local_bundle"):
+            bundle = ROOT / "standalone-games" / game["slug"] / "web"
+            if not (bundle / "index.html").is_file():
+                raise ValueError(f"{game['slug']}: missing web/index.html; build the game first")
     source = (ROOT / "index.html").read_text()
     markers = ("<!-- STRUCTURED_DATA -->", "<!-- GAME_COUNT -->", "<!-- CATALOGUE_START -->", "<!-- CATALOGUE_END -->")
     for marker in markers:
@@ -198,6 +207,13 @@ def build():
         destination = DIST / "games" / game["slug"]
         destination.mkdir(parents=True)
         (destination / "index.html").write_text(detail_page(config, game, games))
+        if game.get("local_bundle"):
+            play_dir = DIST / "play" / game["slug"]
+            shutil.copytree(ROOT / "standalone-games" / game["slug"] / "web", play_dir)
+            page = (play_dir / "index.html").read_text()
+            page = re.sub(r'<link\b[^>]*rel=[\"\']canonical[\"\'][^>]*>\s*', '', page, flags=re.I)
+            page = page.replace("</head>", f'<link rel="canonical" href="{esc(game["url"])}">\n<meta name="funapps-game-id" content="{game["slug"]}">\n</head>', 1)
+            (play_dir / "index.html").write_text(page)
     ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
     sitemap = ET.Element("{http://www.sitemaps.org/schemas/sitemap/0.9}urlset")
     for url in sitemap_urls(config, games):
