@@ -1,0 +1,175 @@
+{
+  "base_url": "https://funapps.ca",
+  "title": "FunApps — Free Canadian Browser Games & Little Escapes",
+  "description": "A little Canadian arcade: Maritime food games, curious adventures, clickers, puzzles and creative escapes. Pick something and play.",
+  "games": [
+    {
+      "slug": "donair-dash",
+      "name": "Donair Dash",
+      "url": "https://donair.funapps.ca/",
+      "description": "A quick shift at the donair counter. Catch the right toppings in order, dodge the extras, and see how many donairs you can serve in 60 seconds.",
+      "category": "Food & frenzy",
+      "icon": "🥙",
+      "color": "#efcb9c",
+      "featured": true,
+      "include_play_url_in_sitemap": true,
+      "controls": ["Follow the order and catch its toppings in sequence.", "Dodge unwanted extras and serve before the 60-second shift ends."]
+    },
+    {
+      "slug": "clams-and-chips",
+      "name": "Clams & Chips: Fryday Rush",
+      "url": "https://clams.funapps.ca/",
+      "description": "Deep-fried Maritime clam meat and thick-cut chips, fresh from your fry shack. Work two fryers and get the timing right during a 90-second rush.",
+      "category": "Food & frenzy",
+      "icon": "🍟",
+      "color": "#d9e2c5",
+      "featured": true,
+      "include_play_url_in_sitemap": true,
+      "controls": ["Manage the clam fryer and chip fryer separately.", "Time each batch and serve the orders during the 90-second rush."]
+    },
+    {
+      "slug": "kitchen-party-outta-hand",
+      "name": "Kitchen Party: Outta Hand!",
+      "url": "https://polite-flan-9cfec6.netlify.app/",
+      "description": "The kitchen party has taken on a life of its own. Serve snacks, collect fiddle notes, and dodge hazards across four ways to play.",
+      "category": "Kitchen parties",
+      "icon": "🎻",
+      "color": "#d9d2e4"
+    },
+    {
+      "slug": "souwester-survival",
+      "name": "Sou’wester Survival",
+      "url": "https://grand-mermaid-96fb8f.netlify.app/",
+      "description": "A very Maritime forecast: donairs, bottles, and fiddles coming your way. Catch the good stuff while steering clear of geese and snowballs.",
+      "category": "Quick challenges",
+      "icon": "🌧️",
+      "color": "#c8dce1"
+    },
+    {
+      "slug": "true-north-turbo",
+      "name": "True North Turbo",
+      "url": "https://startling-sunburst-a54d03.netlify.app/",
+      "description": "A rapid-fire gauntlet of Canadian microgames. Read the next challenge, react quickly, and keep the run going.",
+      "category": "Quick challenges",
+      "icon": "🍁",
+      "color": "#edc4b2"
+    },
+    {
+      "slug": "coast-to-coast-chaos",
+      "name": "Kitchen Party: Coast-to-Coast Chaos",
+      "url": "https://deluxe-crepe-96ca99.netlify.app/",
+      "description": "The guests are getting impatient. Carry supplies through a lively kitchen party, avoid hazards, and keep everyone looked after.",
+      "category": "Kitchen parties",
+      "icon": "🎉",
+      "color": "#f0d8a0"
+    },
+    {
+      "slug": "one-more-tune",
+      "name": "One More Tune!",
+      "url": "https://earnest-licorice-5a7566.netlify.app/",
+      "description": "There is always room for one more tune. Match guests to their stations, tap along to the beat, and keep the party moving.",
+      "category": "Kitchen parties",
+      "icon": "🎶",
+      "color": "#d9d2e4"
+    },
+    {
+      "slug": "double-double-empire",
+      "name": "Double-Double Empire",
+      "url": "https://delightful-basbousa-d3a469.netlify.app/",
+      "description": "Start with coffee and think bigger. Build income, buy upgrades, and collect achievements as your double-double business grows.",
+      "category": "Clickers & tycoons",
+      "icon": "☕",
+      "color": "#e0c7ad"
+    },
+    {
+      "slug": "great-maritime-gauntlet",
+      "name": "SOME GOOD! — The Great Maritime Gauntlet",
+      "url": "https://zesty-strudel-74c18c.netlify.app/",
+      "description": "Eight fast East Coast challenges, three mittens, and no time to dawdle. See how long you can hang on through the gauntlet.",
+      "category": "Quick challenges",
+      "icon": "🧤",
+      "color": "#c5d6cf"
+    },
+    {
+      "slug": "some-good-kitchen-party",
+      "name": "Some Good Kitchen Party",
+      "url": "https://tourmaline-vacherin-14601c.netlify.app/",
+      "description": "Step into a 3D kitchen party, keep the guests fed, and find the fiddle tunes that keep the good times going.",
+      "category": "Kitchen parties",
+      "icon": "🪗",
+      "color": "#eac5a4"
+    },
+    {
+      "slug": "trans-canada-trek",
+      "name": "The Trans-Canada Trek",
+      "url": "https://teal-puffpuff-416dc8.netlify.app/",
+      "description": "Set out from St. John’s for Vancouver. Balance fuel, money, car health, and morale on a road trip across Canada.",
+      "category": "Roads & adventures",
+      "icon": "🚙",
+      "color": "#c9d9c3"
+    },
+    {
+      "slug": "keep-er-goin",
+      "name": "Keep ’Er Goin’!",
+      "url": "https://superlative-valkyrie-a47571.netlify.app/",
+      "description": "The kettle, the food, the music—somebody has to keep track of it all. Deal with party emergencies and keep this gathering going.",
+      "category": "Kitchen parties",
+      "icon": "🫖",
+      "color": "#e2d6b4"
+    },
+    {
+      "slug": "yes-by",
+      "name": "YES B’Y! — The Great East Coast Clicker",
+      "url": "https://super-malasada-822d82.netlify.app/",
+      "description": "Haul traps, earn your next upgrade, and build an Atlantic business one click at a time.",
+      "category": "Clickers & tycoons",
+      "icon": "🦞",
+      "color": "#e9c4b4"
+    },
+    {
+      "slug": "out-for-a-rip",
+      "name": "Out for a Rip",
+      "url": "https://loquacious-kashata-3d2d49.netlify.app/",
+      "description": "Head out on an Atlantic delivery run. Get the errands done while the weather does its best to complicate your day.",
+      "category": "Roads & adventures",
+      "icon": "🛻",
+      "color": "#cbd7dd"
+    },
+    {
+      "slug": "maritime-merchant",
+      "name": "Maritime Merchant: The Cabot Trail",
+      "url": "https://stirring-capybara-79a5a5.netlify.app/",
+      "description": "Trade between ports and put your earnings into a better vessel. Make your way through a Maritime merchant’s life.",
+      "category": "Roads & adventures",
+      "icon": "⛵",
+      "color": "#c2d7d4"
+    },
+    {
+      "slug": "kitchen-party-tycoon",
+      "name": "Kitchen Party Tycoon",
+      "url": "https://bucolic-starship-966249.netlify.app/",
+      "description": "Turn a kitchen party into a growing operation. Earn Sociables, spend them on upgrades, and keep the gathering getting bigger.",
+      "category": "Clickers & tycoons",
+      "icon": "🥳",
+      "color": "#e5c9cc"
+    },
+    {
+      "slug": "east-coast-mayhem",
+      "name": "Some Good Game — East Coast Mayhem",
+      "url": "https://golden-blancmange-09bd5c.netlify.app/",
+      "description": "Take on rapid-fire tasks as the timers shrink. You have three lobster lives to see you through the East Coast mayhem.",
+      "category": "Quick challenges",
+      "icon": "⚡",
+      "color": "#edda9d"
+    },
+    {
+      "slug": "fog-over-fundy",
+      "name": "Fog Over Fundy",
+      "url": "https://kaleidoscopic-mochi-6070f2.netlify.app/",
+      "description": "Pilot a boat through the fog, use signal flares, and make upgrades while keeping an eye out for the creatures in the mist.",
+      "category": "Roads & adventures",
+      "icon": "🚤",
+      "color": "#c6d2cd"
+    }
+  ]
+}

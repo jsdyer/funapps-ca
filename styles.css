@@ -47,3 +47,45 @@
 .game-card a.play-button {
   text-decoration: none;
 }
+
+/* Central arcade catalogue. Cards and detail links exist before JavaScript runs. */
+[hidden]{display:none!important}
+.arcade-section{padding:88px 6% 90px;max-width:1600px;margin:auto}
+.arcade-section .section-head h2{font:400 clamp(40px,4.4vw,66px)/1.06 Georgia,serif;letter-spacing:-2px;margin:18px 0 0}
+.arcade-section .section-head h2 em{color:var(--rust);font-weight:400}
+.arcade-section .section-intro{max-width:340px}
+.catalogue-controls{display:flex;align-items:flex-end;gap:16px;padding:18px 0;border-block:1px solid var(--border);margin-bottom:14px}
+.catalogue-controls label{display:grid;gap:8px;font-size:14px;font-weight:700;flex:1}
+.catalogue-controls label:first-child{flex:2}
+.catalogue-controls input,.catalogue-controls select{width:100%;background:#fffdf5;border:1px solid #96a38e;border-radius:5px;padding:12px 14px;color:var(--ink);font:inherit;font-weight:400;height:46px}
+.catalogue-controls select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 19px) 20px,calc(100% - 14px) 20px;background-size:5px 5px;background-repeat:no-repeat;padding-right:35px}
+.catalogue-controls button{background:var(--ink);color:white;border:1px solid var(--ink);border-radius:5px;padding:12px 20px;height:46px;font-size:14px;cursor:pointer}
+.collection-count{font-size:13px;color:var(--muted);min-height:20px;margin:16px 0}
+.arcade-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.arcade-card{background:#fffdf5;border:1px solid #c1c8b7;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.arcade-art{height:170px;display:flex;align-items:center;justify-content:center;background:var(--card-color,#d9e2c5);font-size:70px;position:relative;overflow:hidden}
+.arcade-art::before{content:'';position:absolute;width:170px;height:170px;border:1px solid #253f3620;border-radius:50%;transform:translate(60px,35px)}
+.arcade-art::after{content:'✳';position:absolute;right:22px;top:16px;font-size:24px;opacity:.6;color:var(--ink)}
+.arcade-art span{position:relative;z-index:1;filter:drop-shadow(0 6px 0 #253f3615)}
+.arcade-body{padding:24px;display:flex;flex-direction:column;flex:1}
+.arcade-body h3{font:400 28px/1.12 Georgia,serif;letter-spacing:-.6px;margin:12px 0}
+.arcade-body h3 a{text-decoration:none}
+.arcade-body p{font-size:16px;line-height:1.6;color:var(--muted);margin:0 0 20px;flex:1}
+.arcade-body .play-button{font-size:14px;text-decoration:none;display:inline-flex;align-items:center;min-height:43px;margin-top:auto}
+.arcade-direct{font-size:13px;margin-top:14px;text-underline-offset:4px;color:#38594a}
+.arcade-actions{display:flex;align-items:baseline;gap:20px;justify-content:space-between;flex-wrap:wrap}
+.arcade-card:hover{box-shadow:0 8px 28px #253f3614}
+.arcade-card:focus-within{outline:2px solid #9c5648;outline-offset:4px}
+.games-section{padding-top:80px;border-top:1px solid var(--border)}
+.site-header nav a,.button,.filter-button,.play-button{font-size:14px}
+.eyebrow,.game-tag{font-size:12px}
+.card-body p,.section-intro p,.about-copy p,.next-section p{font-size:16px}
+.filter-note,footer p,.footer-links a{font-size:13px}
+.hero-note,.hero-foot,.art-caption{font-size:11px}
+.ticker span{font-size:12px}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.hero{min-height:610px}.hero-copy{padding-top:72px}.hero-art{min-height:570px}
+.hero h1{font-size:clamp(62px,6.9vw,104px)}
+input:focus-visible,select:focus-visible{outline:3px solid #b35640;outline-offset:3px}
+@media(max-width:1000px){.arcade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero h1{font-size:72px}.hero-note{white-space:normal}.site-header nav{gap:20px}}
+@media(max-width:640px){.arcade-section{padding:60px 6%}.arcade-grid{grid-template-columns:1fr}.catalogue-controls{flex-wrap:wrap;gap:12px}.catalogue-controls label:first-child{flex-basis:100%}.catalogue-controls label{min-width:180px}.arcade-art{height:160px}.arcade-body{padding:22px}.hero-copy{padding:50px 6%}.hero h1{font-size:clamp(61px,14.5vw,83px)}.hero-art{min-height:350px}.site-header nav a{font-size:13px}.eyebrow{flex-wrap:wrap}.hero-note{font-size:11px}.about-copy p{font-size:16px}}

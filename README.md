@@ -2,6 +2,56 @@
 
 A little corner of the internet for casual games, curious detours, and feel-good fun. Built for funapps.ca with Canada in mind.
 
+The public Netlify hub includes a configurable directory of standalone games, the original local activities below, and a central sitemap. Each standalone game keeps its own hosting and gets a descriptive page here.
+
+## Publish the FunApps hub on Netlify
+
+The production project is **funapps-hub**, with the Netlify address <https://funapps-hub.netlify.app/> and canonical domain <https://funapps.ca/>. Connect this repository in Netlify; `netlify.toml` supplies the build command `python3 build.py` and publish directory `dist`.
+
+To preview the exact static output locally:
+
+```sh
+python3 build.py
+python3 -m http.server 8080 --directory dist
+```
+
+Open <http://localhost:8080/>. Python 3 is the only build dependency. The build copies an explicit list of browser assets, preserves Packet Trace and the solo activities, and generates:
+
+- the homepage catalogue, available without JavaScript;
+- `/games/<slug>/` pages with descriptions, launch links, canonical URLs and structured data;
+- `/sitemap.xml`, `/robots.txt`, and a proper `404.html`;
+- a redirect from `/games-sitemap.xml` and `/sitemap.php` to the central sitemap;
+- an HTTPS `www.funapps.ca` redirect to the canonical apex domain.
+
+The Netlify output does not include the optional multiplayer Node server or its UI. Those sources are retained for a separate Node deployment; Netlify static hosting cannot run its persistent rooms and Server-Sent Events server.
+
+Add **funapps.ca** and **www.funapps.ca** as domains on this Netlify project before changing DNS. With external DNS, use the target Netlify recommends for the apex; if your DNS provider only supports an A record, the fallback is `@ A 75.2.60.5`. Use `www CNAME funapps-hub.netlify.app`. Keep existing game subdomains pointed at their own projects. In particular, do not point Donair or Clams at this hub.
+
+Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, Packet Trace, and the verified Donair/Clams custom URLs. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
+
+## Add or edit a standalone game
+
+Edit **`site.config.json`** and rebuild. No HTML editing is needed to update the catalogue, detail pages, search categories, count or sitemap. The game order follows the file, with `featured: true` entries first.
+
+```json
+{
+  "slug": "your-game",
+  "name": "Your Game",
+  "url": "https://your-game.netlify.app/",
+  "description": "A short, accurate description of what the player does.",
+  "category": "Quick challenges",
+  "icon": "🎮",
+  "color": "#d9e2c5",
+  "controls": ["Describe a confirmed way to play."]
+}
+```
+
+Use a unique lowercase slug and an HTTPS play URL. `controls` is optional. Set `published: false` to retain an entry in configuration while hiding it from the site. After a game has a working custom domain under `funapps.ca`, set `include_play_url_in_sitemap: true` to include its launch URL too. Only the apex and its subdomains are eligible; third-party hostnames are deliberately excluded. Update the game's `url` when moving it to a custom domain so the directory always uses the intended address.
+
+The builder rejects duplicate slugs, duplicate play URLs, unsafe URLs and malformed colours. Text is escaped in HTML and structured data. `catalogue.js` enhances the generated cards with search/category filters; the cards and links still work when JavaScript is unavailable.
+
+Run the focused build checks with `python3 -m unittest test_build.py`.
+
 ## Activities
 
 - **Packet Trace** — investigate and contain three simulated network breaches on a rotatable 3D topology. Use the device inspector or command console to follow evidence, isolate hosts, rotate credentials, and restore services.

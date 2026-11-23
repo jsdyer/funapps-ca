@@ -1,11 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-CA">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f3e7">
-  <meta name="description" content="Little games for taking it easy. A playful corner of the internet, made with Canada in mind.">
-  <title>funapps.ca — a little fun, wherever you are</title>
+  <meta name="description" content="Free browser games with a Canadian streak. Play Donair Dash, Clams & Chips, Maritime adventures, clickers, puzzles and creative little escapes at FunApps.">
+  <title>FunApps — Free Canadian Browser Games & Little Escapes</title>
+  <link rel="canonical" href="https://funapps.ca/">
+  <meta property="og:title" content="FunApps — Small games. Big detours.">
+  <meta property="og:description" content="A little Canadian arcade: Maritime food games, curious adventures, puzzles and creative escapes. Pick something and play.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://funapps.ca/">
+  <meta name="twitter:card" content="summary">
+  <!-- STRUCTURED_DATA -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="games.css">
@@ -22,21 +29,22 @@
   <script src="postcard-maker.js" defer></script>
   <script src="extensions.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="catalogue.js" defer></script>
 </head>
 <body>
-<a class="skip-link" href="#games">Skip to activities</a>
+<a class="skip-link" href="#arcade">Skip to games</a>
 <header class="site-header">
   <a class="brand" href="#top" aria-label="funapps.ca home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a>
-  <nav aria-label="Main navigation"><a href="#games">Activities</a><a href="#about">Our little corner</a><a class="nav-cta" href="multiplayer/">Play together <span aria-hidden="true">↗</span></a></nav>
+  <nav aria-label="Main navigation"><a href="#arcade">The arcade</a><a href="#games">Little breaks</a><a class="nav-cta" href="https://coolcode.ca/">Visit CoolCode</a></nav>
 </header>
 <main id="top">
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="tiny-sun">✳</span> A LITTLE CORNER OF THE INTERNET <span class="eyebrow-line"></span> EST. FOR FUN</div>
-      <h1 id="hero-title">Good times.<br><em>No rush.</em></h1>
-      <p>Little games, curious detours, and feel-good fun. Pull up a chair and stay a while.</p>
-      <div class="hero-actions"><a class="button button-dark" href="#games">Find your fun <span aria-hidden="true">↘</span></a><span class="hero-note">FREE TO PLAY <span>✦</span> EASY TO LOVE</span></div>
-      <div class="hero-foot"><span>✳ &nbsp; MADE FOR YOUR IN-BETWEEN MOMENTS</span><span>SCROLL FOR THE GOOD STUFF ↓</span></div>
+      <div class="eyebrow"><span class="tiny-sun">✳</span> A LITTLE CORNER OF THE INTERNET <span class="eyebrow-line"></span> MADE IN CANADA</div>
+      <h1 id="hero-title">Small games.<br><em>Big detours.</em></h1>
+      <p>A hot donair, a foggy harbour, a wildly ambitious coffee empire. Pick a little adventure and make yourself at home.</p>
+      <div class="hero-actions"><a class="button button-dark" href="#arcade">Find your next game</a><span class="hero-note">FREE TO PLAY <span>✦</span> EASY TO LOVE</span></div>
+      <div class="hero-foot"><span>✳ &nbsp; MADE FOR YOUR IN-BETWEEN MOMENTS</span><span>YOUR NEXT GOOD DISTRACTION</span></div>
     </div>
     <div class="hero-art" aria-label="Illustration of a lakeside sunset, mountains and trees" role="img">
       <svg viewBox="0 0 620 620" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -56,13 +64,22 @@
         <circle cx="310" cy="309" r="284" fill="none" stroke="#304c3f" stroke-width="3"/>
         <g fill="#304c3f"><path d="m87 94 4-13 4 13 13 4-13 4-4 13-4-13-13-4z"/><path d="m516 120 3-9 3 9 9 3-9 3-3 9-3-9-9-3z"/></g>
       </svg>
-      <div class="art-stamp"><span>TAKE IT</span><strong>EASY</strong><span>✦ OUT THERE ✦</span></div>
-      <span class="art-caption">A LITTLE ESCAPE, ANYTIME.</span>
+      <div class="art-stamp"><span>COME ON</span><strong>IN.</strong><span>✦ PLAY A WHILE ✦</span></div>
+      <span class="art-caption">A CANADIAN KIND OF PLAY.</span>
     </div>
   </section>
   <div class="ticker" aria-hidden="true"><span>TAKE A BREAK</span> ✳ <span>PLAY A LITTLE</span> ✳ <span>STAY CURIOUS</span> ✳ <span>TAKE A BREAK</span> ✳ <span>PLAY A LITTLE</span> ✳ <span>STAY CURIOUS</span> ✳</div>
+  <section class="arcade-section" id="arcade" aria-labelledby="arcade-title">
+    <div class="section-head"><div><div class="eyebrow"><span class="tiny-sun">✳</span> THE FUNAPPS ARCADE</div><h2 id="arcade-title">A little <em>East Coast chaos.</em></h2></div><div class="section-intro"><p>Fry-shack shifts, stormy crossings, and kitchen parties that got out of hand. <strong><!-- GAME_COUNT --> games</strong> to get happily sidetracked.</p></div></div>
+    <div class="catalogue-controls" hidden><label>Find a game<input id="arcade-search" type="search" placeholder="Donair, boats, clickers…" autocomplete="off"></label><label>Your kind of fun<select id="arcade-category"><option value="all">All games</option></select></label><button id="arcade-reset" type="button">Reset</button></div>
+    <p id="arcade-count" class="collection-count" role="status" aria-live="polite"></p>
+    <!-- CATALOGUE_START -->
+    <p>The arcade catalogue is generated when the site builds.</p>
+    <!-- CATALOGUE_END -->
+    <p id="arcade-empty" class="empty-filter" hidden>No games match that search. Try another word or reset the filters.</p>
+  </section>
   <section class="games-section" id="games" aria-labelledby="games-heading">
-    <div class="section-head"><div><div class="eyebrow"><span class="tiny-sun">✳</span> YOUR LITTLE FUN BREAK</div><h2 id="games-heading">Pick a little <em>something.</em></h2></div><div class="section-intro"><p>No downloads. No accounts. Just a few good minutes, however you spend them.</p><button class="text-button" id="surprise" type="button">Surprise me <span aria-hidden="true">↗</span></button></div></div>
+    <div class="section-head"><div><div class="eyebrow"><span class="tiny-sun">✳</span> YOUR LITTLE FUN BREAK</div><h2 id="games-heading">Or take the <em>scenic route.</em></h2></div><div class="section-intro"><p>Quizzes, puzzles and creative escapes that open right here. Save a favourite or leave it to chance.</p><button class="text-button" id="surprise" type="button">Surprise me</button></div></div>
     <div class="game-tools" aria-label="Explore the collection">
       <div class="filters" role="group" aria-label="Filter activities"><button type="button" class="filter-button active" data-filter="all" aria-pressed="true">All activities</button><button type="button" class="filter-button" data-filter="puzzles" aria-pressed="false">Puzzles & games</button><button type="button" class="filter-button" data-filter="explore" aria-pressed="false">Explore & create</button><button type="button" class="filter-button" data-filter="favorites" aria-pressed="false">Saved <span aria-hidden="true">♥</span></button></div>
       <p class="filter-note" id="filter-note" aria-live="polite"></p>
@@ -70,20 +87,13 @@
     <div class="game-grid" id="game-grid"><p>Loading the games…</p></div>
     <noscript><p>These mini games need JavaScript enabled to play.</p></noscript>
   </section>
-  <section class="multiplayer-callout" aria-labelledby="multiplayer-heading">
-    <div>
-      <h2 id="multiplayer-heading">Play together</h2>
-      <p>Make a shared pixel mural, play a game, or just chat. Rooms hold up to eight people.</p>
-    </div>
-    <a class="button button-dark" href="multiplayer/">Open multiplayer <span aria-hidden="true">↗</span></a>
-  </section>
   <section class="about-section" id="about">
     <div class="about-art" aria-hidden="true"><div class="sun-icon">✳</div><span>FOR THE JOY<br>OF IT ALL.</span><div class="about-wave">〰</div></div>
-    <div class="about-copy"><div class="eyebrow"><span class="tiny-sun">✳</span> NICE TO HAVE YOU HERE</div><h2>A little less scroll.<br><em>A little more play.</em></h2><p>Fun doesn’t have to be complicated. This is a place for tiny adventures, peaceful puzzles, and the occasional very Canadian detour.</p><p>Come as you are, play at your own pace, and leave whenever real life calls. We’ll be here when you need another break.</p><a class="button button-light" href="#games">Back to the fun <span aria-hidden="true">↗</span></a></div>
+    <div class="about-copy"><div class="eyebrow"><span class="tiny-sun">✳</span> NICE TO HAVE YOU HERE</div><h2>A little less scroll.<br><em>A little more play.</em></h2><p>Fun doesn’t have to be complicated. This is a place for tiny adventures, peaceful puzzles, and the occasional very Canadian detour.</p><p>Come as you are, play at your own pace, and leave whenever real life calls. We’ll be here when you need another break.</p><a class="button button-light" href="#games">Back to the games</a></div>
   </section>
-  <section class="next-section"><div><div class="eyebrow"><span class="tiny-sun">✳</span> MORE GOOD THINGS AHEAD</div><h2>We're just getting <em>started.</em></h2><p>There are more little adventures on the horizon: a Canadian roadside oddities collection and cozy seasonal activities. Stay curious.</p></div><span class="next-mark" aria-hidden="true">✳</span></section>
+  <section class="next-section"><div><div class="eyebrow"><span class="tiny-sun">✳</span> FROM THE SAME CORNER OF THE WEB</div><h2>Made for the <em>fun of it.</em></h2><p>FunApps is a growing collection of playful experiments by Jeffrey Dyer. For useful browser tools, public data and curious investigations, visit its companion site, CoolCode.</p></div><span class="next-mark" aria-hidden="true">✳</span></section>
 </main>
-<footer><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Little things. Good times. Made with Canada in mind. <span aria-hidden="true">♥</span></p><a href="#top">BACK TO TOP ↑</a></footer>
+<footer><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><p>Little things. Good times. Made with Canada in mind. <span aria-hidden="true">♥</span></p><div class="footer-links"><a href="https://coolcode.ca/">CoolCode</a><a href="/sitemap.xml">Sitemap</a><a href="https://github.com/jsdyer/funapps-ca">Source</a></div></footer>
 <dialog id="game-dialog" aria-labelledby="dialog-title"><div class="dialog-header"><div><div class="eyebrow">✳ &nbsp; YOUR FUN BREAK</div><h2 id="dialog-title"></h2></div><button class="close-button" id="close-dialog" aria-label="Close activity">×</button></div><div id="game-container"></div></dialog>
 </body>
 </html>
