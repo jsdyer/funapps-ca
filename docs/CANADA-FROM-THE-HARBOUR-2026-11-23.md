@@ -25,4 +25,17 @@ All 58 new-game tests and seven hub tests pass. Framework type checks and all si
 
 The hub generates 30 game detail pages and 46 sitemap URLs, including all six new play routes. Entry scripts/styles are local and present. The source review also improved Niagara channel labels and synchronized visual/audio Morse timing.
 
-Live browser play-throughs follow publication; results are added after verification.
+Live browser play-throughs passed on the production release `e5908b79aca7e0a13b9715f3fba602d11c20d383` (Netlify deploy `6b049ee82ce5d8ac0aefc041`, ready).
+
+| Game | Observed result through the live controls |
+| --- | --- |
+| Rockies | First expedition completed with all three required sketches, 402 points and three badges. |
+| Prairie | First delivery round completed in three sails, with both postcards delivered and three stamps. |
+| Arctic | All three required observations returned to base on day four, with 1,328 points; the completed notebook opens correctly. |
+| Québec | Full nine-place visit, optional melody and supper completed for 780 points. An intentionally wrong parcel offer retained the item and allowed recovery. English translations remained available throughout. |
+| Signal Hill | All six watches completed with 18/18 stars. Optional sound enabled, replayed and muted through the controls without application errors. |
+| Niagara | First chart completed in two turns, with 12/12 units at the falls, no spill or trapped water, and three droplets. Progression to the second chart works. |
+
+No application console errors were observed on these play-throughs. Desktop layouts were visually reviewed; physical mobile/touch devices were not tested. Later Rockies, Prairie and Niagara rounds are covered by rule tests rather than complete live-browser runs.
+
+All six play pages and six detail pages returned HTTP 200 with correct canonical URLs, game IDs and play links. All 22 local release assets matched the production SHA-256 hashes, including the p5.js vendor module. The live sitemap contains 46 unique URLs, including all six new play routes. The hub displays 30 cards; searching for “Québec” finds the one matching game, and clearing the search restores all 30.
