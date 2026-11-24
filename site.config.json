@@ -156,6 +156,25 @@
       "audited_at": "2026-11-23"
     },
     {
+      "slug": "confederation-bridge",
+      "name": "Hemmed In: Confederation Bridge",
+      "url": "https://funapps.ca/play/confederation-bridge/",
+      "description": "Twelve point nine kilometres, one lane each way, and a view you already paid for. Weave past the trucks, stay off the imaginary shoulder, and try to glimpse the Strait before the weather closes the slit.",
+      "category": "Roads & trails",
+      "icon": "🌉",
+      "color": "#c9cfc8",
+      "technology": "Canvas 2D",
+      "controls": [
+        "Steer with A and D, the arrow keys, or by dragging the road.",
+        "The car cruises. Ease off with S, the down arrow, or the brake when a trailer fills the lane.",
+        "Glimpses of water sit beside the concrete. A full case of white knuckles ends the crossing early."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-24"
+    },
+    {
       "slug": "kouchibouguac-cycle",
       "name": "Kouchibouguac: Trail Ride",
       "url": "https://funapps.ca/play/kouchibouguac-cycle/",

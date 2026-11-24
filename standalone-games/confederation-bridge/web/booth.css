@@ -1,0 +1,320 @@
+:root {
+  --bg: #141c19;
+  --surface: #24302b;
+  --fg: #f4efe4;
+  --muted: #b7b1a4;
+  --accent: #d85a32;
+  --water: #2f8f8a;
+  --paper: #f3ead7;
+  --ink: #1c2420;
+  --concrete: #a7ada3;
+  --line: rgba(28, 36, 32, 0.14);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --radius: 0.9rem;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+}
+
+button, [role="button"] { font: inherit; }
+
+.booth {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.booth canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 0.75rem 0.85rem 0;
+  pointer-events: none;
+}
+
+.ticket-chip {
+  pointer-events: auto;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 2px 12px 2px 2px;
+  padding: 0.45rem 0.7rem 0.5rem;
+  min-width: 0;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+}
+
+.ticket-chip.right { justify-self: end; text-align: right; }
+.ticket-chip.center { text-align: center; min-width: min(16rem, 46vw); }
+
+.kicker {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5e675f;
+  font-weight: 650;
+}
+
+.figure {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 560;
+  line-height: 1.1;
+  margin-top: 0.1rem;
+}
+
+.sub {
+  color: #5c665c;
+  font-size: 0.78rem;
+  margin-top: 0.12rem;
+}
+
+.nerves {
+  margin-top: 0.35rem;
+  height: 0.45rem;
+  background: #e4dcc8;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.nerves span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--water), var(--accent));
+  border-radius: inherit;
+}
+
+.icon-btn {
+  pointer-events: auto;
+  margin-top: 0.35rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 99px;
+  min-height: 2rem;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.icon-btn:hover { background: rgb(28 36 32 / 0.06); }
+
+.radio {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(40rem, calc(100% - 2rem));
+  margin: 0;
+  padding: 0.55rem 0.85rem;
+  background: rgb(20 28 25 / 0.78);
+  color: var(--fg);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+}
+
+.radio strong {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  font-weight: 650;
+  margin-bottom: 0.12rem;
+}
+
+.wheel {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: 0.55rem;
+  gap: 0.5rem;
+}
+
+.wheel button {
+  flex: 1;
+  min-height: 3.25rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.25);
+}
+
+.wheel button:active { transform: translateY(1px); }
+.wheel button.brake { background: var(--accent); color: var(--paper); }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: auto;
+  background: rgb(12 18 16 / 0.38);
+}
+
+.overlay[hidden] { display: none; }
+
+.ticket {
+  width: min(36rem, 100%);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 1.35rem 1.35rem 1.2rem;
+  border-radius: 3px 18px 3px 3px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+  position: relative;
+  animation: rise 280ms ease-out;
+}
+
+.ticket::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+  background: radial-gradient(circle at 8px -2px, transparent 8px, var(--accent) 8.5px) left top / 16px 8px repeat-x;
+}
+
+.stamp {
+  display: inline-block;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.45rem;
+  transform: rotate(-6deg);
+  margin-bottom: 0.6rem;
+}
+
+.ticket h1 {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(2.4rem, 8vw, 4.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0.15rem 0 0.35rem;
+}
+
+.where {
+  margin: 0;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: #5d675e;
+}
+
+.lede {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  margin: 0.85rem 0 0.4rem;
+}
+
+.fine {
+  color: #4e584f;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0 0 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.primary, .ghost {
+  min-height: 3rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 0;
+  font-weight: 650;
+}
+
+.primary { background: var(--ink); color: var(--paper); }
+.primary:hover { background: #2a3833; }
+.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.ghost:hover { background: rgb(28 36 32 / 0.05); }
+
+.help {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+  color: #3e4942;
+  font-size: 0.88rem;
+}
+
+.help li { line-height: 1.35; }
+
+.scoreline {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0.4rem 0;
+}
+
+@media (max-width: 820px) {
+  .hud { grid-template-columns: 1fr 1fr; }
+  .ticket-chip.center { grid-column: 1 / -1; min-width: 0; }
+  .figure { font-size: 1.15rem; }
+  .radio {
+    bottom: 5.1rem;
+    font-size: 0.88rem;
+  }
+  .wheel { display: flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket { animation: none; }
+}
+
+@keyframes rise {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
