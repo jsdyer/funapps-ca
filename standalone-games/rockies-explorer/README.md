@@ -9,13 +9,14 @@ Production address: `https://funapps.ca/play/rockies-explorer/`.
 The first screen is the game: an animated mountain scene with an automatic demonstration, a visible runner, golden postcards and rocks. **Let’s run** begins a 48-second run. Tapping the trail or pressing **Space / Up / W** begins with a jump. There are no opening instructions to dismiss.
 
 - Tap the trail or the large **Jump** button, or press **Space / Up / W**, to hop over rocks and collect postcards.
+- Jump responds when the finger/mouse button first goes down, or on keyboard **keydown**, including Space/Enter while the trail or Jump button has focus. Releasing the press does not trigger another jump. Pause and menu buttons retain their ordinary keyboard behaviour; assistive click-only activation remains supported.
 - Three hearts, brief impact protection, and a progress bar make the outcome visible. Reach Jasper after 48 seconds to finish; three collisions end the run. Each postcard is worth 50 points, with five points per second travelled.
 - **Pause / P / Escape** freezes the run. Losing window focus or hiding the page pauses automatically; resuming requires an explicit action.
 - **Run again** resets the timer, hearts, objects and score. The personal best is saved locally where storage is available.
 - Reduced-motion preference removes decorative parallax while preserving necessary obstacle movement. No audio is required.
 - **Trail planner** opens `?mode=planner`, which preserves all four original route puzzles and links back to quick play.
 
-Quick-mode rules live in `src/quick-engine.ts`; the interface is `src/QuickPlay.svelte`. Six additional tests cover live attract motion, collisions versus jumping, one-time collection, impact grace, pause/reset, a complete successful run, loss, and bounded frame deltas. Total: 15 tests, plus Svelte checks and production build.
+Quick-mode rules live in `src/quick-engine.ts`; the interface is `src/QuickPlay.svelte`; press-start jump handling is in `src/jump-input.ts`. Six quick-rule tests cover live attract motion, collisions versus jumping, one-time collection, impact grace, pause/reset, a complete successful run, loss, and bounded frame deltas. Four input tests verify pointer and focused-keyboard launch before release, movement on the next frame, no duplicate click/repeat jumps, assistive click activation, and ignored secondary inputs. Total: 19 tests, plus Svelte checks and production build.
 
 ### Quick-play browser checks
 

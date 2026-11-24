@@ -1,40 +1,41 @@
-export const FOODS = [
-  {id:'bread',en:'Bread',fr:'Pain',colour:'#e5a348'},
-  {id:'coffee',en:'Coffee',fr:'Café',colour:'#5d456d'},
-  {id:'apple',en:'Apple',fr:'Pomme',colour:'#ed6c67'}
+export const MENU = {
+  coffee:{id:'coffee',en:'Coffee',fr:'Un café'},
+  bread:{id:'bread',en:'Bread',fr:'Du pain'},
+  soup:{id:'soup',en:'Soup',fr:'Une soupe'},
+  water:{id:'water',en:'Water',fr:'De l’eau'},
+  cake:{id:'cake',en:'Cake',fr:'Une part de gâteau'},
+  bill:{id:'bill',en:'The bill',fr:'L’addition'}
+};
+const please=id=>`${MENU[id].fr}, s’il vous plaît.`;
+const pleaseEnglish=id=>`${MENU[id].en}, please.`;
+const want=id=>`Je voudrais ${MENU[id].fr.toLowerCase()}.`;
+const wantEnglish=id=>`I’d like ${MENU[id].en.toLowerCase()}.`;
+export const REQUESTS = [
+  {item:'coffee',choices:['bread','coffee','soup'],kind:'please',chapter:'Start with a little please',server:'Bonjour! Vous désirez?',translation:'Hello! What would you like?',reply:'Bien sûr! Voici votre café.',replyEnglish:'Of course! Here is your coffee.'},
+  {item:'bread',choices:['bread','water','cake'],kind:'please',chapter:'One more with “please”',server:'Et avec ça?',translation:'And with that?',reply:'Voilà votre pain. Bon appétit!',replyEnglish:'Here is your bread. Enjoy!'},
+  {item:'soup',choices:['coffee','soup','bread'],kind:'want',chapter:'Try “I would like…”',server:'Pour le repas?',translation:'What would you like to eat?',reply:'Une soupe, très bien!',replyEnglish:'A soup, very good!'},
+  {item:'water',choices:['cake','coffee','water'],kind:'please',chapter:'Something to drink',server:'Vous voulez autre chose à boire?',translation:'Would you like anything else to drink?',reply:'Un verre d’eau, avec plaisir.',replyEnglish:'A glass of water, with pleasure.'},
+  {item:'cake',choices:['cake','water','bread'],kind:'want',chapter:'A little dessert',server:'Un dessert?',translation:'Would you like dessert?',reply:'Voici votre gâteau!',replyEnglish:'Here is your cake!'},
+  {item:'bill',choices:['water','bill','coffee'],kind:'please',chapter:'Finish with a useful phrase',server:'Tout s’est bien passé?',translation:'Was everything good?',reply:'Voici l’addition. Merci et bonne journée!',replyEnglish:'Here is the bill. Thank you and have a good day!'}
 ];
-export const SHIFT_SECONDS = 60;
-export function initialCafe() {
-  return {status:'ready',remaining:SHIFT_SECONDS,score:0,served:0,missed:0,combo:0,nextId:4,spawnIn:1.8,customers:[
-    {id:1,food:'bread',patience:12,maxPatience:12,lane:0},
-    {id:2,food:'coffee',patience:13,maxPatience:13,lane:1},
-    {id:3,food:'apple',patience:14,maxPatience:14,lane:2}
-  ],feedback:'Match the picture. Tap the food.',lastFood:null};
+export function optionsFor(step){
+  const request=REQUESTS[step];if(!request)return [];
+  return request.choices.map(id=>({id,fr:request.kind==='want'?want(id):please(id),en:request.kind==='want'?wantEnglish(id):pleaseEnglish(id)}));
 }
-export function startCafe(){return {...initialCafe(),status:'playing',feedback:'The café is open!'};}
-export function pauseCafe(state){return state.status==='playing'?{...state,status:'paused'}:state;}
-export function resumeCafe(state){return state.status==='paused'?{...state,status:'playing'}:state;}
-export function serveCafe(state,food){
-  if(state.status!=='playing'||!FOODS.some(f=>f.id===food))return state;
-  const customer=state.customers.find(c=>c.food===food);
-  if(!customer)return {...state,combo:0,lastFood:food,feedback:'Check the order pictures!'};
-  const combo=state.combo+1;
-  return {...state,customers:state.customers.filter(c=>c.id!==customer.id),combo,score:state.score+100+Math.min(combo-1,10)*10,served:state.served+1,lastFood:food,spawnIn:Math.min(state.spawnIn,.65),feedback:`Merci! +${100+Math.min(combo-1,10)*10}`};
+export function initialVisit(){return{status:'ready',step:0,score:0,ordered:[],mistakes:0,attempts:0,delivery:0,shownItem:null,correct:false,feedback:'You’re the customer. Choose what to say.',reply:'Bonjour! Bienvenue!',replyEnglish:'Hello! Welcome!'};}
+export function beginVisit(){return{...initialVisit(),status:'playing',reply:REQUESTS[0].server,replyEnglish:REQUESTS[0].translation};}
+export function choosePhrase(s,id){
+  if(s.status!=='playing'||s.delivery>0)return s;
+  const request=REQUESTS[s.step];if(!request||!request.choices.includes(id))return s;
+  if(id!==request.item)return{...s,attempts:s.attempts+1,mistakes:s.mistakes+1,shownItem:id,correct:false,reply:`${MENU[id].fr}?`,replyEnglish:`That means ${MENU[id].en.toLowerCase()}.`,feedback:`You wanted ${MENU[request.item].en.toLowerCase()}. Have another try!`};
+  return{...s,attempts:s.attempts+1,score:s.score+100,ordered:[...s.ordered,id],shownItem:id,correct:true,delivery:1.35,reply:request.reply,replyEnglish:request.replyEnglish,feedback:'That’s it! Your order is on its way.'};
 }
-export function tickCafe(state,dt,random=.5){
-  if(state.status!=='playing'||!Number.isFinite(dt)||dt<=0)return state;
-  const elapsed=Math.min(dt,.1,state.remaining);
-  const remaining=Math.max(0,state.remaining-elapsed);
-  if(remaining<=1e-8)return {...state,remaining:0,status:'finished',feedback:'Merci, neighbour! Your shift is done.'};
-  const missed=state.customers.filter(c=>c.patience<=elapsed).length;
-  let customers=state.customers.filter(c=>c.patience>elapsed).map(c=>({...c,patience:c.patience-elapsed}));
-  let spawnIn=state.spawnIn-elapsed,nextId=state.nextId;
-  if(spawnIn<=0&&customers.length<3){
-    const lane=[0,1,2].find(i=>!customers.some(c=>c.lane===i));
-    const safeRandom=Math.min(.999999,Math.max(0,Number.isFinite(random)?random:.5));
-    const patience=11-(SHIFT_SECONDS-remaining)/30;
-    customers=[...customers,{id:nextId++,food:FOODS[Math.floor(safeRandom*3)].id,patience,maxPatience:patience,lane}];
-    spawnIn=1.65;
-  }
-  return {...state,remaining,customers,spawnIn,nextId,missed:state.missed+missed,combo:missed?0:state.combo,feedback:missed?'A neighbour had to go. Next order!':state.feedback};
+export function tickVisit(s,dt){
+  if(s.status!=='playing'||s.delivery<=0||!Number.isFinite(dt)||dt<=0)return s;
+  const delivery=Math.max(0,s.delivery-Math.min(.1,dt));
+  if(delivery>1e-8)return{...s,delivery};
+  if(s.step===REQUESTS.length-1)return{...s,status:'finished',delivery:0,feedback:'You ordered your whole meal in French!'};
+  const step=s.step+1;return{...s,step,delivery:0,shownItem:null,correct:false,reply:REQUESTS[step].server,replyEnglish:REQUESTS[step].translation,feedback:step===2?'Try without English, or switch English help on.':'Choose the phrase for your next request.'};
 }
+export function pauseVisit(s){return s.status==='playing'?{...s,status:'paused'}:s;}
+export function resumeVisit(s){return s.status==='paused'?{...s,status:'playing'}:s;}

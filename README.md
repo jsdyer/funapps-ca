@@ -70,7 +70,7 @@ Run the focused build checks with `python3 -m unittest test_build.py`.
 | Signal Hill: 1901 | Web Components + Web Audio + SVG | `/play/cabot-tower-signals/` |
 | Niagara: Current Keeper | React + TypeScript + SVG | `/play/niagara-currents/` |
 
-The twelve regional games open in casual quick-play modes: moving scenes, concise visual cues and direct controls. Original planning, puzzle and adventure modes remain available from secondary links inside the games. Signal Hill's default now centres on receiving the three dots of Morse S with Marconi's kite antenna in 1901.
+The twelve regional games open in casual quick-play modes: moving scenes, concise visual cues and direct controls. Original planning, puzzle and adventure modes remain available from secondary links inside the games. Signal Hill rewards precise centre tracking while receiving the three dots of Morse S with Marconi's kite antenna in 1901. Westward jumps on the start of a press. Québec puts an anglophone diner at a restaurant table to practise ordering in French, with picture cues and optional English help.
 
 Each game's source, tests, reference notes, and build instructions are in its `standalone-games/<slug>/` directory. The generated `web/` releases are committed, including framework code, so the production Python build needs no npm downloads. There are no runtime CDN dependencies or API keys. Rebuild a game's release after changing its source; commit both source and release.
 

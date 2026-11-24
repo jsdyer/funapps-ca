@@ -13,7 +13,7 @@
       "color": "#b8ccd3",
       "technology": "Svelte + TypeScript + SVG",
       "controls": [
-        "Tap or press Space to jump; the hiker runs automatically.",
+        "Press or tap to jump immediately; the hiker runs automatically.",
         "Collect postcards and clear the rocks in a short mountain run.",
         "Pause when needed, then replay after the run."
       ],
@@ -64,15 +64,15 @@
       "slug": "quebec-bonjour",
       "name": "Bonjour, voisin! — Québec",
       "url": "https://funapps.ca/play/quebec-bonjour/",
-      "description": "The café is open and neighbours are arriving. Match each picture order to bread, coffee or apples—no French needed.",
+      "description": "You’re an anglophone visiting a Québec restaurant. Order the food you want in French, with picture cues and friendly English help.",
       "category": "Food & frenzy",
       "icon": "⚜️",
       "color": "#c3c7e6",
       "technology": "Alpine.js + SVG",
       "controls": [
-        "Tap the matching food picture or press 1, 2 or 3.",
-        "Serve arriving neighbours before their patience runs out.",
-        "Build a streak during the 60-second café shift."
+        "Look at what you want, then tap a French phrase or press 1, 2 or 3.",
+        "Ask for English help whenever you need it; the server helps you learn.",
+        "Order your way through a short restaurant visit, from coffee to the bill."
       ],
       "featured": true,
       "local_bundle": true,
@@ -83,15 +83,15 @@
       "slug": "cabot-tower-signals",
       "name": "Signal Hill: 1901",
       "url": "https://funapps.ca/play/cabot-tower-signals/",
-      "description": "Fly Marconi’s kite antenna into the golden signal and receive three dots across the Atlantic.",
+      "description": "Fly Marconi’s kite antenna into the golden signal. Hold close to the centre for more points as you receive three dots across the Atlantic.",
       "category": "Quick challenges",
       "icon": "📡",
       "color": "#b8d2d4",
       "technology": "Web Components + Web Audio + SVG",
       "controls": [
         "Move the pointer, drag, or use arrow keys to steer the kite.",
-        "Hold in the golden glow to receive three dots: Morse S.",
-        "Catch the signal before the 40-second round ends, then fly again."
+        "Stay close to the signal’s centre for more precision points while receiving three dots: Morse S.",
+        "Catch the signal before the 40-second round ends, then replay to improve your score."
       ],
       "featured": true,
       "local_bundle": true,

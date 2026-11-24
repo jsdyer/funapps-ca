@@ -1,22 +1,34 @@
-# Bonjour, voisin! — Café Rush
+# Bonjour, voisin! — Your Table in Québec
 
-The default game is now a picture-matching café shift: customers arrive with illustrated bread, coffee or apple orders, and the player taps the matching food. It uses the existing locally bundled Alpine.js stack. The full village adventure is preserved behind **Village adventure** at `classic.html`.
+You are now the **English-speaking customer**, visiting a small Québec restaurant from the Maritimes. A clear picture and English label show what you want. Pick one of three short French phrases, watch Élise bring the item to your table, and build toward ordering a whole meal. The full older village adventure is still available through **Village adventure** at `classic.html`.
 
-## Quick play
+## Restaurant visit
 
-- The first screen already shows moving neighbours, order bubbles, drifting clouds and the counter. There is no tutorial dialog or reading gate.
-- **Open the café**, Space, or any food button starts a 60-second shift. The initial three customers request one of each food, so any first food choice earns a successful serve.
-- Click/tap Bread, Coffee or Apple, or press **1**, **2**, **3**. The oldest matching order is served automatically; there is no extra customer-selection step. English labels and pictures are always visible, with French labels as a small optional learning cue.
-- Correct orders earn 100 points plus a growing combo bonus. A mismatched food only resets the combo; waiting customers remain available. A customer whose patience runs out leaves and frees their counter position.
-- **Pause**, **P**, or **Escape** pauses; losing focus or hiding the page also pauses. Resuming is explicit. Hidden time does not advance the shift. The clock uses bounded elapsed time, not a frame counter.
-- The finish screen shows points, served neighbours, and a large **Another quick shift** button. A new shift clears orders, timer, score and combo. Only the separate café best score is stored locally, with storage failures tolerated.
-- Reduced-motion preference disables decorative motion. The food buttons remain ordinary keyboard-focusable buttons. No sound, remote fonts, CDN or account is needed.
+The visit has six requests: **coffee, bread, soup, water, cake, and the bill**. It starts with polite noun phrases, then introduces **Je voudrais…** (I’d like…), and ends with **L’addition, s’il vous plaît.** (The bill, please.) The player chooses what to say; they do not serve other customers or manage a kitchen.
 
-### Quick-play QA
+- **Take a seat**, Space or a numbered choice starts. The restaurant and friendly server are already visible and animated; there is no tutorial dialog.
+- Choose a French phrase by tapping its card or pressing **1**, **2**, **3**. Pictures and English wishes stay visible throughout.
+- The first two requests show English translations beneath all choices. Later requests invite the player to try French; **English help** is always available, with no penalty. The server’s responses always include a concise English translation.
+- A wrong choice illustrates what that phrase means and invites another try. It never removes points or blocks the meal.
+- A correct choice earns 100 points and animates the item arriving. A short 1.35-second delivery transition prevents duplicate scoring before the next request. All six requests yield **600 points**.
+- There is **no countdown**. This is a short, friendly ordering encounter, not a speed or pronunciation test. All play works silently.
+- **Pause**, **P** or **Escape** pauses. Losing focus or hiding the page also pauses, including an in-progress delivery. Resume is explicit; late frames are bounded.
+- The ending offers **Visit again** and **Keep these six phrases**, a bilingual illustrated phrase collection. Replay resets the requests, score and mistakes.
+- Reduced-motion preference disables decorative animation. Native buttons support Tab/Enter and touch. Alpine.js and all artwork are bundled locally; no CDN, remote fonts, account or external API is needed.
 
-`npm test` passes **16 tests**: six café-rule tests plus ten retained village-rule tests. `npm run build` builds both modes and preserves third-party license notices. The café rule suite covers ready-state timer freeze, correct and mismatched orders, combo points, pause/resume, bounded elapsed time, expiry/respawn, a complete 60-second shift and terminal/restart behavior.
+## Validation and browser walkthrough
 
-Browser walkthrough: open the default page; moving customers should be visible behind a small Play card. Press **1**, **2**, **3** or use the food buttons: expect three served neighbours and **330** points. Pause and resume, serve further orders by their pictures, and allow the shift to finish. **Another quick shift** returns to 60 seconds and zero points. Follow **Village adventure** to verify the original game; its header offers **Quick café game** back to the default.
+`npm test`: **18 passing tests** (eight restaurant-rule tests plus ten preserved village-rule tests). `npm run build` produces both modes and retains runtime license notices. Tests cover all choice sets and translations, friendly incorrect-choice recovery, locked delivery transitions, pause/resume, language progression, complete six-request finish, terminal scoring, restart and invalid/late inputs.
+
+1. **Take a seat**. The wish is **Coffee**. Choose **Un café, s’il vous plaît.** (key **2**). Expect a cup on the table, 100 points, then the bread request.
+2. Choose **Du pain, s’il vous plaît.** (**1**).
+3. For soup, choose **Je voudrais une soupe.** (**2**). Toggle **English help** if wanted; it is free.
+4. For water, choose **De l’eau, s’il vous plaît.** (**3**).
+5. For cake, choose **Je voudrais une part de gâteau.** (**1**).
+6. For the bill, choose **L’addition, s’il vous plaît.** (**2**). Expect **600 points** and the ending after delivery.
+7. **Keep these six phrases** displays all six correct phrases with English meanings. **Visit again** starts a clean meal.
+
+Recovery check: on the first request choose **Du pain, s’il vous plaît.** (**1**). A bread illustration appears, the server explains that it means bread, and the coffee wish remains. Choose **2** to recover without losing points. Pause during any delivery to verify that progression waits for resume.
 
 ## Preserved village adventure
 

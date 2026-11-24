@@ -1,18 +1,20 @@
 <script lang="ts">
  import {onMount} from 'svelte';
  import {newRun,tickRun,jump,pauseRun,resumeRun,RUN_SECONDS,type RunState} from './quick-engine';
+ import {createJumpInput} from './jump-input';
  let run:RunState=$state(newRun('demo'));let reduced=$state(false);let frame:HTMLElement;let width=$state(1060);let height=$state(520);let best=$state(0);
  const region=$derived(run.elapsed<16?'BANFF':run.elapsed<32?'ICEFIELDS':'JASPER');
  const points=$derived(Math.floor(run.elapsed)*5+run.cards*50);
  function start(){run=newRun();}
  function act(){if(run.mode==='demo'||run.mode==='over'||run.mode==='won')run=jump(newRun());else if(run.mode==='playing')run=jump(run);}
+ const jumpInput=createJumpInput(act);
  function togglePause(){run=run.mode==='paused'?resumeRun(run):pauseRun(run);}
  onMount(()=>{
   try{best=Number(localStorage.getItem('funapps-rockies-run-best'))||0;}catch{}
   reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let last=performance.now(),raf=0;
   const draw=(now:number)=>{const before=run.mode;run=tickRun(run,(now-last)/1000);last=now;if(before==='playing'&&(run.mode==='won'||run.mode==='over')&&points>best){best=points;try{localStorage.setItem('funapps-rockies-run-best',String(best));}catch{}}raf=requestAnimationFrame(draw);};raf=requestAnimationFrame(draw);
-  const keys=(e:KeyboardEvent)=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target instanceof HTMLAnchorElement)return;if(e.code==='Space'&&e.target instanceof HTMLElement&&e.target.closest('button,input,select,textarea'))return;if(['Space','ArrowUp','KeyW'].includes(e.code)){e.preventDefault();if(!e.repeat)act();}if(['KeyP','Escape'].includes(e.code)){e.preventDefault();if(!e.repeat)togglePause();}};
+  const keys=(e:KeyboardEvent)=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target instanceof HTMLAnchorElement)return;if(e.code==='Space'&&e.target instanceof HTMLElement&&e.target.closest('button,input,select,textarea'))return;if(['Space','ArrowUp','KeyW'].includes(e.code)){e.preventDefault();if(!e.repeat)act();}if(['KeyP','Escape'].includes(e.code)){e.preventDefault();if(!e.repeat)togglePause();}};
   const hide=()=>{if(document.hidden)run=pauseRun(run);};const blur=()=>run=pauseRun(run);
   window.addEventListener('keydown',keys);window.addEventListener('blur',blur);document.addEventListener('visibilitychange',hide);
   const ro=new ResizeObserver(()=>{const ratio=frame.clientWidth/frame.clientHeight;width=Math.max(600,Math.min(1060,ratio*520));height=width/ratio;});ro.observe(frame);
@@ -24,7 +26,7 @@
 <main class="mountain-game">
  <header><a href="https://funapps.ca/" aria-label="Back to FunApps">f<span>FunApps</span></a><div><h1>Westward<span>Mountain Run</span></h1></div><a class="planner" href="?mode=planner">Trail planner</a></header>
  <div class="playfield" bind:this={frame}>
-  <button class="world" onclick={act} aria-label="Mountain trail. Tap to jump over rocks and collect postcards.">
+  <button class="world" onpointerdown={jumpInput.pointerDown} onkeydown={jumpInput.keyDown} onclick={jumpInput.click} aria-label="Mountain trail. Tap to jump over rocks and collect postcards.">
    <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="A running hiker on an animated mountain trail. Golden postcards are good; rocks need a jump.">
     <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#376eb1"/><stop offset="1" stop-color="#b6e5e6"/></linearGradient><linearGradient id="lake" x2="0" y2="1"><stop stop-color="#56c6bf"/><stop offset="1" stop-color="#178f9b"/></linearGradient></defs>
     <rect width="1100" height={height} fill="url(#sky)"/><circle cx={width*.75} cy={height*.18} r="42" fill="#ffe09a"/>
@@ -50,7 +52,7 @@
   <div class="hud"><div><span>{region} TO JASPER</span><strong>{run.mode==='demo'?'48':Math.max(0,Math.ceil(RUN_SECONDS-run.elapsed))}<small> sec</small></strong></div><div class="collection"><span>POSTCARDS</span><strong>▧ {run.cards}</strong></div><div><span>KEEP GOING</span><strong aria-label={`${run.hearts} hearts`}>{'♥'.repeat(run.hearts)}<b>{'♡'.repeat(3-run.hearts)}</b></strong></div><button class="pause" onclick={togglePause} disabled={run.mode!=='playing'&&run.mode!=='paused'}>{run.mode==='paused'?'Resume':'Pause'}</button></div>
   {#if run.mode==='demo'}<section class="intro"><p>A MARITIMER. SOME VERY BIG HILLS.</p><h2>Catch the view.<br/>Jump the rocks.</h2><button class="start" onclick={start}>Let’s run</button><span>Tap anywhere or press Space to jump</span></section>{/if}
   {#if run.mode==='paused'||run.mode==='won'||run.mode==='over'}<section class="result" aria-live="polite"><p>{run.mode==='paused'?'TAKE A BREATHER':run.mode==='won'?'YOU MADE IT TO JASPER':'A LITTLE STUMBLE'}</p><h2>{run.mode==='paused'?'Trail paused.':run.mode==='won'?'What a grand view.':'Back on your feet?'}</h2>{#if run.mode!=='paused'}<strong>{points}<small> points · {run.cards} postcards</small></strong><span>Best {best} · Banff to Jasper in 48 seconds</span>{/if}<button class="start" onclick={run.mode==='paused'?togglePause:start}>{run.mode==='paused'?'Keep running':'Run again'}</button></section>{/if}
-  <div class="bottom"><p>▧ Catch postcards <span>● Jump rocks</span></p><button class="jump" onclick={act} disabled={run.mode==='paused'}>Jump <kbd>Space</kbd></button></div>
+  <div class="bottom"><p>▧ Catch postcards <span>● Jump rocks</span></p><button class="jump" onpointerdown={jumpInput.pointerDown} onkeydown={jumpInput.keyDown} onclick={jumpInput.click} disabled={run.mode==='paused'}>Jump <kbd>Space</kbd></button></div>
   <div class="progress" role="progressbar" aria-label="Distance to Jasper" aria-valuenow={Math.round(run.elapsed/RUN_SECONDS*100)} aria-valuemin="0" aria-valuemax="100"><i style={`width:${run.elapsed/RUN_SECONDS*100}%`}></i></div>
  </div>
  <footer><span>Salt air traded for mountain air.</span><span>Fictional trail · <a href="?mode=planner">Prefer a quiet hike? Open the trail planner</a></span></footer>
