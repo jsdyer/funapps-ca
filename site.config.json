@@ -272,6 +272,26 @@
       "domain_configured": true
     },
     {
+      "slug": "shell-shocked",
+      "name": "Shell Shocked: Harbourfront Lobster Rush",
+      "url": "https://shell-shocked-lobster.netlify.app/",
+      "description": "A steaming lobster dinner on the Halifax waterfront, against the clock. Crack the shell, pick out the stuck meat, dunk it in butter, and shoo the gulls before they steal a bite.",
+      "category": "Food & frenzy",
+      "icon": "🦞",
+      "color": "#f2c4b4",
+      "featured": true,
+      "controls": [
+        "Tap a claw, knuckle or the tail again and again to crack it open.",
+        "Tap the meat to dunk it in butter and eat it. Quick bites build a combo.",
+        "Tap swooping gulls to shoo them. Each finished lobster adds 7 seconds."
+      ],
+      "custom_domain": "lobster.funapps.ca",
+      "audited_at": "2026-11-23",
+      "domain_ready": false,
+      "netlify_host": "shell-shocked-lobster.netlify.app",
+      "domain_configured": false
+    },
+    {
       "slug": "kitchen-party-outta-hand",
       "name": "Kitchen Party: Outta Hand!",
       "url": "https://polite-flan-9cfec6.netlify.app/",
