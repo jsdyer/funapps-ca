@@ -31,7 +31,7 @@ function end(){state.value={...state.value,status:'ended',message:'You called it
 
 <template>
  <div class="shell" :inert="modalOpen">
-  <header class="topbar"><a href="https://funapps.ca" class="brand"><span class="brand-mark">f.</span> FunApps</a><div class="top-actions"><span class="edition">THE GREAT CANADIAN ROAD TRIP</span><button class="text-button" @click="help=true">How to play</button><button class="text-button" @click="confirmRestart=true">New trip</button></div></header>
+  <header class="topbar"><a href="https://funapps.ca" class="brand"><span class="brand-mark">f.</span> FunApps</a><div class="top-actions"><span class="edition">THE GREAT CANADIAN ROAD TRIP</span><a class="text-button" href="./">Quick play</a><button class="text-button" @click="help=true">How to play</button><button class="text-button" @click="confirmRestart=true">New trip</button></div></header>
   <main>
    <section class="heading"><div><p class="eyebrow">A LITTLE PLANNING. A LOT OF OPEN ROAD.</p><h1>Postcards <em>from Canada</em><span class="maple">✦</span></h1><p class="subtitle">Vancouver to St. John’s. Make the miles mean something.</p></div><div class="trip-badge"><span>YOUR TRAVEL JOURNAL</span><strong>{{ state.cards.length }} <small>{{ state.cards.length === 1 ? 'postcard' : 'postcards' }}</small></strong><button @click="cardView=true">Open collection</button></div></section>
    <section class="dashboard" aria-label="Trip supplies">

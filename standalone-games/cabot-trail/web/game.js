@@ -1,98 +1,24 @@
-import { LENGTH, MAX_SPEED, STOPS, clamp, curveAt, hillAt, createGame, nextStop, nearbyStop, canPhotograph, takePhoto, continueTour, recover, score, step } from './engine.js';
-
-const $ = id => document.getElementById(id);
-const canvas = $('road'), ctx = canvas.getContext('2d');
-canvas.tabIndex = 0;
-let game = createGame(), lastTime = 0, lastUI = 0, lastToast = '', toastUntil = 0;
-const inputs = { left: false, right: false, brake: false, accelerate: false };
-const keyMap = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowDown: 'brake', s: 'brake', ArrowUp: 'accelerate', w: 'accelerate' };
-const heldKeys = new Set(), heldPointers = new Map();
-let best = 0;
-try { best = Number(localStorage.getItem('funapps-cabot-best') || 0); } catch {}
-function bestText() { $('best-score').textContent = best ? `Your best tour: ${best.toLocaleString()} points, saved on this device.` : 'Your best tour will be saved on this device.'; }
-bestText();
-
-function miniature(index, wide = false) {
-  const colours = [['#bcdedb','#5c9a9b','#567b62','#ddba7a'],['#d3dfce','#72a5a3','#547963','#d88b66'],['#dbc7aa','#6d9ca0','#486c5e','#bf8b5b'],['#ded7c2','#8cacaa','#587967','#b98370']][index];
-  return `<svg viewBox="0 0 240 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><rect width="240" height="130" fill="${colours[0]}"/><circle cx="188" cy="32" r="17" fill="#f7e4ba"/><path d="M0 58Q32 26 64 55T130 57L170 96H0" fill="${colours[2]}" opacity=".6"/><path d="M0 78Q38 43 90 82L150 109H0" fill="${colours[2]}"/><path d="M94 77Q158 64 240 75V130H0V109Z" fill="${colours[1]}"/><path d="M0 100Q49 80 86 100T166 130H0" fill="${colours[2]}"/><path d="M0 113Q49 90 83 111T123 130" fill="none" stroke="#dfc899" stroke-width="5"/>${index === 1 || index === 3 ? '<path d="M120 90v-20h16v20Z" fill="#f0e4c8"/><path d="M116 71l12-11 12 11Z" fill="#b9674d"/><path d="M144 97V81h13v16Z" fill="#f0e4c8"/><path d="M141 82l10-9 10 9Z" fill="#a15a43"/>' : '<path d="M32 95V75m-8 10 8-20 9 20m-6 11V79m-7 9 7-17 8 17" stroke="#284e44" stroke-width="3" fill="#284e44"/>'}<path d="M173 92h30m-55 13h24m32-17h19" stroke="#eaf1dd" stroke-width="1" opacity=".5"/></svg>`;
-}
-
-function renderAlbum() {
-  $('album').innerHTML = STOPS.map((stop, i) => {
-    const taken = game.photos.includes(stop.id), missed = game.z > stop.z + 260 && !taken;
-    return `<li class="${taken ? 'taken' : missed ? 'missed' : ''}"><div class="album-thumb">${taken ? miniature(i) : String(i + 1).padStart(2, '0')}</div><div class="album-copy"><strong>${stop.name}</strong><small>${taken ? 'Postcard collected ✓' : missed ? 'For your next trip' : stop.subtitle}</small></div></li>`;
-  }).join('');
-  $('photo-count').textContent = game.photos.length;
-}
-renderAlbum();
-
-function clearInput() {
-  heldKeys.clear(); heldPointers.clear();
-  for (const k in inputs) inputs[k] = false;
-  document.querySelectorAll('[data-control]').forEach(b => b.dataset.active = 'false');
-}
-function syncInput() {
-  for (const k in inputs) inputs[k] = [...heldKeys].some(key => keyMap[key] === k) || [...heldPointers.values()].includes(k);
-  document.querySelectorAll('[data-control]').forEach(b => b.dataset.active = String(inputs[b.dataset.control]));
-}
-function announce(text, seconds = 3) { lastToast = text; toastUntil = performance.now() + seconds * 1000; $('toast').textContent = text; $('toast').classList.add('visible'); }
-function hideOverlay() { $('overlay').hidden = true; canvas.focus({ preventScroll: true }); }
-function showCard(html) { clearInput(); $('overlay').innerHTML = `<div class="start-card result-card">${html}</div>`; $('overlay').hidden = false; $('overlay').querySelector('button')?.focus({ preventScroll: true }); }
-function newTour() { game = createGame(); game.status = 'driving'; clearInput(); hideOverlay(); renderAlbum(); $('pause').disabled = false; $('pause').innerHTML = 'Pause <kbd>P</kbd>'; announce('Cruise is on. Steer gently; brake before a bend.', 5); }
-$('start').addEventListener('click', newTour);
-
-function pause() {
-  if (game.status !== 'driving') return;
-  game.status = 'paused';
-  showCard('<span class="stamp">PULL OVER FOR A MOMENT</span><h2>The coast<br>can wait.</h2><p>Your tour is paused. Daylight and comfort are safely on hold.</p><button class="primary" id="resume">Back to the road</button><button class="primary secondary" id="restart">Start a fresh tour</button>');
-  $('resume').onclick = resume;
-  $('restart').onclick = newTour;
-}
-function resume() { if (game.status !== 'paused') return; game.status = 'driving'; hideOverlay(); clearInput(); }
-$('pause').onclick = pause;
-
-function photograph() {
-  const stop = takePhoto(game);
-  if (!stop) return;
-  const i = STOPS.findIndex(s => s.id === stop.id);
-  renderAlbum();
-  showCard(`<span class="stamp">POSTCARD ${String(game.photos.length).padStart(2, '0')} / 04</span><div class="postcard-image">${miniature(i, true)}</div><h2>${stop.name}</h2><p class="trip-note">${stop.note}</p><p>Photo tucked into your album. A little break restores ride comfort.</p><button class="primary" id="continue">Continue the coastal tour</button>`);
-  $('continue').onclick = () => { continueTour(game); hideOverlay(); clearInput(); announce('Back on the road. Your next view is waiting.'); };
-}
-$('camera').onclick = photograph;
-
-function finish() {
-  clearInput(); $('pause').disabled = true;
-  if (game.status === 'won') {
-    const points = score(game);
-    if (points > best) { best = points; try { localStorage.setItem('funapps-cabot-best', String(best)); } catch {} bestText(); }
-    showCard(`<span class="stamp">THE LONG WAY WAS THE RIGHT WAY</span><h2>${game.photos.length === 4 ? 'An album<br>full of coast.' : 'Home with<br>a story.'}</h2><p>${game.photos.length === 4 ? 'All four postcards, one beautiful loop. That was a proper scenic drive.' : 'You made the coastal loop. There are still a few lookoffs to discover on your next trip.'}</p><div class="result-grid"><div><strong>${game.photos.length}/4</strong><span>POSTCARDS</span></div><div><strong>${Math.round(game.comfort)}%</strong><span>COMFORT</span></div><div><strong>${points.toLocaleString()}</strong><span>POINTS</span></div></div>${game.recovery ? '<p class="small-note">Tour completed with a checkpoint recovery.</p>' : ''}<button class="primary" id="again">Take the long way again</button>`);
-    $('again').onclick = newTour;
-  } else {
-    showCard(`<span class="stamp">TIME FOR A BREATHER</span><h2>${game.daylight <= 0 ? 'The sun<br>has called it.' : 'A rather<br>bumpy ride.'}</h2><p>${game.daylight <= 0 ? 'You ran out of daylight. Try the next stretch again with a fresh start.' : 'The roadside was a little too rough. Brake before bends and make small steering adjustments.'}</p><p>Your ${game.photos.length} collected postcard${game.photos.length === 1 ? '' : 's'} will stay in the album.</p><button class="primary" id="recover">Retry from the last photo stop</button><button class="primary secondary" id="again">Start a fresh tour</button>`);
-    $('recover').onclick = () => { recover(game); hideOverlay(); clearInput(); $('pause').disabled = false; announce('Fresh daylight. Fresh comfort. Enjoy this stretch.'); };
-    $('again').onclick = newTour;
-  }
-  renderAlbum();
-}
-
-document.addEventListener('keydown', e => {
-  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-  if (e.target.closest('input,select,textarea,a,summary') || e.altKey || e.ctrlKey || e.metaKey) return;
-  if (keyMap[k] && game.status === 'driving') { e.preventDefault(); heldKeys.add(k); syncInput(); }
-  if (e.repeat) return;
-  if (k === 'p' || k === 'Escape') { e.preventDefault(); game.status === 'paused' ? resume() : pause(); }
-  if (k === ' ' && game.status === 'driving') { e.preventDefault(); photograph(); }
-});
-document.addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; heldKeys.delete(k); syncInput(); });
-document.querySelectorAll('[data-control]').forEach(b => {
-  b.addEventListener('pointerdown', e => { if (game.status !== 'driving') return; e.preventDefault(); b.setPointerCapture(e.pointerId); heldPointers.set(e.pointerId, b.dataset.control); syncInput(); });
-  for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(event, e => { heldPointers.delete(e.pointerId); syncInput(); });
-  b.addEventListener('contextmenu', e => e.preventDefault());
-});
-window.addEventListener('blur', () => { clearInput(); pause(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { clearInput(); pause(); } });
-
+import{newDrive,startDrive,pauseDrive,resumeDrive,driveStep,TOUR_SECONDS,PLACES}from'./arcade-engine.js';
+import{clamp,curveAt,hillAt,STOPS}from'./engine.js';
+const $=id=>document.getElementById(id),canvas=$('road'),ctx=canvas.getContext('2d');
+let state=newDrive(),demo=startDrive(),game=demo,lastTime=0,lastHUD=0,down=false;
+const inputs={left:false,right:false,brake:false,target:null},keys=new Set(),pointers=new Map();
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let best=0;try{best=Number(localStorage.getItem('cabot-quick-best'))||0;}catch{}if(best)$('best').textContent=`Best cruise: ${best} points`;
+function clear(){keys.clear();pointers.clear();inputs.left=inputs.right=inputs.brake=false;inputs.target=null;down=false;}
+function sync(){for(const kind of ['left','right','brake'])inputs[kind]=[...keys].some(k=>({ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right',ArrowDown:'brake',s:'brake'})[k]===kind)||[...pointers.values()].includes(kind);}
+function start(){state=startDrive();clear();$('card').hidden=true;$('pause').disabled=false;$('pause').textContent='Pause';$('hint').hidden=false;canvas.focus({preventScroll:true});updateHUD();}
+function resume(){resumeDrive(state);clear();$('card').hidden=true;$('pause').textContent='Pause';lastTime=0;}
+function pause(){if(state.status!=='driving')return;pauseDrive(state);clear();$('kicker').textContent='PULLED OVER';$('title').textContent='The coast can wait.';$('copy').textContent='Your drive is paused.';$('start').textContent='Resume';$('best').textContent='';$('card').hidden=false;$('pause').textContent='Resume';}
+function finish(){clear();best=Math.max(best,state.score);try{localStorage.setItem('cabot-quick-best',String(best));}catch{}$('kicker').textContent='COASTAL LOOP COMPLETE';$('title').textContent=state.photos>=10?'An album full of coast.':'Home with a story.';$('copy').textContent=`${state.photos} postcards · ${state.bumps} bumps · ${state.score} points`;$('start').textContent='Drive again';$('best').textContent=`Best cruise: ${best} points`;$('card').hidden=false;$('pause').disabled=true;$('hint').hidden=true;}
+$('start').onclick=()=>state.status==='paused'?resume():start();$('pause').onclick=()=>state.status==='paused'?resume():pause();
+for(const direction of ['left','right','brake']){const b=$(direction);b.onpointerdown=e=>{e.preventDefault();if(state.status==='ready'||state.status==='finished')start();if(state.status!=='driving')return;b.setPointerCapture(e.pointerId);pointers.set(e.pointerId,direction);inputs.target=null;sync();};for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,e=>{pointers.delete(e.pointerId);sync();});b.addEventListener('click',e=>{if(e.detail===0&&direction!=='brake'){if(state.status==='ready'||state.status==='finished')start();if(state.status==='driving')inputs.target=clamp(state.x+(direction==='left'?-.65:.65),-1,1);}});}
+$('brake').addEventListener('keydown',e=>{if(e.key==='Enter'||e.code==='Space'){e.preventDefault();if(state.status==='driving'){keys.add('ArrowDown');sync();}}});$('brake').addEventListener('keyup',e=>{if(e.key==='Enter'||e.code==='Space'){e.preventDefault();keys.delete('ArrowDown');sync();}});
+function aim(e){const rect=canvas.getBoundingClientRect();inputs.target=clamp(((e.clientX-rect.left)/rect.width-.5)*2.3,-1,1);}
+canvas.onpointerdown=e=>{if(state.status==='ready'||state.status==='finished')start();if(state.status!=='driving')return;down=true;canvas.setPointerCapture(e.pointerId);aim(e);};canvas.onpointermove=e=>{if(down&&state.status==='driving')aim(e);};for(const ev of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(ev,()=>down=false);
+window.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||e.target.closest('a,summary,details'))return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowLeft','ArrowRight','ArrowDown','a','d','s'].includes(k)){e.preventDefault();if(state.status==='ready')start();if(state.status==='driving'){keys.add(k);inputs.target=null;sync();}}if((k==='p'||k==='Escape')&&!e.repeat){e.preventDefault();state.status==='paused'?resume():pause();}if(e.code==='Space'&&!e.repeat&&!e.target.closest('button')){e.preventDefault();state.status==='driving'?pause():state.status==='paused'?resume():start();}});window.addEventListener('keyup',e=>{keys.delete(e.key.length===1?e.key.toLowerCase():e.key);sync();});window.addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+function updateHUD(){$('photos').textContent=state.photos;$('bumps').textContent=state.bumps;$('time').textContent=Math.ceil(TOUR_SECONDS-state.elapsed);const cue=state.eventTime>0?state.event:'';if($('cue').textContent!==cue)$('cue').textContent=cue;$('place').textContent=PLACES[Math.min(3,Math.floor(game.elapsed/(TOUR_SECONDS/4)))].toUpperCase()+' · CAPE BRETON';}
+function drawTokens(w,h){for(const o of game.objects){if(o.taken&&o.kind==='photo')continue;const p=Math.max(.08,o.y*o.y),x=w/2+(o.x-game.x)*w*.37*p,y=h*.37+h*.49*p,r=Math.max(8,Math.min(39,w*.048)*Math.sqrt(p));if(o.kind==='photo'){ctx.fillStyle='#ffe17844';ctx.beginPath();ctx.arc(x,y,r*1.4,0,Math.PI*2);ctx.fill();rounded(x-r,y-r*.7,r*2,r*1.4,Math.max(3,r*.13),'#ffe273');rounded(x-r*.83,y-r*.54,r*1.65,r,Math.max(2,r*.08),'#f9fff1');polygon([[x-r*.68,y+r*.26],[x-r*.28,y-r*.3],[x+r*.1,y+r*.26]],'#3e9186');polygon([[x-r*.1,y+r*.26],[x+r*.26,y-r*.15],[x+r*.66,y+r*.26]],'#74ac77');ctx.fillStyle='#f5b752';ctx.beginPath();ctx.arc(x+r*.43,y-r*.3,r*.13,0,Math.PI*2);ctx.fill();}else{polygon([[x-r,y+r*.3],[x-r*.7,y-r*.3],[x-r*.1,y-r*.62],[x+r*.65,y-r*.35],[x+r,y+r*.35]],'#8b5143');polygon([[x-r*.7,y-r*.3],[x-r*.1,y-r*.62],[x+r*.25,y-r*.12],[x-r*.2,y+r*.3]],'#c07c58');line(x-r,y+r*.4,x+r,y+r*.4,'#eeac62',4);}}}
 function polygon(points, colour) { ctx.fillStyle = colour; ctx.beginPath(); points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill(); }
 function line(x1, y1, x2, y2, colour, width = 1) { ctx.strokeStyle = colour; ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
 function rounded(x, y, w, h, r, colour) { ctx.fillStyle = colour; ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); }
@@ -164,6 +90,7 @@ function drawRoad(w, h) {
       for (const side of [-1,1]) { const sx=a.x+side*a.rw*1.2, sy=a.y, sh=Math.min(26,a.rw*.1); line(sx,sy,sx,sy-sh,'#e4dfc1',Math.max(1,a.rw*.009)); }
     }
   }
+  drawTokens(w,h);
   const steer = Number(inputs.right)-Number(inputs.left);
   drawCar(w / 2, h * .86, w / 960, steer);
   const vignette = ctx.createLinearGradient(0,h*.8,0,h); vignette.addColorStop(0,'#173b3700'); vignette.addColorStop(1,'#173b3733'); ctx.fillStyle=vignette;ctx.fillRect(0,h*.8,w,h*.2);
@@ -185,28 +112,4 @@ function drawCar(x, y, scale, steer) {
   if(inputs.brake){rounded(-53,5,23,7,2,'#f6d271');rounded(30,5,23,7,2,'#f6d271');}
   ctx.restore();
 }
-
-function updateUI() {
-  $('speed').textContent = Math.round(game.speed * 1.6);
-  $('comfort').value = game.comfort; $('comfort-label').textContent = `${Math.round(game.comfort)}%`;
-  const time = Math.max(0,Math.ceil(game.daylight)); $('daylight').textContent = `${Math.floor(time/60)}:${String(time%60).padStart(2,'0')}`;
-  const percent = Math.round(game.z/LENGTH*100); $('progress-label').textContent = `${percent}%`; $('progress').style.width=`${percent}%`;
-  const stop = nextStop(game), near=nearbyStop(game), ready=canPhotograph(game);
-  $('camera').disabled=!ready;
-  $('camera-label').textContent=ready?'Take the postcard':near?(game.speed>22?'Slow below 35':'Pull right to park'):'Photo stop ahead';
-  $('road-sign').hidden = !stop || stop.z-game.z>700 || game.status!=='driving';
-  if(stop){$('sign-name').textContent=stop.name;$('sign-distance').textContent=near?'SLOW DOWN · KEEP RIGHT':`LOOKOFF IN ${Math.ceil((stop.z-game.z)/10)*10} m`;}
-  $('leg-name').textContent=game.status==='intro'?'YOUR COASTAL ESCAPE':stop?`NEXT STOP · ${stop.name.toUpperCase()}`:'THE HOME STRETCH';
-  if(game.status==='driving'&&Math.abs(game.x)>1.02&&lastToast!=='Rough shoulder — ease back onto the road.') announce('Rough shoulder — ease back onto the road.',2);
-  if(performance.now()>toastUntil){$('toast').classList.remove('visible');lastToast='';}
-  renderAlbum();
-}
-function frame(time) {
-  const dt = lastTime ? Math.min(.05,(time-lastTime)/1000) : 0;lastTime=time;
-  const previous=game.status;step(game,inputs,dt);
-  if(previous==='driving'&&(game.status==='won'||game.status==='lost'))finish();
-  drawRoad(canvas.width,canvas.height);
-  if(time-lastUI>100){updateUI();lastUI=time;}
-  requestAnimationFrame(frame);
-}
-requestAnimationFrame(frame);
+function frame(time){const dt=lastTime?Math.min(.1,(time-lastTime)/1000):0;lastTime=time;if(!document.hidden){if(state.status==='driving'){driveStep(state,inputs,dt);if(state.status==='finished')finish();}else if(state.status==='ready'&&!reduced){const target=demo.objects.find(o=>o.kind==='photo'&&o.y>.3&&!o.taken);driveStep(demo,{target:target?.x??0},dt);if(demo.status==='finished')demo=startDrive();}}game=state.status==='ready'?demo:state;const r=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2),w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);}ctx.setTransform(ratio,0,0,ratio,0,0);drawRoad(w,h);if(time-lastHUD>80){updateHUD();lastHUD=time;}requestAnimationFrame(frame);}requestAnimationFrame(frame);

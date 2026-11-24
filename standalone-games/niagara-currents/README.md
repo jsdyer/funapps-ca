@@ -1,5 +1,30 @@
 # Niagara: Current Keeper
 
+## Quick play — default experience
+
+The default page is now a **live water-gate arcade game**. The Niagara waterfall, current and glowing basin move immediately in a demonstration. One **Play the current** button starts a 45-second round. Move the copper gate into the glow to fill three basins: scenic falls, riverside garden and power station. The beam, splash, fill meter and target provide the instructions visually.
+
+- Move the mouse or drag anywhere across the scene to position the gate. Left/Right, A/D, or the visible steering buttons provide the same control without dragging. A first movement key or field touch starts play.
+- The glow moves gently at first, then a little farther and faster. Each filled basin advances immediately. Fill all three to win; otherwise the timer produces a score and immediate replay.
+- The scene continues behind the start panel, with no compulsory tutorial, forms or codebook. Optional **Channel puzzles** opens the original six puzzles at `?mode=planner`.
+- Pause/Resume and Restart stay visible. Blur and tab hiding pause a running round; returning never resumes it silently. Large frame gaps are capped and motion uses elapsed time.
+- The attract demonstration respects reduced-motion preference. The action round retains essential motion. No audio is used. Storage is optional and limited to a local best score.
+
+Quick mode uses `src/Quick.tsx`, `src/quick-engine.ts` and `src/quick.css`. `src/main.tsx` selects and lazy-loads the appropriate mode; `src/Planner.tsx` retains the original game. All assets remain bundled locally.
+
+### Quick-play QA
+
+1. Open the default page: moving water and a copper gate are visible immediately; only one Play button is needed.
+2. Start. Move/drag toward the glowing basin. The current follows the gate, splashes when aligned, and fills the meter. Tap/hold steering buttons and use A/D or Left/Right to verify alternatives.
+3. Keep the gate over the glow. Each full meter changes the destination, and the third fill ends with **Every basin filled** and **Play again**. The deterministic rule walkthrough can win in under 20 seconds of correctly tracked play.
+4. Leave the gate at an edge to miss: water spills, the timer ends at 45 seconds, and replay remains available. There are no punitive lives or navigation dead ends.
+5. Pause or switch tabs. The clock and gate freeze; explicit resume retains progress. Restart resets all basins, time, score and movement.
+6. Open **Channel puzzles**, complete the classic first chart using the walkthrough below, and return with **Quick play**.
+
+The suite has **14 tests**: eight original puzzle tests and six arcade tests covering an entire three-stage win, demo/restart, water conservation, time expiry, pause/resume, input bounds and frame-gap protection. Type checking and production builds pass. Live browser QA is performed by the publishing agent.
+
+## Optional channel puzzles
+
 A complete **React + TypeScript + SVG** channel-routing puzzle, told through little notes from a Maritime traveller visiting Niagara. Six original boards progress from a simple bend to branching networks that share twelve finite water units between scenic falls, a mist garden and a small turbine.
 
 Production path: `https://funapps.ca/play/niagara-currents/`.
@@ -29,13 +54,13 @@ npm run build
 
 `npm run build` runs TypeScript checking and Vite. Deployment output is **`web/`**, with relative asset paths and bundled React; it can be copied directly into a static subdirectory. Full runtime/build-helper license notices are copied from `public/THIRD-PARTY-LICENSES.txt`. No CDN, remote font, image server, API key, WebGL, or backend is needed. All panorama and channel art is original SVG/CSS.
 
-`src/engine.ts` owns topology, rotation, finite flow, conservation, hint arrangement and scoring. `src/main.tsx` supplies accessible controls, original SVG art and records. There are no debug controls or browser game-state hooks.
+`src/engine.ts` owns topology, rotation, finite flow, conservation, hint arrangement and scoring. `src/Planner.tsx` supplies the planner controls, original SVG art and records. There are no debug controls or browser game-state hooks.
 
 Eight tests cover all six complete solutions, the first chart's precise two-click solution, immutable rotation/wrap/fixed tiles, conservation across 480 scrambled boards, hint reachability on every chart, loop detection, malformed rotations, and medal rules.
 
 ## Browser QA walkthrough
 
-1. Load the game. The Niagara panorama and first chart are visible. No modal or audio blocks play. The initial prediction spills twelve units.
+1. Open **Channel puzzles** (`?mode=planner`). The Niagara panorama and first chart are visible. No modal or audio blocks play. The initial prediction spills twelve units.
 2. Activate the button whose name starts **B2, rotate channel** once, then the button starting **C3, rotate channel** once. The falls target must read **12 / 12**, spilled **0**, trapped **0**, and the counter **2 turns**.
 3. Press **Release the current**. The result reads **“That’s a good current.”**, awards **3 droplets**, disables channel rotation and offers **Next chart**. The panorama adds a subtle rainbow and lit power-station windows.
 4. Activate **Undo turn** from the result. The last rotation is undone and the puzzle becomes editable. Reapply C3 and release; the best three-droplet record stays intact.

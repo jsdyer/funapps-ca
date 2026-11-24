@@ -1,0 +1,1 @@
+import{T as e}from"./index-t1Naz8MR.js";e(),typeof window<`u`&&((globalThis.__svelte??={}).v??=new Set).add(`5`);

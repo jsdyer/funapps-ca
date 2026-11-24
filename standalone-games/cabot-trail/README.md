@@ -1,3 +1,20 @@
+# Action-first Postcard Cruise
+
+The default game is now a full-screen 55-second coastal arcade drive. Cruise control starts immediately: steer into glowing postcard tokens and dodge brown rocks. The landscape already moves behind the compact opening card. Click **Drive!**, touch the road, or start steering—no stopping, parking, camera button, or speed threshold is required.
+
+- **Controls:** A/D or left/right, drag on the road, or large left/right buttons. Down/S or the Brake button slows the cruise if desired. P/Escape pauses; Space starts/pauses when outside a button.
+- **Round:** postcards award 100 points. Bumps reduce the finish bonus but never abruptly end a casual drive. The 55-second round ends with score and replay; scenery labels progress through Ingonish, Neils Harbour, Pleasant Bay and Chéticamp.
+- **Input handling:** blur/visibility pauses, held keys/pointers clear, pointer cancellation is handled, and simulated movement is bounded and frame-rate independent. Reduced motion stops the attract demo.
+- **Original game:** `classic.html` retains the longer drive, photo stops, and existing tests. A small **Scenic tour** link opens it. Both routes use the original local Canvas 2D artwork.
+
+### Quick-play validation
+
+`npm test`: 15 tests (9 original tour tests and 6 arcade-rule tests). Covers autothrottle/braking, automatic directional pickup, nonfatal rocks, pause/resume, bounded elapsed time, frame-independent steering, one finish award and reset. `npm run build` syntax-checks both modes and engines.
+
+Browser QA: confirm the road moves before starting, click Drive!, steer into a glowing postcard, avoid or hit a rock, use the optional brake, pause/resume, and wait for the 55-second result. Replay starts with zero postcards/bumps and a fresh timer. Scenic tour retains the original four-lookoff adventure.
+
+---
+
 # Cabot Trail — The Scenic Route
 
 A complete scenic-driving game built with native JavaScript ES modules and a custom Canvas 2D pseudo-3D road renderer. There are no dependencies, CDNs, images, audio permissions, accounts, or WebGL requirements. All scenery is drawn locally.

@@ -16,7 +16,7 @@
 
 <svelte:head><title>Westward: A Maritimer in the Rockies | FunApps</title></svelte:head>
 <div class="page" inert={modal!==null}>
- <header class="masthead"><a href="https://funapps.ca" class="brand"><span>f.</span> FUNAPPS <small>/ FROM AWAY</small></a><div class="header-right"><span>ALBERTA · CANADIAN ROCKIES</span><button class="text-button" onclick={()=>modal='help'}>How to explore</button></div></header>
+ <header class="masthead"><a href="https://funapps.ca" class="brand"><span>f.</span> FUNAPPS <small>/ FROM AWAY</small></a><div class="header-right"><a href="?" class="text-button">Quick play</a><span>ALBERTA · CANADIAN ROCKIES</span><button class="text-button" onclick={()=>modal='help'}>How to explore</button></div></header>
  <main>
   <section class="intro-heading"><div><p class="eyebrow">A MARITIMER, A SKETCHBOOK, A VERY BIG HORIZON.</p><h1>Westward<span>.</span></h1><p class="subtitle">A little farther from the ocean. A little closer to the sky.</p></div><div class="traveller-note"><span>POSTMARK / HOME</span><p>“These are some<br><em>serious hills.”</em></p><small>FIELD NOTES FROM THE ROCKIES</small></div></section>
   <nav class="expeditions" aria-label="Choose an expedition">{#each EXPEDITIONS as e,i}<button class:chosen={i===selected} aria-pressed={i===selected} onclick={()=>choose(i)}><span class="tab-region">{e.region}</span><strong>{e.name}</strong><span class="tab-stars" aria-label={`${records[i]} of 3 trail badges`}>{'◆'.repeat(records[i])}{'◇'.repeat(3-records[i])}</span></button>{/each}</nav>

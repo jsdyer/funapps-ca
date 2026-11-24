@@ -1,37 +1,15 @@
-<!doctype html>
-<html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prairie Windrider — A sailor on a sea of grass</title><meta name="description" content="Read the breeze, set your sail, and deliver postcards across five prairie wind puzzles. A Maritime traveller's inland adventure."><meta name="theme-color" content="#243e44"><link rel="stylesheet" href="./style.css"><script type="module" src="./game.js"></script></head><body>
-<header><a class="brand" href="https://funapps.ca/">FUNAPPS <span>/ AWAY FROM THE ATLANTIC</span></a><button class="text-button" id="how">How to play</button></header>
-<main>
-<div class="heading"><div><p class="eyebrow">A MARITIMER. A MAIL BAG. A VERY BIG SKY.</p><h1>Prairie <em>Windrider.</em></h1><p class="intro">Turns out you can miss the ocean<br>and still find a little sailing.</p></div><div class="postmark"><span>INLAND POST</span><strong>SEA OF<br>GRASS</strong><span>FIVE SMALL ADVENTURES</span></div></div>
-<nav id="courses" aria-label="Choose a delivery round"></nav>
-<div class="game-layout">
-<section class="map-panel" aria-label="Windrider course">
-<div class="map-bar"><div><span class="eyebrow" id="course-kicker"></span><h2 id="course-name"></h2></div><div class="position"><span>BUGGY AT</span><strong id="position"></strong></div></div>
-<div id="canvas-wrap" role="img" aria-label="Prairie course map. Blue squares are wet ground, brown fences are blocked, white markers are delivery stops. Exact positions and the landing preview are also described in the controls."><div class="loading">Drawing the big sky…</div></div>
-<div class="legend"><span><i class="dot buggy"></i>Your buggy</span><span><i class="dot station"></i>Delivery stop</span><span><i class="dot marsh"></i>Wet ground</span><span><i class="dash"></i>Landing preview</span></div>
-<div class="letter"><span>POSTCARD HOME</span><p id="letter"></p></div>
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prairie Windrider — Catch the afternoon post</title><meta name="description" content="Steer a little land yacht, catch golden postcards and dodge hay bales in a quick prairie mail run."><meta name="theme-color" content="#173c40"><link rel="stylesheet" href="./quick.css"><script type="module" src="./quick.js"></script></head><body>
+<main class="arcade">
+<header><a href="https://funapps.ca/" class="brand">f. <span>FUNAPPS</span></a><div class="title"><h1>Prairie Windrider</h1><span>A sea of grass. A sail full of mail.</span></div><a href="./planner.html" class="planner">Route puzzles</a></header>
+<section class="field" id="field" aria-label="Prairie mail run">
+<div id="canvas" tabindex="0" role="application" aria-label="Steer the land yacht with Left and Right or A and D. Move a pointer or drag across the field. Collect gold envelopes and avoid red hay bales."></div>
+<div class="hud"><div><span>POSTCARDS</span><strong id="mail">0</strong></div><div class="time"><span>TIME</span><strong id="time">50</strong></div><div><span>SCORE</span><strong id="score">0</strong></div></div>
+<div class="intro" id="intro"><p class="eyebrow">CATCH THE AFTERNOON POST</p><h2>Let the wind<br>do the pedalling.</h2><p><span>✉ Catch</span><span>▤ Dodge</span></p><button class="play" id="play">Play mail run</button><small>Move left & right · 50 seconds</small></div>
+<div class="pause-panel" id="pause-panel" hidden><h2>Taking a breather.</h2><button class="play" id="resume">Keep sailing</button></div>
+<div class="result" id="result" hidden><div class="medals" id="medals" aria-label="Stamps earned"></div><p class="eyebrow">THE AFTERNOON POST IS HOME</p><h2 id="result-title">A fine bit of sailing.</h2><p id="result-score"></p><button class="play" id="again">Sail again</button><small id="best"></small></div>
+<div class="bottom-hint" id="hint">Steer into the gold envelopes</div>
+<div class="wind" aria-hidden="true"><span id="wind-arrow">≋</span> PRAIRIE BREEZE</div>
 </section>
-<aside class="controls" aria-label="Sail controls">
-<div class="hud"><div><span>SAILS USED</span><strong id="moves">0 / 7</strong></div><div><span>DELIVERIES</span><strong id="deliveries">0 / 2</strong></div></div>
-<div class="wind-card"><p class="eyebrow">READ THE PRAIRIE BREEZE</p><strong id="wind"></strong><p>Wind adds one grid space to your sail.</p><div class="forecast" id="forecast" aria-label="Wind forecast"></div></div>
-<section id="active-controls"><h2>Set a course.</h2><p class="instruction">Choose your heading and sail. The dashed line shows exactly where you’ll land.</p>
-<div class="compass" role="group" aria-label="Choose a heading">
-<button data-dir="7"><strong>NW</strong><span>Northwest</span></button><button data-dir="0"><strong>N</strong><span>North</span></button><button data-dir="1"><strong>NE</strong><span>Northeast</span></button>
-<button data-dir="6"><strong>W</strong><span>West</span></button><div class="compass-centre" aria-hidden="true">✳</div><button data-dir="2"><strong>E</strong><span>East</span></button>
-<button data-dir="5"><strong>SW</strong><span>Southwest</span></button><button data-dir="4"><strong>S</strong><span>South</span></button><button data-dir="3"><strong>SE</strong><span>Southeast</span></button>
-</div>
-<div class="sail-label"><span>Sail strength</span><span>grid spaces</span></div><div class="power" role="group" aria-label="Choose sail strength"><button data-power="1">1 <span>Reefed</span></button><button data-power="2">2 <span>Steady</span></button><button data-power="3">3 <span>Full sail</span></button></div>
-<div class="landing" id="landing"><strong id="landing-title"></strong><p id="landing-note"></p></div>
-<button class="primary" id="sail">Set sail</button><button class="wait" id="wait">Brake & wait for the next breeze</button>
-</section>
-<section id="result" hidden aria-live="polite"></section>
-<div class="utility"><button id="undo">Undo</button><button id="hint">A sailor’s hint</button><button id="restart">Restart</button></div>
-<p class="live-note" id="message" role="status" aria-live="polite">Choose a heading and see where the breeze will take you.</p>
-</aside>
-</div>
-<section class="manifest" aria-labelledby="manifest-heading"><div><p class="eyebrow">THE MAIL MUST GET THROUGH</p><h2 id="manifest-heading">Today’s little deliveries.</h2><p id="brief"></p><p id="finish-note"></p><details class="coordinates"><summary>Blocked grid spaces</summary><p id="obstacle-note"></p></details></div><ol id="stations"></ol></section>
-<details class="notes"><summary>Field notes, controls & the real Prairies</summary><div><p>Choose one of eight compass headings and 1–3 sail units. The wind adds one space in its shown direction. A diagonal sail moves that many spaces on both axes. Stop exactly on each delivery marker, then land at the depot. Passing over a stop doesn’t deliver its postcard.</p><p>Wet ground and fences block the whole path, not just the landing. Invalid sails cost nothing. Brake & wait uses one move and changes the wind. Undo takes back a move. The hint suggests a complete route if one remains.</p><p>Mouse and touch use the same controls. Tab and Enter operate every button. Arrow keys choose cardinal headings; Q/E/Z/C choose diagonals; 1/2/3 set sail strength. Space sails when you are not focused on a control. Nothing moves until you choose an action.</p><p>These imaginary courses and grid-based wind rules are a puzzle, not a land-sailing guide. The Maritime perspective is fictional; the big-sky inspiration is real. <a href="https://www.tourismsaskatchewan.com/explore-living-skies" target="_blank" rel="noopener">Explore Saskatchewan’s living skies</a>.</p><p>Made with p5.js in Canvas 2D. <a href="./THIRD-PARTY-LICENSES.txt">Library licence</a> · <a href="./vendor/p5.esm.js" download>p5.js source</a></p></div></details>
-</main>
-<footer><span>THE PRAIRIES, WITH A LITTLE SALT IN THE STORY.</span><span>No timer. No traffic. Just the next good breeze.</span></footer>
-<dialog id="welcome" aria-labelledby="welcome-title"><div class="welcome-art" aria-hidden="true">✉<span>POSTMARKED: SOMEWHERE OUT WEST</span></div><p class="eyebrow">WELCOME ABOARD THE MAIL BUGGY</p><h2 id="welcome-title">A sailor on<br>a sea of grass.</h2><p>You’ve come west from the Maritimes, borrowed a little land yacht, and volunteered for the afternoon post.</p><ol><li><strong>Read the breeze.</strong> It pushes your buggy one extra grid space.</li><li><strong>Pick a heading and sail.</strong> Check the landing preview before moving.</li><li><strong>Make every stop.</strong> Deliver the postcards, then reach the depot before your sails run out.</li></ol><p class="tip">First-round tip: choose East and Full sail (3). The breeze will carry you right to Golden Elevator.</p><button class="primary" id="start">Let’s catch a breeze</button><p class="quiet">No clock to race. Undo and hints are always here.</p></dialog>
-</body></html>
+<footer><div class="steering"><button id="left" aria-label="Steer left">◀</button><span>MOVE / DRAG<br><kbd>A</kbd> <kbd>D</kbd> or <kbd>←</kbd> <kbd>→</kbd></span><button id="right" aria-label="Steer right">▶</button></div><div class="footer-actions"><button id="pause" disabled>Pause</button><button id="restart">Restart</button></div><p>From the Atlantic<br>to a very big sky.</p></footer>
+<p class="sr-only" id="announce" role="status" aria-live="polite"></p>
+</main></body></html>

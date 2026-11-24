@@ -5,17 +5,17 @@
   "games": [
     {
       "slug": "rockies-explorer",
-      "name": "Westward: A Maritimer in the Rockies",
+      "name": "Westward: Mountain Run",
       "url": "https://funapps.ca/play/rockies-explorer/",
-      "description": "Trade sea-level strolls for mountain lookouts. Plan climbs, collect sketches, and find your way home on Banff- and Jasper-inspired expeditions.",
+      "description": "Jump into a mountain run. Hop over rocks, collect postcards, and watch Banff-inspired peaks give way to Jasper.",
       "category": "Roads & trails",
       "icon": "🏔️",
       "color": "#b8ccd3",
       "technology": "Svelte + TypeScript + SVG",
       "controls": [
-        "Choose connected trails and compare their daylight and energy costs.",
-        "Collect the expedition’s lookout sketches and use rest stops wisely.",
-        "Return to the trailhead before daylight runs out."
+        "Tap or press Space to jump; the hiker runs automatically.",
+        "Collect postcards and clear the rocks in a short mountain run.",
+        "Pause when needed, then replay after the run."
       ],
       "featured": true,
       "local_bundle": true,
@@ -26,15 +26,15 @@
       "slug": "prairie-windrider",
       "name": "Prairie Windrider",
       "url": "https://funapps.ca/play/prairie-windrider/",
-      "description": "A Maritime sailor finds a sea of grass. Read the wind and steer a land yacht across prairie courses to deliver your postcards.",
-      "category": "Puzzles & planning",
+      "description": "Catch the prairie breeze in a land yacht. Steer through a moving landscape, collect mail, and dodge the obstacles.",
+      "category": "Quick challenges",
       "icon": "🌾",
       "color": "#e7cf91",
       "technology": "p5.js + Canvas 2D",
       "controls": [
-        "Choose your heading and sail strength before each move.",
-        "Use the wind to reach delivery stops while avoiding obstacles.",
-        "Complete each course within its move allowance."
+        "Steer with the pointer, touch controls, or left and right keys.",
+        "Collect postcards and avoid obstacles while the wind nudges your yacht.",
+        "Finish the short mail run and try to beat your score."
       ],
       "featured": true,
       "local_bundle": true,
@@ -43,17 +43,17 @@
     },
     {
       "slug": "arctic-expedition",
-      "name": "North of the Harbour",
+      "name": "North of the Harbour: Supply Run",
       "url": "https://funapps.ca/play/arctic-expedition/",
-      "description": "Leave the familiar harbour for a fictional northern research expedition. Read the forecast, choose camps, and bring your observations home.",
-      "category": "Roads & trails",
+      "description": "Take a sled across the northern ice. Steer for supply crates, dodge dark ice, and bring home a better score.",
+      "category": "Quick challenges",
       "icon": "❄️",
       "color": "#b9d8e4",
       "technology": "Vue + TypeScript + SVG",
       "controls": [
-        "Choose routes and camp actions using the expedition map and buttons.",
-        "Balance supplies, warmth, and energy against the weather forecast.",
-        "Complete your observations and return to base."
+        "Move left or right with the pointer, touch controls, or arrow keys.",
+        "Collect supply crates and avoid dark ice.",
+        "Pause or replay the short sled run."
       ],
       "featured": true,
       "local_bundle": true,
@@ -64,15 +64,15 @@
       "slug": "quebec-bonjour",
       "name": "Bonjour, voisin! — Québec",
       "url": "https://funapps.ca/play/quebec-bonjour/",
-      "description": "Follow a friendly errand trail through a Québec neighbourhood. Collect clues, practise a little French, and get everyone ready for a gathering—with English help whenever you want it.",
-      "category": "Words & stories",
+      "description": "The café is open and neighbours are arriving. Match each picture order to bread, coffee or apples—no French needed.",
+      "category": "Food & frenzy",
       "icon": "⚜️",
       "color": "#c3c7e6",
       "technology": "Alpine.js + SVG",
       "controls": [
-        "Explore the neighbourhood and talk to its residents.",
-        "Use clues, collected items, and your phrase notebook to complete the errands.",
-        "Show English translations or hints at any time without penalty."
+        "Tap the matching food picture or press 1, 2 or 3.",
+        "Serve arriving neighbours before their patience runs out.",
+        "Build a streak during the 60-second café shift."
       ],
       "featured": true,
       "local_bundle": true,
@@ -81,17 +81,17 @@
     },
     {
       "slug": "cabot-tower-signals",
-      "name": "Signal Hill: Harbour Watch",
+      "name": "Signal Hill: 1901",
       "url": "https://funapps.ca/play/cabot-tower-signals/",
-      "description": "Take a turn at Cabot Tower’s fictional harbour watch. Decode signals, consult the codebook, and send the right reply across the water.",
-      "category": "Words & stories",
+      "description": "Fly Marconi’s kite antenna into the golden signal and receive three dots across the Atlantic.",
+      "category": "Quick challenges",
       "icon": "📡",
       "color": "#b8d2d4",
       "technology": "Web Components + Web Audio + SVG",
       "controls": [
-        "Read the visual Morse signal and use the codebook to decode it.",
-        "Build your reply with dot and dash buttons, then submit it.",
-        "Optional audio starts only when requested; every mission is playable silently."
+        "Move the pointer, drag, or use arrow keys to steer the kite.",
+        "Hold in the golden glow to receive three dots: Morse S.",
+        "Catch the signal before the 40-second round ends, then fly again."
       ],
       "featured": true,
       "local_bundle": true,
@@ -102,15 +102,15 @@
       "slug": "niagara-currents",
       "name": "Niagara: Current Keeper",
       "url": "https://funapps.ca/play/niagara-currents/",
-      "description": "A Maritimer meets the mighty inland falls. Turn channels, plan the water’s path, and make every drop count in Niagara-inspired flow puzzles.",
-      "category": "Puzzles & planning",
+      "description": "The water is already flowing. Slide the gate to guide Niagara’s current into the glowing basin and fill each stage.",
+      "category": "Quick challenges",
       "icon": "💦",
       "color": "#a7d4d2",
       "technology": "React + TypeScript + SVG",
       "controls": [
-        "Select channel tiles and rotate them to connect the water’s path.",
-        "Meet the flow targets without spilling water.",
-        "Release the water, inspect the result, and undo or retry your arrangement."
+        "Drag the gate or use left and right controls.",
+        "Guide the falling water into the glowing target.",
+        "Fill three basins and replay for a better score."
       ],
       "featured": true,
       "local_bundle": true,
@@ -121,15 +121,15 @@
       "slug": "fundy-tidekeeper",
       "name": "Fundy Tidekeeper",
       "url": "https://funapps.ca/play/fundy-tidekeeper/",
-      "description": "Read the tide, cross the causeways, and bring everyone home in six coastal route puzzles.",
-      "category": "Puzzles & planning",
+      "description": "Ride the moving Fundy tide. Steer your boat toward floating supplies and clear the rocks as the water rises and falls.",
+      "category": "Quick challenges",
       "icon": "🌊",
       "color": "#b7d8db",
       "technology": "SVG + Web Components",
       "controls": [
-        "Choose a reachable island to move one step and advance the tide.",
-        "Watch the tide forecast, collect supplies, and return to the harbour.",
-        "Wait, undo, or restart to try another route."
+        "Steer the boat left and right with the pointer, touch or keyboard.",
+        "Collect floating supplies and avoid exposed rocks.",
+        "Play a short tide run, pause, or try again."
       ],
       "featured": true,
       "local_bundle": true,
@@ -138,17 +138,17 @@
     },
     {
       "slug": "cabot-trail",
-      "name": "Cabot Trail: Scenic Drive",
+      "name": "Cabot Trail: Postcard Cruise",
       "url": "https://funapps.ca/play/cabot-trail/",
-      "description": "Take the curves, ease off for the views, and collect coastal photographs on a Cape Breton driving tour.",
+      "description": "The car is rolling and Cape Breton’s curves are ahead. Steer through the scenery and collect photo pickups along the road.",
       "category": "Roads & trails",
       "icon": "🚙",
       "color": "#c3d3b5",
       "technology": "Canvas 2D",
       "controls": [
-        "Steer with arrow keys or WASD, or use the on-screen driving controls.",
-        "Slow down at the scenic pullouts to collect photographs.",
-        "Pause when you need a break and finish your coastal tour."
+        "Steer with left and right keys, the pointer, or on-screen controls.",
+        "The car accelerates automatically; brake when needed.",
+        "Collect photo pickups and complete the scenic drive."
       ],
       "featured": true,
       "local_bundle": true,
@@ -159,15 +159,15 @@
       "slug": "kouchibouguac-cycle",
       "name": "Kouchibouguac: Trail Ride",
       "url": "https://funapps.ca/play/kouchibouguac-cycle/",
-      "description": "Ride through a colourful park-inspired trail network, find the checkpoints, and take time for the scenery.",
+      "description": "Hop on and start pedalling. Steer through a moving park-inspired trail, collect camera pickups, and dodge the fallen logs.",
       "category": "Roads & trails",
       "icon": "🚲",
       "color": "#bcd6bc",
       "technology": "Phaser 3",
       "controls": [
-        "Choose a connected trail using the map, destination buttons, or arrow keys/WASD. Your bike rides to the next junction automatically.",
-        "Photograph four landscapes, manage your energy, and rest along the way.",
-        "Return to the trailhead and finish within the simulated afternoon. P or Escape pauses the ride."
+        "The bike pedals automatically. Steer left and right with keys, pointer or touch.",
+        "Collect camera pickups and dodge logs.",
+        "Finish the 50-second trail ride and replay for a higher score."
       ],
       "featured": true,
       "local_bundle": true,
@@ -178,15 +178,15 @@
       "slug": "pei-potato-harvest",
       "name": "PEI Potato Harvest",
       "url": "https://funapps.ca/play/pei-potato-harvest/",
-      "description": "Plan a season in the red soil: choose crops, watch the weather, and harvest the right potatoes for your orders.",
-      "category": "Puzzles & planning",
+      "description": "Potatoes are popping out of PEI’s red soil. Pick the ripe ones, leave the rocks, and fill your basket before the shift ends.",
+      "category": "Food & frenzy",
       "icon": "🥔",
       "color": "#dfb59c",
       "technology": "Svelte + TypeScript",
       "controls": [
-        "Choose a field and plant, water, or tend its crop.",
-        "Advance the turn when your work is done and watch the forecast.",
-        "Harvest mature potatoes and fill market orders before the season ends."
+        "Tap the potatoes as they pop out of the soil.",
+        "Leave the rocks and build a harvest streak.",
+        "Finish the short picking round and try again."
       ],
       "featured": true,
       "local_bundle": true,
@@ -197,15 +197,15 @@
       "slug": "newfoundland-ferry",
       "name": "Newfoundland Ferry",
       "url": "https://funapps.ca/play/newfoundland-ferry/",
-      "description": "Fit the vehicles, balance your lanes, and sail for Newfoundland in a series of ferry-loading puzzles.",
-      "category": "Puzzles & planning",
+      "description": "Cars are arriving and the ferry is getting ready to sail. Match each vehicle to its pictured lane and get everyone aboard.",
+      "category": "Quick challenges",
       "icon": "⛴️",
       "color": "#b8cfdf",
       "technology": "React + TypeScript + SVG",
       "controls": [
-        "Select a waiting vehicle, then choose a lane on the deck.",
-        "Check capacity and balance; unload or undo to rearrange.",
-        "Complete the manifest and sail to the next harbour."
+        "Tap the matching lane or use keys 1, 2 and 3.",
+        "Load the arriving vehicles using the picture cues.",
+        "Complete the loading rush and watch the ferry sail."
       ],
       "featured": true,
       "local_bundle": true,
@@ -216,15 +216,15 @@
       "slug": "canada-roadtrip",
       "name": "Postcards from Canada",
       "url": "https://funapps.ca/play/canada-roadtrip/",
-      "description": "Plan a branching road trip from Vancouver to St. John’s. Choose scenic detours, keep the tank filled, and bring home a journal of postcards.",
-      "category": "Roads & trails",
+      "description": "One van, ten views, two oceans. Snap moving landmarks as they enter your camera frame on a quick cross-Canada trip.",
+      "category": "Quick challenges",
       "icon": "🗺️",
       "color": "#e5c58d",
       "technology": "Vue + TypeScript + SVG",
       "controls": [
-        "Choose your next connected stop on the map.",
-        "Balance fuel, budget, travel days, and vehicle condition.",
-        "Collect experiences on the way to St. John’s, then compare your trip score."
+        "Tap SNAP or press Space as a landmark enters the glowing camera frame.",
+        "The van drives automatically; collect up to ten postcards in 48 seconds.",
+        "Pause with P or Escape and replay to improve your score."
       ],
       "featured": true,
       "local_bundle": true,

@@ -58,17 +58,19 @@ Run the focused build checks with `python3 -m unittest test_build.py`.
 | Game | Browser technology | Play path |
 | --- | --- | --- |
 | Fundy Tidekeeper | Native Web Components and SVG | `/play/fundy-tidekeeper/` |
-| Cabot Trail | Canvas 2D and JavaScript | `/play/cabot-trail/` |
+| Cabot Trail: Postcard Cruise | Canvas 2D and JavaScript | `/play/cabot-trail/` |
 | Kouchibouguac Trail Ride | Phaser 3, Canvas renderer | `/play/kouchibouguac-cycle/` |
 | PEI Potato Harvest | Svelte and TypeScript | `/play/pei-potato-harvest/` |
 | Newfoundland Ferry | React, TypeScript and SVG | `/play/newfoundland-ferry/` |
 | Postcards from Canada | Vue, TypeScript and SVG | `/play/canada-roadtrip/` |
-| Westward: A Maritimer in the Rockies | Svelte + TypeScript + SVG | `/play/rockies-explorer/` |
+| Westward: Mountain Run | Svelte + TypeScript + SVG | `/play/rockies-explorer/` |
 | Prairie Windrider | p5.js + Canvas 2D | `/play/prairie-windrider/` |
-| North of the Harbour | Vue + TypeScript + SVG | `/play/arctic-expedition/` |
+| North of the Harbour: Supply Run | Vue + TypeScript + SVG | `/play/arctic-expedition/` |
 | Bonjour, voisin! — Québec | Alpine.js + SVG | `/play/quebec-bonjour/` |
-| Signal Hill: Harbour Watch | Web Components + Web Audio + SVG | `/play/cabot-tower-signals/` |
+| Signal Hill: 1901 | Web Components + Web Audio + SVG | `/play/cabot-tower-signals/` |
 | Niagara: Current Keeper | React + TypeScript + SVG | `/play/niagara-currents/` |
+
+The twelve regional games open in casual quick-play modes: moving scenes, concise visual cues and direct controls. Original planning, puzzle and adventure modes remain available from secondary links inside the games. Signal Hill's default now centres on receiving the three dots of Morse S with Marconi's kite antenna in 1901.
 
 Each game's source, tests, reference notes, and build instructions are in its `standalone-games/<slug>/` directory. The generated `web/` releases are committed, including framework code, so the production Python build needs no npm downloads. There are no runtime CDN dependencies or API keys. Rebuild a game's release after changing its source; commit both source and release.
 

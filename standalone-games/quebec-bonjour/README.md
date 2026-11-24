@@ -1,4 +1,24 @@
-# Bonjour, voisin !
+# Bonjour, voisin! — Café Rush
+
+The default game is now a picture-matching café shift: customers arrive with illustrated bread, coffee or apple orders, and the player taps the matching food. It uses the existing locally bundled Alpine.js stack. The full village adventure is preserved behind **Village adventure** at `classic.html`.
+
+## Quick play
+
+- The first screen already shows moving neighbours, order bubbles, drifting clouds and the counter. There is no tutorial dialog or reading gate.
+- **Open the café**, Space, or any food button starts a 60-second shift. The initial three customers request one of each food, so any first food choice earns a successful serve.
+- Click/tap Bread, Coffee or Apple, or press **1**, **2**, **3**. The oldest matching order is served automatically; there is no extra customer-selection step. English labels and pictures are always visible, with French labels as a small optional learning cue.
+- Correct orders earn 100 points plus a growing combo bonus. A mismatched food only resets the combo; waiting customers remain available. A customer whose patience runs out leaves and frees their counter position.
+- **Pause**, **P**, or **Escape** pauses; losing focus or hiding the page also pauses. Resuming is explicit. Hidden time does not advance the shift. The clock uses bounded elapsed time, not a frame counter.
+- The finish screen shows points, served neighbours, and a large **Another quick shift** button. A new shift clears orders, timer, score and combo. Only the separate café best score is stored locally, with storage failures tolerated.
+- Reduced-motion preference disables decorative motion. The food buttons remain ordinary keyboard-focusable buttons. No sound, remote fonts, CDN or account is needed.
+
+### Quick-play QA
+
+`npm test` passes **16 tests**: six café-rule tests plus ten retained village-rule tests. `npm run build` builds both modes and preserves third-party license notices. The café rule suite covers ready-state timer freeze, correct and mismatched orders, combo points, pause/resume, bounded elapsed time, expiry/respawn, a complete 60-second shift and terminal/restart behavior.
+
+Browser walkthrough: open the default page; moving customers should be visible behind a small Play card. Press **1**, **2**, **3** or use the food buttons: expect three served neighbours and **330** points. Pause and resume, serve further orders by their pictures, and allow the shift to finish. **Another quick shift** returns to 60 seconds and zero points. Follow **Village adventure** to verify the original game; its header offers **Quick café game** back to the default.
+
+## Preserved village adventure
 
 A complete illustrated neighbourhood adventure built with **Alpine.js 3.17.5**, native HTML/SVG/CSS and a locally bundled JavaScript runtime. A Maritime visitor follows clues around the invented Québec village of Port-Lumière, carries parcels to their recipients, helps a market grower, and finds the right place for a neighbourhood supper.
 

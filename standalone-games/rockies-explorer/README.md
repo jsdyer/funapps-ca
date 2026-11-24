@@ -1,10 +1,27 @@
 # Westward: A Maritimer in the Rockies
 
-A complete, turn-based alpine route puzzle built with **Svelte 5, TypeScript and original SVG artwork**. A traveller from the Maritimes has brought a sketchbook and a thermos to the inland Canadian Rockies. Four fictional expeditions draw inspiration from Banff, Bow Lake country, the Icefields corridor and Jasper.
+An immediately moving mountain runner, with the original trail-planning game retained as an optional mode. Built with **Svelte 5, TypeScript and original SVG artwork**. A traveller from the Maritimes has brought a sketchbook and a thermos to the inland Canadian Rockies. Four fictional expeditions draw inspiration from Banff, Bow Lake country, the Icefields corridor and Jasper.
 
 Production address: `https://funapps.ca/play/rockies-explorer/`.
 
-## Play
+## Quick play (default)
+
+The first screen is the game: an animated mountain scene with an automatic demonstration, a visible runner, golden postcards and rocks. **Let’s run** begins a 48-second run. Tapping the trail or pressing **Space / Up / W** begins with a jump. There are no opening instructions to dismiss.
+
+- Tap the trail or the large **Jump** button, or press **Space / Up / W**, to hop over rocks and collect postcards.
+- Three hearts, brief impact protection, and a progress bar make the outcome visible. Reach Jasper after 48 seconds to finish; three collisions end the run. Each postcard is worth 50 points, with five points per second travelled.
+- **Pause / P / Escape** freezes the run. Losing window focus or hiding the page pauses automatically; resuming requires an explicit action.
+- **Run again** resets the timer, hearts, objects and score. The personal best is saved locally where storage is available.
+- Reduced-motion preference removes decorative parallax while preserving necessary obstacle movement. No audio is required.
+- **Trail planner** opens `?mode=planner`, which preserves all four original route puzzles and links back to quick play.
+
+Quick-mode rules live in `src/quick-engine.ts`; the interface is `src/QuickPlay.svelte`. Six additional tests cover live attract motion, collisions versus jumping, one-time collection, impact grace, pause/reset, a complete successful run, loss, and bounded frame deltas. Total: 15 tests, plus Svelte checks and production build.
+
+### Quick-play browser checks
+
+Open the default URL: the hiker and scenery should already be moving behind a compact Play card. Start, then use Space or the large Jump button as a rock approaches. A jump should visibly clear the obstacle; a grounded hit removes one heart. Collecting a postcard increments the HUD. Pause freezes the clock and scene, and Resume continues. Finish or lose, then Run again should restore three hearts and 48 seconds. Check `?mode=planner` still opens the original route game.
+
+## Trail planner (`?mode=planner`)
 
 Choose connected trails, climb through elevation bands, sketch the required views, and return to the trailhead before daylight runs out. Climbing consumes extra energy. Low contours and steep shortcuts give different route choices. A finite supply of tea restores energy, while each shelter's first break saves a ration. Optional sketches add points.
 
@@ -39,7 +56,7 @@ npm run build
 
 Nine rule tests cover full three-badge solutions to every expedition, ascent/descent costs, atomic invalid actions, immutable history for undo, single-use sketches, limited shelter/tea recovery, final-day win/loss boundaries, stranded-state detection, and scoring. Svelte check verifies the complete UI; production build bundles the runtime.
 
-## Browser QA walkthrough
+## Planner browser QA walkthrough
 
 1. Open the game and close the introduction with **Pack the sketchbook**. Initial first-expedition supplies: 24 daylight, 12 energy, two tea rations, zero of three required sketches.
 2. Complete the first expedition using this exact sequence. Every movement has an ordinary route button, so no canvas interaction is needed:

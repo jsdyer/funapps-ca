@@ -72,7 +72,8 @@
 .arcade-body h3 a{text-decoration:none}
 .arcade-body p{font-size:16px;line-height:1.6;color:var(--muted);margin:0 0 20px;flex:1}
 .arcade-body .play-button{font-size:14px;text-decoration:none;display:inline-flex;align-items:center;min-height:43px;margin-top:auto}
-.arcade-direct{font-size:13px;margin-top:14px;text-underline-offset:4px;color:#38594a}
+.arcade-direct{font-size:15px;font-weight:800;text-decoration:none;color:white;background:var(--ink);border-radius:8px;padding:13px 19px;min-height:46px;display:inline-flex;align-items:center}
+.arcade-about{font-size:13px;text-underline-offset:4px;color:#38594a}
 .arcade-actions{display:flex;align-items:baseline;gap:20px;justify-content:space-between;flex-wrap:wrap}
 .arcade-card:hover{box-shadow:0 8px 28px #253f3614}
 .arcade-card:focus-within{outline:2px solid #9c5648;outline-offset:4px}

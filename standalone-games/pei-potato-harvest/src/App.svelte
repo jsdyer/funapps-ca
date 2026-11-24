@@ -43,7 +43,7 @@
 <div class="app-shell" inert={welcome || help || confirmRestart || farm.finished}>
   <header class="topbar">
     <a href="https://funapps.ca" class="brand"><span class="brand-mark">f.</span> FunApps <span class="brand-divider">/</span> Island collection</a>
-    <div class="top-actions"><span class="built-tag">PEI · CANADA</span><button class="quiet" onclick={() => help = true}>How to play</button><button class="quiet" onclick={() => confirmRestart = true}>New season</button></div>
+    <div class="top-actions"><a href="./">Quick harvest</a><span class="built-tag">PEI · CANADA</span><button class="quiet" onclick={() => help = true}>How to play</button><button class="quiet" onclick={() => confirmRestart = true}>New season</button></div>
   </header>
 
   <main>

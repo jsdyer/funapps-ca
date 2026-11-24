@@ -90,12 +90,12 @@ def game_card(game):
     classes = "arcade-card featured" if game.get("featured") else "arcade-card"
     search = " ".join(game[field] for field in ("name", "description", "category"))
     return f'''<article class="{classes}" data-category="{esc(game['category'])}" data-search="{esc(search)}">
-  <a class="arcade-art" href="{detail_path(game)}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><span>{esc(game['icon'])}</span></a>
+  <a class="arcade-art" href="{esc(game['url'])}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><span>{esc(game['icon'])}</span></a>
   <div class="arcade-body"><span class="game-tag">{esc(game['category'])}</span>
-    <h3><a href="{detail_path(game)}">{esc(game['name'])}</a></h3>
+    <h3><a href="{esc(game['url'])}">{esc(game['name'])}</a></h3>
     <p>{esc(game['description'])}</p>
-    <div class="arcade-actions"><a class="play-button" href="{detail_path(game)}">Explore game</a>
-    <a class="arcade-direct" href="{esc(game['url'])}" aria-label="Play {esc(game['name'])}">Play now</a></div>
+    <div class="arcade-actions"><a class="arcade-direct" href="{esc(game['url'])}" aria-label="Play {esc(game['name'])}">Play now</a>
+    <a class="arcade-about" href="{detail_path(game)}">About this game</a></div>
   </div>
 </article>'''
 

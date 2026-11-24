@@ -1,3 +1,20 @@
+# Action-first Trail Ride
+
+The default game is now a moving, full-screen 50-second bicycle ride. Pedalling is automatic: steer into bright camera tokens and dodge brown logs. A brief animated demonstration runs before play without consuming the player's timer or score. No route choices or instructions dialog blocks the first ride. A single **Ride!** button starts, and the first steering input can also start it.
+
+- **Controls:** A/D or left/right, drag on the trail, or large left/right buttons. Tab + Enter also operates the steering buttons in useful steps. P or Escape pauses. Space starts or pauses when not on a button.
+- **Round:** cameras award 100 points; bumps only reduce the end-of-round bonus, so a mistake never traps the player in a failure screen. All rounds end at 50 seconds with score and replay.
+- **Safety of input:** pointer cancellation, key release, blur and hidden-tab pause clear held controls. Simulation uses bounded elapsed seconds. Reduced-motion preference stops the attract demo.
+- **Original game:** `planner.html` retains the existing route-planning adventure, its controls, and tests. The default screen links to it as **Trail planner**.
+
+### Quick-play validation
+
+`npm test`: 13 tests (7 original planner tests and 6 arcade-rule tests). Covers ready mode, frame-independent steering, camera/log collisions, pause/resume, bounded deltas, finish-once scoring and restart. `npm run build` bundles both Phaser entries with local assets and licensing.
+
+Browser QA: confirm the trail moves behind the opening card, click Ride!, hold left/right or drag to cameras, hit a log for a nonfatal bump, pause/resume, and allow the 50-second finish. Replay must show zero photos/bumps and 50 seconds. Follow Trail planner to retain the original adventure.
+
+---
+
 # Kouchibouguac — A Good Day to Ride
 
 A complete, local-first cycling adventure made with **Phaser 3.90.0** in explicit **Canvas mode** (no WebGL dependency). Every tree, trail, waterway, marker and bicycle is drawn procedurally. The production bundle includes the engine; no CDN, account, API, remote font or external art is required to play.

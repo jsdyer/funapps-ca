@@ -1,5 +1,30 @@
 # Prairie Windrider
 
+## Quick play — default experience
+
+The default page is now a **50-second real-time land-yacht mail run**. A moving prairie demonstration is visible immediately; one **Play mail run** button starts the clock. The player steers into large gold envelopes and avoids red hay bales. No map reading, direction planning or instructions dialog is required.
+
+- Move the mouse, drag on touch, use Left/Right or A/D, or tap/hold the two steering buttons. The first movement key or touch on the field also starts play.
+- Each postcard earns 100 points; a bump costs at most 75 points and gives a short recovery window. Bumps never end the round.
+- After 50 seconds, the score, postcards and stamps appear with **Sail again**. Fourteen postcards earn two stamps and 24 earn three.
+- Pause/Resume and Restart are always visible. Losing focus or hiding the page pauses a running round and requires an explicit resume. Large frame gaps are capped; game speed uses elapsed time.
+- Reduced-motion preference freezes the attract demonstration. Gameplay still uses the motion essential to steering. There is no audio. Only a best score is saved locally, and storage failures are harmless.
+
+Quick mode source: `src/quick-engine.mjs`, `src/quick.js`, `src/quick.css`, `src/index.html`. The original five route puzzles remain available through **Route puzzles**, at `planner.html`, with a **Quick play** return link. Both modes share the local p5.js distribution.
+
+### Quick-play QA
+
+1. Open the default page: the yacht, letters and field move before pressing Play; no instructions modal appears.
+2. Press **Play mail run**. A first envelope reaches the yacht in about a second. Steer left and right and verify the yacht follows the pointer/keys/buttons.
+3. Catch an envelope: the count and score rise and a small ring flashes. A red bale causes one bump and a brief recovery flash; the run continues.
+4. Pause: both the scene and clock stop. Resume keeps the same score and position. Switch tabs or blur the window and confirm explicit resume is required.
+5. Finish 50 seconds or replay from a result. **Sail again** and Restart reset time, objects, score, bumps and movement.
+6. Follow **Route puzzles**, verify the original game below, then use **Quick play** to return.
+
+The test suite has **17 tests**: the 11 original planner tests plus six arcade tests covering demo/reset, collection, collision recovery, pause/resume, input bounds, frame-gap protection, round completion and ordinary frame-rate independence. Production build and JavaScript syntax checks pass. Live browser QA is performed by the publishing agent.
+
+## Optional route puzzles
+
 Five wind-vector delivery puzzles seen through the eyes of a fictional Maritime sailor travelling inland. Choose a heading and sail strength, account for the crosswind, deliver postcards at prairie stops, and reach the depot within the move budget. This is a puzzle about predictable vectors and obstacles, not a real land-sailing simulator.
 
 **Technology:** JavaScript ES modules, **p5.js 2.4.0** in explicit **Canvas 2D (`P2D`)** mode, ordinary accessible HTML controls. All gameplay state changes immediately on an action. `noLoop()` and `redraw()` draw only when needed; the game has no real-time animation dependency, timer, WebGL, API, account, CDN, or remote font.
@@ -16,7 +41,7 @@ npm test
 npm run build
 ```
 
-The complete production directory is `web/`. Deploy it recursively, including `vendor/`. Every runtime URL is relative, so the release works under a subdirectory or standalone hostname. `src/engine.mjs` contains deterministic rules and a breadth-first hint solver; `src/game.js` contains HTML interaction and the p5 canvas artwork. `src/index.html` and `src/style.css` are the page shell and responsive style.
+The complete production directory is `web/`. Deploy it recursively, including `vendor/`. Every runtime URL is relative, so the release works under a subdirectory or standalone hostname. `src/engine.mjs` contains deterministic rules and a breadth-first hint solver; `src/game.js` contains HTML interaction and the p5 canvas artwork. `src/planner.html` and `src/style.css` are the optional planner page shell and responsive style.
 
 The build copies the upstream, **unmodified and unminified** p5 ESM distribution to `web/vendor/p5.esm.js` (about 3.7 MB before HTTP compression). It has no unresolved bare imports and is directly imported as a separate module, so it remains replaceable by a compatible modified library. The local source and complete LGPL 2.1 licence are linked from the game's field notes. The exact npm dependency is pinned in the package and lockfile. This intentionally uses more source bytes than a minified bundle in exchange for straightforward source availability and replacement.
 
@@ -39,7 +64,7 @@ The canvas is visual only. Current position, landing, delivery coordinates, fore
 
 ## Browser QA
 
-1. Load the release. The introductory dialog appears, with a drawn big-sky prairie course behind it. Click **Let’s catch a breeze**.
+1. Open **Route puzzles** (`planner.html`). The introductory dialog appears, with a drawn big-sky prairie course behind it. Click **Let’s catch a breeze**.
 2. First course starts at **B7**, heading East, strength 3. The current wind pushes east. **Set sail to F7** delivers Golden Elevator and uses one move.
 3. Click **North**, choose **1 Reefed**, then **Set sail to G6**.
 4. Click **Northeast**, choose **3 Full sail**, then **Set sail to K3**. Both postcards are delivered and the depot is reached. Expected: **3 sails, 3 of 3 stamps**, success panel and **Next delivery round**.

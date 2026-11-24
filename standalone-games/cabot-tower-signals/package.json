@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "build": "node --check web/app.js && node --check web/engine.js && node --check web/audio.js"
+    "build": "node --check web/app.js && node --check web/engine.js && node --check web/audio.js && node --check web/arcade.js && node --check web/arcade-engine.js"
   }
 }

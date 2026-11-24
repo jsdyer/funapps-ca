@@ -1,10 +1,27 @@
 # North of the Harbour
 
-A complete, turn-based fictional Arctic research expedition from a Maritime visitor’s perspective. Built with **Vue 3, TypeScript, CSS and SVG**, with all runtime code bundled locally. No account, API, CDN, font download or WebGL is needed.
+A moving, casual sled supply run from a Maritime visitor’s perspective, with the original turn-based Arctic expedition preserved as an optional planner. Built with **Vue 3, TypeScript, CSS and SVG**, with all runtime code bundled locally. No account, API, CDN, font download or WebGL is needed.
 
 Production path: `https://funapps.ca/play/arctic-expedition/`.
 
-## Gameplay
+## Quick play (default)
+
+The opening screen immediately shows a sled travelling through the snow, orange supply crates and dark ice. **Let’s go**, a left/right key, or a touch on the snowfield starts a 45-second run. No instructions need to be dismissed.
+
+- Move the mouse over the snowfield, drag with a finger, or hold **Left / Right / A / D** to steer. Large on-screen steering buttons also work with held touch/pointer input.
+- Catch orange crates for 100 points; avoid dark ice, which costs one of three hearts. Brief impact protection prevents a single cluster costing all lives. Survive 45 seconds to return to base; three impacts end the run. Travel earns five points per second.
+- **Pause / P / Escape / Space** pauses an active run. Window blur or a hidden tab pauses automatically; explicit Resume continues. Space starts from the attract or result screen.
+- **Run again** clears the field and score and restores three hearts and 45 seconds. Best score is stored locally when possible.
+- Reduced-motion preference freezes decorative snow bands; collectible and hazard motion remains necessary to play. No audio is required.
+- **Expedition planner** opens `?mode=planner`, preserving the full original research expedition and its Quick play return link.
+
+Quick-mode rules are in `src/quick-engine.ts`; artwork, controls and game loop in `src/QuickPlay.vue`. Six new tests cover demo motion, steering bounds, collection, hazards, pause/reset, a full winning run, loss and large frame gaps. Total: 16 tests, type-checked game rules, and a production Vue build.
+
+### Quick-play browser checks
+
+Open the default page: supply crates and the demonstration sled should already move. Start, steer toward an orange crate, and confirm the supply counter increases. Passing over dark ice should remove one heart. Pause freezes both clock and objects; Resume continues. Losing focus must pause. Restart after a completed/failed round must restore the initial state. Follow Expedition planner to confirm the retained mode loads.
+
+## Expedition planner (`?mode=planner`)
 
 You begin at Harbour base with six field days, three actions per day, ten energy, ten warmth, eight rations and two camp kits. Record the **Glacier lookout, Weather ridge and Tundra garden** observations, then return to Harbour base and hand in the notebook. Mirror lake and Quiet inlet are optional notes that add points and flavour.
 
@@ -39,7 +56,7 @@ npm run build
 
 Ten meaningful tests verify both complete routes below, map connectivity, action limits, overnight reset, camp deployment/recovery, non-repeatable observations, failures/recovery, deadline and final-day boundaries, no invalid/post-terminal actions, and input immutability. The rules module is type-checked and Vite compiles the Vue interface.
 
-## Browser QA — straightforward winning expedition
+## Planner browser QA — straightforward winning expedition
 
 Start with **Head north**. All named movements below use the destination buttons. “Observe” means **Record observation**. “Night” means **Settle in for the night**; if actions remain, confirm **Yes, end the day**.
 

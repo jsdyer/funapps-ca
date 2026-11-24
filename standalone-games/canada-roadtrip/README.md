@@ -1,6 +1,19 @@
 # Postcards from Canada
 
-A complete, turn-based cross-country road-trip game made with **Vue 3, TypeScript and SVG**. Drive from Vancouver to St. John’s, choose northern or southern branches, keep the van supplied, and collect a personal set of postcards. No timer, accounts, network API, runtime CDN, or remote font is required.
+A moving cross-country postcard hunt made with **Vue 3, TypeScript and SVG**. The van drives automatically: tap SNAP or press Space as each landmark enters the camera frame. Ten views pass in a 48-second trip, from the Pacific to Newfoundland. A moving demonstration and one short cue replace the compulsory introduction. No accounts, network API, runtime CDN, or remote font is required.
+
+The original turn-based journey remains available through **Trip planner** (`?mode=planner`). Its rules and walkthrough are retained below. Existing planner saves are preserved.
+
+## Quick play
+
+- **Let’s roll**, the SNAP button, or a tap on the scene starts the trip.
+- Photograph the moving views inside the central frame. The frame and SNAP button turn gold at the right moment. Each view scores once, with up to 200 points for a centred shot; missed shots do not remove points.
+- **Pause**, **P**, or **Escape** pauses the round. Leaving the tab/window pauses it too. Resume is explicit; a fresh trip clears the current score and collection.
+- The end screen lists collected views and a local personal best. No camera permission or actual photograph capture is involved; this is an illustrated arcade game.
+- Reduced-motion preference stops the attract animation and removes flashes/bobbing. Gameplay scenery still moves because timing is the mechanic.
+- `src/QuickPlay.vue` and `src/quick-engine.ts` implement the default. The old app and its styles load only in planner mode.
+
+Quick QA: load the page and verify scenery is visible immediately, start, snap while the frame glows, verify score/card increase, pause/resume, then finish and restart. Six new rule tests cover all ten captures, duplicate/missed shots, demo, pause/resume, bounded deltas and completion/reset.
 
 Production address: `https://funapps.ca/play/canada-roadtrip/`.
 

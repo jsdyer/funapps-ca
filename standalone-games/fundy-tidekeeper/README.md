@@ -1,5 +1,26 @@
 # Fundy Tidekeeper
 
+## Quick play — the default
+
+The first screen is now an animated, full-page **Boat Run**. Golden crates drift toward a bright rescue boat while the tide uncovers and covers rocks. One **Play boat run** button starts a 60-second round. Move the boat to catch ten crates; rock bumps break the combo but never abruptly end the game. A full haul ends early with a score and **Play again**. Nothing requires reading a route chart.
+
+- Mouse: move over the water to steer. Touch: tap/drag on the water, or hold the large left/right buttons.
+- Keyboard: Left/Right or A/D; Space starts/pauses from the game area. P pauses/resumes. Tab/Enter work on all buttons.
+- The game pauses when the page is hidden or loses focus, and requires an explicit resume. Scores and timers freeze while paused.
+- Motion in the preview is decorative, with no clock or score penalty. Reduced-motion preference disables preview motion and decorative wave/ring animations; active play still moves the objects needed for the game.
+- Best score is stored defensively; play continues if storage is unavailable.
+- The old route puzzles remain intact at `web/puzzles.html`, linked as **Route puzzles**, with a return link to the boat run.
+
+`web/run-engine.js` contains the pure quick-play rules. `web/run.js` is the SVG Web Component, and `web/run.css` its responsive presentation. These files are both source and deployable release. The existing `engine.js`, `app.js` and `styles.css` now serve the optional puzzle page. No dependencies or build step are needed.
+
+### Quick-play verification
+
+`npm test`: **21 passing tests** (14 existing puzzle tests, six quick-play rules tests and one component-mount regression). The new tests cover pause/readiness, bounded steering, frame-gap clamping, crate collection, exposed-versus-covered rocks, timeout/restart, and a full generated winning run. The mount regression also checks native `HTMLElement.hidden` coercion, listener validity, visible startup, pause key repeat and resume input reset. `node --check web/run.js` also passes.
+
+Browser QA: verify crates drift on the opening screen while the HUD remains 0/10 and 60 seconds. Choose **Play boat run**, move to the first crate at centre and confirm score/cargo rise. Move left/right with keys and the large buttons. Pause/resume and switch away/back to verify time freezes. Steer under successive golden crates until 10/10; **Home with the haul!** and replay should appear. Test **Route puzzles** separately.
+
+## Optional route puzzle
+
 A six-round turn-based causeway puzzle inspired by the Bay of Fundy. Sail-free, combat-free: deliver supplies, pick up island visitors, read the tide, and return to Harbour before the end of the shift.
 
 ## Technology and delivery

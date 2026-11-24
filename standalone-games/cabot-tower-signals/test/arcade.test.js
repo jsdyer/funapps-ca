@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {newReception,startReception,stepReception,togglePause,signalTarget,ROUND_SECONDS} from '../web/arcade-engine.js';
+test('attract mode never spends time or receives dots',()=>{const s=newReception();assert.equal(stepReception(s,100,{dx:1}),s);assert.equal(s.elapsed,0);});
+test('kite steers and stays within the flight area',()=>{let s=startReception();for(let i=0;i<800;i++)s=stepReception(s,.02,{dx:-1,dy:-1});assert.equal(s.x,90);assert.equal(s.y,85);});
+test('three held signal locks receive S and finish with a score',()=>{let s=startReception();for(let i=0;i<2000&&s.phase==='playing';i++)s=stepReception(s,.02,{target:signalTarget(s)});assert.equal(s.phase,'won');assert.equal(s.dots,3);assert.ok(s.score>300);assert.ok(s.elapsed<15);assert.equal(stepReception(s,.05),s);});
+test('leaving the glow leaks charge but preserves received dots',()=>{let s={...startReception(),dots:1,charge:1,x:90,y:85};s=stepReception(s,.05);assert.equal(s.dots,1);assert.ok(s.charge<1);assert.ok(s.charge>0);});
+test('pause freezes the complete simulation and resume continues',()=>{let s=stepReception(startReception(),.05,{dx:1});const elapsed=s.elapsed;s=togglePause(s);assert.equal(s.phase,'paused');assert.equal(stepReception(s,.05,{dx:1}),s);s=togglePause(s);assert.equal(s.phase,'playing');assert.ok(stepReception(s,.05).elapsed>elapsed);});
+test('dt is bounded after suspension; invalid dt is ignored',()=>{const s=startReception();assert.equal(stepReception(s,NaN),s);assert.equal(stepReception(s,-4),s);assert.equal(stepReception(s,100).elapsed,.05);});
+test('missed reception ends the round and restarting clears progress',()=>{let s={...startReception(),x:90,y:85};for(let i=0;i<1000&&s.phase==='playing';i++)s=stepReception(s,.05,{target:{x:90,y:85}});assert.equal(s.phase,'ended');assert.equal(s.elapsed,ROUND_SECONDS);assert.equal(s.dots,0);const fresh=startReception();assert.equal(fresh.elapsed,0);assert.equal(fresh.dots,0);assert.equal(fresh.charge,0);assert.equal(fresh.score,0);});

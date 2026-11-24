@@ -1,67 +1,49 @@
-# Signal Hill: Harbour Watch
+# Signal Hill: 1901
 
-A fictional day at a harbour-club signal desk, viewed through the eyes of a Maritime traveller visiting Newfoundland. Decode six friendly Morse messages, choose the reply that fits each scene, then build the reply with dots and dashes. No Morse knowledge, sound, dexterity or timed keypresses are needed.
+An immediate-action kite game inspired by Marconi’s first transatlantic wireless reception. The scene is moving on arrival: radio waves cross the Atlantic, a kite flies above Signal Hill, and a golden signal target shows exactly where to steer. No decoding form, map menu or introductory reading is required.
 
-**Technology:** native Web Components, original SVG artwork, CSS, and optional Web Audio. No framework, npm runtime dependencies, external fonts, CDN, account, API or remote art. `web/` is the complete self-contained production app, ready for `https://funapps.ca/play/cabot-tower-signals/` or another static directory. All local runtime URLs are relative.
+**Technology:** native Web Components, original SVG artwork and optional Web Audio. The complete dependency-free release lives in `web/`. No CDN, accounts or external assets are required. The previous six-watch Morse puzzle remains available as an optional **Original Morse puzzle** link (`classic.html`), with its engine and tests intact.
 
-## Game and controls
+## Immediate play
 
-- Choose **Take the watch** to begin. Each incoming strip is one letter; match it to the free, complete codebook.
-- Type the decoded word into **Decoded message**, then choose **Check message**.
-- Read the fictional harbour situation and select the appropriate reply. Incorrect choices explain the mismatch and let you try again.
-- Build each highlighted reply letter with **Dot**, **Dash**, **Erase last** and **Clear letter**. **Send letter** checks it and moves to the next letter.
-- Keyboard: `.` adds a dot, `-` adds a dash, Backspace erases, and Enter sends when focus is outside another control. Native Tab/Enter button operation and typing in the answer field are preserved.
-- Click a codebook tile to pin its pattern. The next required reply letter is pinned automatically when a new letter starts. The codebook and signal replay cost no points.
-- **Replay signal** flashes the tower lamp; each received strip can be replayed separately. **Sound off** is the initial state. Click it to enable optional audio, then replay a signal. Audio is created/resumed only from user actions and stops when the browser loses focus or the page changes visibility.
-- **Show me the message** / **Show this pattern** are explicit hints. Each distinct hint is charged only once. Hints and incorrect submissions affect stars, but never lock out completion.
-- Each completed watch earns 500 points minus 35 per retry and 50 per hint, with a minimum of 100. Three stars require no retries or hints, two stars follow one, and one star follows more. Finishing unlocks the next watch.
-- **Restart this watch** resets the current puzzle. Completed watches can be replayed from the navigation. Only best stars are saved locally; blocked or malformed storage is handled safely. A reload starts a fresh first watch but preserves earned stars where storage is available.
+- Press **Catch the signal**, click the sky, or press an arrow key to start. The attract scene has no time or score penalties.
+- Move the pointer, drag on touchscreens, use Arrow keys/WASD, or hold the visible direction buttons. The kite follows your direction immediately.
+- Hold the kite in the **golden glow** to receive a dot. The filling ring shows progress. Receive three dots to complete Morse **S**.
+- Each dot needs 2.2 seconds in the signal. Leaving the signal slowly loses incomplete progress; already received dots stay collected. The target shifts after each successful dot.
+- A round lasts at most 40 simulated seconds. Win for 300 points plus a time bonus; restart is one button. Only the best score is stored locally.
+- **Pause**, `P`, Escape or Space while the sky is focused pauses/resumes. Losing focus or hiding the tab pauses play automatically. Resuming is explicit; elapsed time does not advance while paused.
+- Sound begins off. The optional toggle enables short Morse tones; visual feedback remains complete without audio.
 
-## Build and verification
+The game uses a responsive SVG viewport with separate artwork, target and kite placement. Pointer coordinates and target geometry use the same transform at wide and narrow widths. Motion delta is capped to 50ms, so suspended frames do not jump the simulation forward. Reduced-motion preference slows decorative waves and kite sway while preserving the playable mechanic.
 
-Requires a modern browser with JavaScript modules and custom elements. Optional audio requires Web Audio support. The rule tests run on Node 22+; tested with Node 24.
+## Build and checks
 
 ```sh
 npm test
 npm run build
 ```
 
-There is no installation or compilation requirement. `npm run build` syntax-checks the three browser modules; it does not generate or rewrite the game files. The release is maintained directly in `web/`.
+No install step or compiler is required. The build syntax-checks both game modes. Seventeen tests cover the new action rules, a complete three-dot winning run, finite play boundaries, charge recovery, timeout, restart, pause/resume and dt handling, plus the preserved Morse puzzle and audio opt-in/cancellation checks.
 
-Ten tests cover Morse bijection and real-message round trips, invalid input, every mission's complete winning path, dispatch recovery, wrong-letter feedback and editing, stage/input guards, hint scoring, saved-record safety, Web Audio event spacing, audio opt-in/cancellation, and muting during a pending audio resume. No game rule depends on animation frames or an audio callback.
+Browser QA:
 
-## Browser QA walkthrough
+1. Load the default entry: confirm the scene moves before starting, with a single **Catch the signal** button and the short steering instruction.
+2. Start and move the kite into the outlined glow. Hold until the first dot illuminates, then follow the new glow twice. Expect **The Atlantic is connected**, three dots and a score. The third signal is left of the first two.
+3. Press **Fly again**: score/charge/dots/timer reset. Move away until timeout; verify **Try again** remains obvious.
+4. Check arrow-key movement and on-screen press/release controls. Pause, switch away from the tab, and resume: no elapsed time should be consumed while paused. A visible golden target's boundary matches the actual lock region.
+5. At phone widths, steer by dragging anywhere in the sky; the illustration and target remain in the viewport. No scrolling or form entry is needed during a round.
+6. Enable sound, receive a dot, then mute. The entire game must also remain playable silently.
+7. Follow **Original Morse puzzle** and confirm the preserved harbour-watch mode still starts. Its footer links back to the new action game.
 
-1. Load the game and select **Take the watch**. Initial stars are 0/18, first incoming strips are `....` and `..`, and sound is off.
-2. Enter **HI** and choose **Check message**. Select **Send a friendly hello**. The reply is HI and H is highlighted.
-3. Click **Dot** four times, then **Send letter H**. Click **Dot** twice, then **Send letter I**. Expect **Clear as a bell**, three stars, 500 points and **Next watch**. All operations are untimed.
-4. Click **Next watch** and repeat using the table below. The last completion should show **Every light has a story**, six watches finished and 18/18 best stars if no retries/hints were used.
+## History and artistic interpretation
 
-| Watch | Decode | Reply choice | Send letters, in order |
-| --- | --- | --- | --- |
-| A hello across the harbour | HI | Send a friendly hello | H `....`; I `..` |
-| The kettle is calling | TEA | Accept the invitation | Y `-.--`; E `.`; S `...` |
-| A curtain of grey | FOG | Keep it at the waiting buoy | W `.--`; A `.-`; I `..`; T `-` |
-| A postcard with a destination | EAST | Send it to the east quay | E `.` |
-| The homeward message | HOME | Welcome it into its berth | I `..`; N `-.` |
-| All lights accounted for | SAFE | Acknowledge and close the watch | O `---`; K `-.-` |
+On December 12, 1901, Guglielmo Marconi received the Morse letter **S** (three dots) transmitted from Poldhu, Cornwall, England, to Signal Hill in Newfoundland. He used a kite to raise his antenna; his receiving apparatus was in a former hospital. Cabot Tower is shown only as a neighbouring landmark, not the room in which he received the 1901 signal.
 
-5. On a replay, enter a wrong received word. Expect an explanatory message and one retry, with the answer field still editable. Select an incorrect dispatch response, then recover with the correct choice.
-6. While sending H, enter one dot and submit. It should identify the pattern as E and ask for H. Erase/clear, then send H correctly. No letter is lost or skipped.
-7. Open the codebook with Tab and pin another letter; ensure its large pattern changes. The current outgoing letter remains visible in the reply word. Use `.` and `-` keys while focus is outside the text field.
-8. Enable sound and replay a received message. Expect optional gentle sine tones and matching visible lamp pulses. Disable sound and replay again: silent visual feedback should remain. Leaving the tab stops any audio. The entire six-watch path works without enabling sound.
-9. At narrow widths, the mission navigation changes to two columns, the illustration and desk stack, signal strips wrap, and the alphabet changes to five columns. All controls remain ordinary HTML buttons with readable text and natural page scrolling.
+The moving target, collection mechanic, repeated game rounds and score are an arcade interpretation, not a reconstruction of radio equipment or a radio propagation simulation. The history is optional below the active play area.
 
-## Regional and technical references
+Primary sources:
 
-This is an invented modern harbour-club activity. The miniature model boats, replies and dispatch decisions are game fiction; these are not real marine operating procedures. The Morse alphabet itself is standard letter encoding.
-
-Cabot Tower served as a flag-signalling tower from 1900 to 1958. Parks Canada's communications history places Marconi's 1901 wireless reception in a former hospital on Signal Hill, not inside Cabot Tower. The illustration is an original stylized view, not a geographical map or architectural survey.
-
-Primary sources checked on 23 November 2026:
-
+- [Parks Canada — Signal Hill National Historic Site](https://www.parks.canada.ca/culture/designation/lieu-site/signal-hill)
 - [Parks Canada — Communication: flags, cables and de-coders](https://parks.canada.ca/lhn-nhs/nl/signalhill/culture/histoire-history/comm)
-- [Parks Canada — Cabot Tower](https://parks.canada.ca/lhn-nhs/nl/signalhill/culture/histoire-history/tour-tower)
-- [MDN — Web Audio API best practices](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices)
 
-All code and artwork in this directory are original. No third-party runtime library is bundled, so no runtime dependency licence notice is required.
+All code and artwork here are original. No third-party runtime library is bundled.

@@ -1,4 +1,24 @@
-# Last Ferry to Newfoundland
+# Newfoundland Ferry
+
+## Boarding Rush — the default
+
+The game now opens directly on a moving ferry terminal. A car approaches the ramp wearing a large **triangle, circle or square**; the matching deck lane glows in the same colour and shape. **Start boarding** begins a 60-second shift. Tap the matching lane (or press 1, 2, 3), load twelve vehicles, and watch the ferry depart for Newfoundland. A missed car simply leaves room for the next one; a wrong lane keeps the car available. No manifest, weight calculation or tutorial is required.
+
+- Mouse/touch: the three large lane buttons below the ship. The matching lane is illuminated; shape and text supplement colour.
+- Keyboard: 1, 2 and 3 select lanes. P or Escape pauses; Space starts/pauses when the game area has focus. All buttons support Tab/Enter.
+- The introductory animation has no timer penalty. Gameplay and the crossing pause on blur/hidden and require explicit resume. Frame jumps are capped, and restart clears all run state.
+- Reduced-motion preference disables decorative waves, shaking and ferry movement; the car movement needed for active play remains.
+- The previous five deck-packing puzzles are preserved at `?mode=puzzles`, linked as **Deck puzzles**, with a link back to quick play. They load their own CSS and JavaScript only when selected.
+
+`src/Quick.tsx`, `src/rush-engine.ts` and `src/quick.css` implement the default game. `src/Classic.tsx` preserves the previous UI. The small `src/main.tsx` entry loads the selected mode. There are no external runtime requests.
+
+### Quick-play verification
+
+`npm test`: **13 passing tests** (seven original puzzle checks plus six Boarding Rush checks). New checks cover ready/pause states, matching and incorrect lanes, all twelve boardings and arrival, missed-car recovery, deadline/restart, frame-gap clamping, and ensuring a full lane never receives another car after misses. `npm run build` passes TypeScript and production bundling.
+
+Browser QA: the opening screen shows an approaching car while the HUD stays 0/12 and 60 seconds. Choose **Start boarding**. Tap the highlighted lane and confirm one car appears on deck; wait briefly for each next car. With no misses the lane sequence is **1, 2, 3, 2, 1, 3, 3, 1, 2, 1, 3, 2**. The twelfth matching tap starts the three-second crossing, then **All aboard. All ashore.** and replay appear. A wrong lane retains the car; a late car is replaced. Pause and background the page to check frozen time. Follow **Deck puzzles** and the return link to verify both modes.
+
+## Optional deck-packing puzzles
 
 A five-crossing deck-packing puzzle built with **React 19, TypeScript, Vite and native SVG**. It runs entirely in the browser; React and all game assets are bundled in `web/`. No external font, image, CDN, API or WebGL dependency is needed.
 

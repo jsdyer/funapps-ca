@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A Fundy-inspired tidal causeway puzzle built with native SVG and Web Components.",
-  "scripts": { "test": "node --test test/engine.test.js" }
+  "description": "A quick Fundy boat run and optional causeway puzzles, built with SVG and Web Components.",
+  "scripts": { "test": "node --test test/*.test.js" }
 }

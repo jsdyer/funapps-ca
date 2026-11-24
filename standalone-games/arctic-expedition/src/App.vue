@@ -32,7 +32,7 @@ const isReachable=(id:string)=>state.value.status==='active'&&state.value.action
 
 <template>
 <div class="app-shell" :inert="modal!==null">
-<header class="topbar"><a href="https://funapps.ca" class="brand"><span class="brand-symbol">✳</span> FUNAPPS <span class="brand-divider">/</span> <span class="collection">FARTHER AFIELD</span></a><div class="top-actions"><button @click="open('help')">Field guide</button><button @click="open('restart')">New expedition</button></div></header>
+<header class="topbar"><a href="https://funapps.ca" class="brand"><span class="brand-symbol">✳</span> FUNAPPS <span class="brand-divider">/</span> <span class="collection">FARTHER AFIELD</span></a><div class="top-actions"><a href="?">Quick play</a><button @click="open('help')">Field guide</button><button @click="open('restart')">New expedition</button></div></header>
 <main>
 <section class="masthead"><div><p class="eyebrow">A MARITIMER HEADS NORTH</p><h1>North of<br><em>the Harbour.</em></h1><p class="lead">Different horizon. Same good mittens.<br>Bring a notebook, make a plan, and come home with a story.</p></div><div class="mission-stamp"><span>THE NORTHERN NOTEBOOK</span><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M6 65 37 13 58 49 80 6 114 65Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m25 33 12-20 13 23-12-4-6 5Z M65 34 15-28 16 30-16-7Z" fill="currentColor"/><circle cx="12" cy="13" r="5" fill="currentColor"/></svg><strong>6 days · 3 observations</strong><small>One very different kind of coast.</small></div></section>
 

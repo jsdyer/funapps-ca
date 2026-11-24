@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test", "build": "node --check web/game.js && node --check web/engine.js" }
+  "scripts": { "test": "node --test", "build": "node --check web/game.js && node --check web/arcade-engine.js && node --check web/classic-game.js && node --check web/engine.js" }
 }

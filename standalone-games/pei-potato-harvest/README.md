@@ -1,4 +1,23 @@
-# PEI Potato Harvest
+# PEI Potato Harvest — Red Soil Rush
+
+The default is now a quick 45-second harvest. Golden potatoes visibly pop out of the red soil: tap them before they hide, and leave the angular grey rocks alone. The original turn-based farm game remains available through **Season planner** (`?mode=planner`). Both modes retain the existing Svelte + TypeScript stack and local Vite bundles.
+
+## Quick play
+
+- The first screen has a moving field scene and potatoes popping up, without a tutorial dialog. **Start picking**, Space, or a potato starts the round. The attract scene does not consume time.
+- Tap/click a potato, or use **1–9** for the labelled three-by-three plots. Native buttons support Tab and Enter. Potatoes and rocks have different colours, shapes and accessible labels.
+- Each potato earns at least 10 points. Consecutive harvests grow the bonus. Clicking a rock deducts 10 points (never below zero) and resets the combo. Missed potatoes reset the combo but do not end the game.
+- **Pause**, **P** or **Escape** pauses. Hiding the page or leaving the window pauses automatically, with explicit resume. The clock uses bounded elapsed time; it does not continue in the background.
+- After 45 seconds, see potatoes harvested and points, then use **Pick another batch**. Restart resets every plot, score, timer and combo. The quick-play best score uses a separate failure-tolerant local-storage key.
+- Reduced motion disables decorative movement. No sound, account, external runtime services or French knowledge is required.
+
+### Quick-play QA
+
+`npm run check`: **0 errors and 0 warnings**. `npm test`: **15 passing tests** (six quick-harvest tests and nine retained farming tests). `npm run build`: successful production build, with the season planner loaded only when requested.
+
+Browser walkthrough: the initial field shows golden potatoes at plots **1** and **5**, and a grey rock at **9**. Press **1**, then **5** to start and harvest both (20 points); press **9** to check the rock feedback (10 points, never negative). Pause/resume, pick newly appearing potatoes, and allow the 45-second round to finish. Replay should restore 45 seconds, zero score, and the starting field. **Season planner** opens the preserved strategy game; **Quick harvest** in its header returns to the action game.
+
+## Preserved season planner
 
 A complete turn-based farm strategy game: twelve compressed growing turns, four red-soil fields, three potato varieties, weather and moisture, crop grades, soil depletion, market orders and an end-of-season score. The player wins by fulfilling all three community orders. A fourth premium order adds an optional challenge. There are no timers or real-money mechanics.
 
