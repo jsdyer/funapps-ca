@@ -232,6 +232,26 @@
       "audited_at": "2026-11-23"
     },
     {
+      "slug": "jellybean-row",
+      "name": "Jellybean Row",
+      "url": "https://jellybean-row-funapps.netlify.app/",
+      "description": "The fog is rolling into St. John's. Paint each Jellybean Row house the colour on its jellybean so the boats can still find home.",
+      "category": "Quick challenges",
+      "icon": "🏠",
+      "color": "#f0c7b0",
+      "featured": true,
+      "controls": [
+        "Tap a paint colour, then tap the house with the matching jellybean.",
+        "Keys 1–6 pick a colour. Q W E R T paint the five houses from left to right.",
+        "Clear a row to earn a few more seconds. The shift ends when the fog wins."
+      ],
+      "custom_domain": "jellybean.funapps.ca",
+      "audited_at": "2026-11-24",
+      "domain_ready": false,
+      "netlify_host": "jellybean-row-funapps.netlify.app",
+      "domain_configured": false
+    },
+    {
       "slug": "canada-roadtrip",
       "name": "Postcards from Canada",
       "url": "https://funapps.ca/play/canada-roadtrip/",
