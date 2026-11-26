@@ -30,6 +30,10 @@ Add **funapps.ca** and **www.funapps.ca** as domains on this Netlify project bef
 
 Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, the bundled games, Packet Trace, and the verified Donair/Clams custom URLs. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
 
+## Favicon
+
+The gold game-controller mark is provided as `favicon.png` (96 × 96), `favicon.ico` (16–256 px), and `apple-touch-icon.png` (180 × 180). These files are included in the production build and linked from the homepage, game detail pages, and Packet Trace. The former `/favicon.svg` URL redirects to the PNG. Keep these URLs stable for browser caches and Google Search; search-result icons update after Google recrawls the homepage and image.
+
 ## Add or edit a standalone game
 
 Edit **`site.config.json`** and rebuild. No HTML editing is needed to update the catalogue, detail pages, search categories, count or sitemap. The game order follows the file, with `featured: true` entries first.

@@ -8,7 +8,7 @@ const { createRooms, RoomError } = require('./rooms.cjs');
 const MAX_BODY = 4096;
 const ROOT = path.join(__dirname, '..');
 const SITE_FILES = [
-  'index.html', 'favicon.svg', 'styles.css', 'games.css', 'postcards.css',
+  'index.html', 'favicon.ico', 'favicon.png', 'apple-touch-icon.png', 'styles.css', 'games.css', 'postcards.css',
   'roadtrip.css', 'extra.css', 'games.js', 'postcards.js', 'roadtrip.js',
   'extra.js', 'extensions.js', 'app.js', 'multiplayer/index.html',
   'rain-window.css', 'rain-window.js', 'postcard-maker.css', 'postcard-maker.js',
@@ -25,7 +25,9 @@ const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon'
 };
 
 function json(response, status, payload) {

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
 PUBLIC_FILES = (
     "styles.css", "games.css", "postcards.css", "roadtrip.css", "extra.css",
-    "rain-window.css", "postcard-maker.css", "detail.css", "favicon.svg",
+    "rain-window.css", "postcard-maker.css", "detail.css", "favicon.ico", "favicon.png", "apple-touch-icon.png",
     "games.js", "postcards.js", "roadtrip.js", "extra.js", "rain-window.js",
     "postcard-maker.js", "extensions.js", "app.js", "catalogue.js",
 )
@@ -109,7 +109,9 @@ def page_head(title, description, canonical, data=None):
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{esc(canonical)}">
 <meta property="og:site_name" content="FunApps"><meta name="twitter:card" content="summary">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/detail.css">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="96x96">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/detail.css">
 {('<script type="application/ld+json">' + json_ld(data) + '</script>') if data else ''}
 </head><body><a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="header-inner detail-header"><a class="brand" href="/" aria-label="FunApps home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><a href="/#arcade">All games</a></div></header>'''
@@ -231,7 +233,8 @@ def build():
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n")
     (DIST / "_redirects").write_text(
         f"https://www.funapps.ca/* {base}/:splat 301!\n"
-        "/games-sitemap.xml /sitemap.xml 301\n/sitemap.php /sitemap.xml 301\n")
+        "/games-sitemap.xml /sitemap.xml 301\n/sitemap.php /sitemap.xml 301\n"
+        "/favicon.svg /favicon.png 301\n")
     (DIST / "_headers").write_text("/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n")
     missing = page_head("Page not found | FunApps", "That page is missing. Find your next game at FunApps.", base + "/404.html")
     missing = missing.replace("</head>", '<meta name="robots" content="noindex">\n</head>')
