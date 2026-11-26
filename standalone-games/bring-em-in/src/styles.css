@@ -1,0 +1,62 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,680&family=Outfit:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
+  --font-sans: "Outfit", "Avenir Next", system-ui, sans-serif;
+  --color-ink: #1a2c30;
+  --color-foam: #f4f7f4;
+  --color-mist: #d5e3e4;
+  --color-card: #f6f1e7;
+  --color-line: #d3c7b4;
+  --color-harbour: #0e4a56;
+  --color-harbour-deep: #082f38;
+  --color-buoy: #d64532;
+  --color-sand: #e7d3a4;
+  --radius: 0.9rem;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-harbour-deep);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.45;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@keyframes haul-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.haul-pulse {
+  animation: haul-pulse 1.1s ease-in-out infinite;
+}
+
+.safe-pad {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .haul-pulse {
+    animation: none;
+  }
+}

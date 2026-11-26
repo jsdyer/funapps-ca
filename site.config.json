@@ -23,6 +23,25 @@
       "audited_at": "2026-11-26"
     },
     {
+      "slug": "bring-em-in",
+      "name": "Bring 'Em In",
+      "url": "https://funapps.ca/play/bring-em-in/",
+      "description": "A morning out of Shelburne, Nova Scotia. Steer to your red buoys, haul the pots, and tie up at Government Wharf before the bell.",
+      "category": "Food & frenzy",
+      "icon": "🦞",
+      "color": "#b7d4d2",
+      "technology": "React + Canvas 2D",
+      "controls": [
+        "A or Left turns the boat left. D or Right turns it right.",
+        "W or Ahead goes forward. Slow down beside a red buoy, then haul.",
+        "Tie up at the wharf before the bell. Blue buoys are not yours."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-26"
+    },
+    {
       "slug": "rockies-explorer",
       "name": "Westward: Mountain Run",
       "url": "https://funapps.ca/play/rockies-explorer/",
@@ -613,5 +632,5 @@
       "domain_configured": false
     }
   ],
-  "updated_at": "2026-11-23"
+  "updated_at": "2026-11-26"
 }
