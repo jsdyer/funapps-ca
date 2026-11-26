@@ -113,7 +113,9 @@
     const cx = w * 0.5 + curve - camX * mix(w * 0.58, w * 0.02, u);
     return { sx: cx + x * half, sy, t: u, half };
   }
+  var PEEK = 0;
   function draw(ctx, sim, w, h, now) {
+    PEEK = sim.phase === "title" ? 0 : sim.peek || 0;
     const camX = sim.phase === "title" ? Math.sin(now * 0.28) * 0.05 : sim.carX;
     const km = sim.phase === "title" ? 0.35 : sim.km;
     const weather = sim.weather;
@@ -128,13 +130,41 @@
     sky.addColorStop(1, storm ? "#d5dcde" : "#d7e2df");
     ctx.fillStyle = sky;
     ctx.fillRect(-40, -40, w + 80, h * 0.55);
+    const hy = h * 0.3;
+    const sea = ctx.createLinearGradient(0, hy, 0, h * 0.75);
+    sea.addColorStop(0, storm ? "#a9b8b7" : "#2b7f83");
+    sea.addColorStop(1, storm ? "#8d9d9c" : "#14535a");
+    ctx.fillStyle = sea;
+    ctx.fillRect(-40, hy, w + 80, h * 0.5);
+    if (!storm && PEEK > 0.05) {
+      ctx.strokeStyle = `rgba(240, 248, 244, ${0.45 * PEEK})`;
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 26; i++) {
+        const yy = hy + 6 + (i * 37 % 100) / 100 * h * 0.3;
+        const xx = (i * 173 + now * (12 + i % 4 * 6)) % (w + 60) - 30;
+        const len = 8 + (yy - hy) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(xx, yy);
+        ctx.lineTo(xx + len, yy);
+        ctx.stroke();
+      }
+      ctx.fillStyle = km > 6.45 ? "#b04a32" : "#5f7d4a";
+      ctx.fillRect(-40, hy - 4, w + 80, 5);
+      const lh = (w * 0.86 - camX * w * 0.1);
+      ctx.fillStyle = "#f4efe4";
+      ctx.fillRect(lh, hy - 22, 5, 18);
+      ctx.fillStyle = "#d85a32";
+      ctx.fillRect(lh - 1, hy - 25, 7, 4);
+    }
     const gapL = project(40, -1, camX, km, w, h);
     const gapR = project(40, 1, camX, km, w, h);
     const water = ctx.createLinearGradient(0, h * 0.16, 0, gapL.sy + 8);
     water.addColorStop(0, storm ? "#9eb0b0" : "#1f6f74");
     water.addColorStop(1, storm ? "#c5d0cf" : "#7ec3bb");
     ctx.fillStyle = water;
+    ctx.globalAlpha = Math.max(0, 1 - PEEK * 1.6);
     ctx.fillRect(gapL.sx, h * 0.16, Math.max(8, gapR.sx - gapL.sx), gapL.sy - h * 0.16 + 10);
+    ctx.globalAlpha = 1;
     if (km > 11.1) {
       ctx.fillStyle = "#b04a32";
       ctx.fillRect(w * 0.46, h * 0.18, w * 0.08, 10);
@@ -215,7 +245,8 @@
   function wall(ctx, z0, z1, side, camX, km, w, h, alt, index) {
     const b0 = project(z0, side, camX, km, w, h);
     const b1 = project(z1, side, camX, km, w, h);
-    const height = (p) => mix(h * 0.92, h * 0.18, p.t);
+    const ratio = mix(1.55, 0.72, PEEK);
+    const height = (p) => Math.max(4, (p.sy - h * 0.3) * ratio + h * 0.15 * p.t * (1 - PEEK));
     const top0 = b0.sy - height(b0);
     const top1 = b1.sy - height(b1);
     const k = 0.62 + (1 - b0.t) * 0.4;
@@ -341,7 +372,7 @@
     ctx.fillStyle = "#f4efe4";
     ctx.font = `650 ${Math.max(10, w * 0.011)}px Outfit, sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillText("TOLL PAID", w * 0.055, -h * 0.114);
+    ctx.fillText("TOLL: LATER", w * 0.055, -h * 0.114);
     ctx.restore();
     ctx.fillStyle = "#101614";
     ctx.beginPath();
@@ -373,10 +404,32 @@
     "The guardrail has a better view than you do.",
     "A truck is not a landmark. It is, however, the landmark.",
     "Twelve point nine kilometres. Feels longer in a squall.",
-    "Toll paid. Scenery still in committee.",
+    "No toll yet. They bill you on the way off the Island.",
     "The Strait is right there. The wall would like a word.",
     "Stay between the concrete opinions.",
-    "Winter lives on this bridge. You are visiting."
+    "Winter lives on this bridge. You are visiting.",
+    "Remember the ferry? You could see the water from the ferry.",
+    "No passing for 12.9 km. Get comfortable with that mudflap.",
+    "Getting onto the Island is free. Leaving is where they get you.",
+    "Sit up straight. Higher. No, higher. Still concrete.",
+    "Fun fact: the best view of this bridge is from Cape Jourimain.",
+    "Your passenger says it's beautiful out there. Your passenger is guessing.",
+    "Somewhere beyond this wall, a lobster boat is having a lovely time.",
+    "High-wind advisory: high-sided vehicles restricted. You're low-sided. Lucky you.",
+    "Eleven thousand metres of guardrail, and every one of them is in your eyeline.",
+    "Mainlanders call it scenic. Islanders call it Tuesday."
+  ];
+  var PEEK_LINES = [
+    "You sat up for a peek. The Strait says hi. The lane says eyes front.",
+    "Peeking. Steering is now more of a hope.",
+    "Ooh, water. Big, blue, finally. Mind the wall.",
+    "You can see it. You can also see the wall coming.",
+    "That's the Northumberland Strait. Say goodbye, it's leaving."
+  ];
+  var FOG_PEEK = [
+    "You peeked into fog. It's beige all the way down.",
+    "Sat up for the view. The view is out sick.",
+    "Peeked over the wall. Found more weather."
   ];
   function weatherAt(km) {
     if (km < 2.4) return "clear";
@@ -420,6 +473,10 @@
       yaw: 0,
       nerves: 10,
       glimpses: 0,
+      peek: 0,
+      straitSecs: 0,
+      peekLineCd: 0,
+      humpSaid: false,
       scrapes: 0,
       knocks: 0,
       nears: 0,
@@ -447,7 +504,7 @@
   }
   function tally(sim) {
     const finish = sim.result === "arrived" ? 500 : 0;
-    const raw = sim.glimpses * 125 + sim.nears * 45 + Math.floor(sim.km * 22) - sim.scrapes * 30 - sim.knocks * 20 + finish;
+    const raw = sim.glimpses * 125 + Math.floor(sim.straitSecs * 60) + sim.nears * 45 + Math.floor(sim.km * 22) - sim.scrapes * 30 - sim.knocks * 20 + finish;
     return Math.max(0, raw);
   }
   function say(sim, line) {
@@ -521,6 +578,27 @@
     }
     sim.sparks = sim.sparks.filter((s) => s.life > 0);
     sim.weather = weatherAt(sim.km);
+    sim.peekLineCd = Math.max(0, sim.peekLineCd - dt);
+    const peekTarget = input.peek ? 1 : 0;
+    sim.peek += (peekTarget - sim.peek) * (1 - Math.exp(-(input.peek ? 6 : 9) * dt));
+    const hump = sim.km > 6.1 && sim.km < 6.8;
+    if (hump && !sim.humpSaid) {
+      sim.humpSaid = true;
+      say(sim, "The hump! Highest point on the bridge, built so ships fit underneath. Sit up \u2014 double view points.");
+      pop(sim, "THE HUMP");
+    }
+    if (sim.peek > 0.6) {
+      const murky = sim.weather === "fog" || sim.weather === "snow";
+      const blocked = sim.entities.some((e) => e.kind === "truck" && e.z > 0 && e.z < 9 && Math.abs(sim.carX - e.x) < 0.5);
+      const rate = blocked ? 0.15 : murky ? 0.3 : 1;
+      sim.straitSecs += dt * rate * (hump ? 2 : 1);
+      sim.nerves += 5.5 * dt;
+      if (sim.peekLineCd <= 0) {
+        sim.peekLineCd = 7;
+        const pool = blocked ? ["You sat up to see the ocean. You saw a trailer door. Up close."] : murky ? FOG_PEEK : PEEK_LINES;
+        say(sim, pool[Math.floor(sim.rng() * pool.length)]);
+      }
+    }
     const target = input.brake ? 0.62 : input.boost ? 1.22 : 1;
     sim.speed += (target - sim.speed) * (1 - Math.exp(-3.2 * dt));
     let wind = 0;
@@ -546,8 +624,9 @@
       (e) => e.kind === "ice" && e.z < 9 && e.z > -1 && Math.abs(sim.carX - e.x) < e.w
     );
     const grip = onIce ? 1.25 : 5.4;
-    const steer = Math.max(-1, Math.min(1, input.steer));
-    sim.carV += (-steer * 3.05 - sim.carV * grip) * dt + wind * dt;
+    const steer = Math.max(-1, Math.min(1, input.steer)) * (1 - sim.peek * 0.55);
+    sim.carV += (-steer * 3.05 - sim.carV * grip) * dt + wind * (1 + sim.peek * 0.5) * dt;
+    if (sim.peek > 0.3) sim.carV += Math.sin(sim.elapsed * 1.7) * 0.35 * sim.peek * dt;
     if (onIce) sim.carV += wind * 0.65 * dt;
     sim.carX += sim.carV * dt;
     sim.carX = Math.max(-1.08, Math.min(1.08, sim.carX));
@@ -630,6 +709,7 @@
         viewRank = 1;
       }
     }
+    if (sim.peek > 0.6 && viewRank < 2) view = sim.weather === "fog" || sim.weather === "snow" ? "BEIGE" : "THE STRAIT!";
     sim.viewWord = view;
     sim.nerves += Math.abs(wind) * 4.2 * dt;
     if (onIce) sim.nerves += 3.5 * dt;
@@ -660,7 +740,7 @@
       sim.result = "arrived";
       sim.speed = 0;
       sim.viewWord = "ISLAND";
-      say(sim, "Welcome to PEI. The island has views. The bridge kept its own.");
+      say(sim, "Welcome to PEI. The Island has views. The bridge kept its own. Toll's on the way back.");
     }
   }
 
@@ -698,22 +778,24 @@
         <div class="ticket-chip right">
           <span class="kicker">Glimpses</span>
           <div class="figure" data-glimpses>0</div>
+          <div class="sub" data-strait>Strait seen: 0.0s</div>
           <button type="button" class="icon-btn" data-mute>Sound on</button>
         </div>
       </header>
-      <p class="radio"><strong data-band>Bridge radio</strong><span data-line>Toll paid. Scenery not included.</span></p>
+      <p class="radio"><strong data-band>Bridge radio</strong><span data-line>Free to get on. Scenery not included.</span></p>
       <div class="wheel" aria-label="Steering">
         <button type="button" data-hold="left">Left</button>
         <button type="button" class="brake" data-hold="brake">Ease off</button>
+        <button type="button" class="peek" data-hold="peek">Sit up</button>
         <button type="button" data-hold="right">Right</button>
       </div>
       <div class="overlay" data-overlay>
         <article class="ticket">
-          <div class="stamp">TOLL PAID</div>
+          <div class="stamp">TOLL: LATER</div>
           <p class="where">New Brunswick \u2192 Prince Edward Island</p>
           <h1>Hemmed In</h1>
           <p class="lede">12.9 kilometres of Confederation Bridge. One lane each way. Concrete tall enough to edit the ocean out of the trip.</p>
-          <p class="fine">The shoulder is a theory. The trucks are not. Whatever view is left hides beside the wall, and the wind would like you to meet that wall personally.</p>
+          <p class="fine">The shoulder is a theory. The trucks are not. Hold <strong>Space</strong> (or <strong>Sit up</strong>) to crane over the wall and actually see the Strait \u2014 but your steering goes soft while you gawk.</p>
           <div class="actions">
             <button type="button" class="primary" data-start>Start the crossing</button>
             <button type="button" class="ghost" data-how>How to miss the wall</button>
@@ -721,6 +803,7 @@
           <ul class="help" data-help hidden>
             <li>A / \u2190 drifts left. D / \u2192 drifts right. Drag the road with a finger.</li>
             <li>The car cruises. Hold S, \u2193, or Ease off when a trailer fills the lane.</li>
+            <li>Hold Space or Sit up to peek over the concrete. Every second of real ocean scores. The hump in the middle counts double.</li>
             <li>Glimpses of water sit near the concrete. Grab them if you like living nervously.</li>
             <li>Three scrapes won't end it. A full case of white knuckles will.</li>
           </ul>
@@ -753,6 +836,7 @@
     let holdLeft = false;
     let holdRight = false;
     let holdBrake = false;
+    let holdPeek = false;
     let pointerSteer = 0;
     let pointerOn = false;
     let muted = false;
@@ -765,6 +849,7 @@
       nerves: booth.querySelector("[data-nerves]"),
       view: booth.querySelector("[data-view]"),
       glimpses: booth.querySelector("[data-glimpses]"),
+      strait: booth.querySelector("[data-strait]"),
       line: booth.querySelector("[data-line]"),
       band: booth.querySelector("[data-band]"),
       overlay: booth.querySelector("[data-overlay]"),
@@ -786,15 +871,17 @@
       if (pointerOn && steer === 0) steer = pointerSteer;
       steer = Math.max(-1, Math.min(1, steer));
       const boost = keys.has("KeyW") || keys.has("ArrowUp");
-      const brake = keys.has("KeyS") || keys.has("ArrowDown") || keys.has("Space") || holdBrake;
-      return { steer, boost, brake };
+      const brake = keys.has("KeyS") || keys.has("ArrowDown") || holdBrake;
+      const peek = keys.has("Space") || keys.has("ShiftLeft") || keys.has("ShiftRight") || holdPeek;
+      return { steer, boost, brake, peek };
     }
     function paintHud() {
       el.km.textContent = `${sim.km.toFixed(1)} / ${SPAN_KM} km`;
-      el.weather.textContent = sim.phase === "title" ? "Borden-Carleton, waiting" : weatherLabel(sim.weather);
+      el.weather.textContent = sim.phase === "title" ? "Cape Jourimain, waiting" : weatherLabel(sim.weather);
       el.nerves.style.width = `${sim.nerves}%`;
       el.view.textContent = `View: ${sim.viewWord.toLowerCase()}`;
       el.glimpses.textContent = String(sim.glimpses);
+      el.strait.textContent = `Strait seen: ${sim.straitSecs.toFixed(1)}s`;
       el.line.textContent = sim.line;
       if (sim.gustAge < 0.48 && (sim.weather === "wind" || sim.weather === "snow" || sim.weather === "ice")) {
         el.band.textContent = sim.gustDir < 0 ? "Gust \u2190 coming" : "Gust \u2192 coming";
@@ -811,7 +898,7 @@
       const arrived = sim.result === "arrived";
       el.endStamp.textContent = arrived ? "ISLAND" : "PULLED OVER";
       el.endTitle.textContent = arrived ? "You got across." : "That's the shoulder.";
-      el.endCopy.textContent = arrived ? `Prince Edward Island. ${sim.glimpses} glimpse${sim.glimpses === 1 ? "" : "s"} of water, ${sim.nears} brave passes, ${sim.scrapes} arguments with the concrete. The potatoes can see the Strait. You earned the parking lot.` : `White knuckles won. ${sim.km.toFixed(1)} km into a 12.9 km hallway, with ${sim.glimpses} glimpse${sim.glimpses === 1 ? "" : "s"} to show for it. The emergency phone is also concrete.`;
+      el.endCopy.textContent = arrived ? `Prince Edward Island. ${sim.glimpses} glimpse${sim.glimpses === 1 ? "" : "s"} of water, ${sim.nears} brave passes, ${sim.scrapes} arguments with the concrete. The potatoes can see the Strait. You saw ${sim.straitSecs.toFixed(1)} seconds of actual ocean. Getting on was free; leaving the Island is the part with the toll.` : `White knuckles won. ${sim.km.toFixed(1)} km into a 12.9 km hallway, with ${sim.glimpses} glimpse${sim.glimpses === 1 ? "" : "s"} to show for it. The emergency phone is also concrete. You saw ${sim.straitSecs.toFixed(1)} seconds of water. The old ferry showed you the whole crossing.`;
       el.score.textContent = `${score} pts`;
       el.best.textContent = `Best on this browser: ${best}. Scrapes ${sim.scrapes}, truck brushes ${sim.knocks}.`;
       el.end.hidden = false;
@@ -833,14 +920,16 @@
     const onKeyDown = (e) => {
       if (e.code === "Space") e.preventDefault();
       if (!injected) keys.add(e.code);
-      if (e.code === "Enter" && sim.phase !== "play") begin();
+      if ((e.code === "Enter" || e.code === "Space") && sim.phase !== "play") {
+        if (sim.phase === "title" || !el.end.hidden) begin();
+      }
     };
     const onKeyUp = (e) => {
       if (!injected) keys.delete(e.code);
     };
     const onBlur = () => {
       if (!injected) keys.clear();
-      holdLeft = holdRight = holdBrake = false;
+      holdLeft = holdRight = holdBrake = holdPeek = false;
       pointerOn = false;
     };
     window.addEventListener("keydown", onKeyDown);
@@ -873,6 +962,7 @@
     bindHold("left", (v) => holdLeft = v);
     bindHold("right", (v) => holdRight = v);
     bindHold("brake", (v) => holdBrake = v);
+    bindHold("peek", (v) => holdPeek = v);
     canvas.addEventListener("pointerdown", (e) => {
       if (sim.phase !== "play") return;
       mixer.unlock();

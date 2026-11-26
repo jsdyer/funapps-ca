@@ -178,6 +178,7 @@ button, [role="button"] { font: inherit; }
 
 .wheel button:active { transform: translateY(1px); }
 .wheel button.brake { background: var(--accent); color: var(--paper); }
+.wheel button.peek { background: #2f6f68; color: var(--paper); }
 
 .overlay {
   position: absolute;
