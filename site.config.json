@@ -4,6 +4,25 @@
   "description": "A little Canadian arcade: Maritime food games, curious adventures, clickers, puzzles and creative escapes. Pick something and play.",
   "games": [
     {
+      "slug": "last-boat",
+      "name": "Last Boat",
+      "url": "https://funapps.ca/play/last-boat/",
+      "description": "The horn already went at Western Brook Pond. Run the boardwalk, jump the rocks, duck the spruce, and reach the dock before the tour boat slips into the fjord.",
+      "category": "Roads & trails",
+      "icon": "🚤",
+      "color": "#9ec4c8",
+      "technology": "React + Canvas 2D",
+      "controls": [
+        "Space, or the right side of the screen, jumps.",
+        "Down arrow, S, or the left side ducks under spruce.",
+        "P pauses. Make the dock before the clock runs out."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-26"
+    },
+    {
       "slug": "rockies-explorer",
       "name": "Westward: Mountain Run",
       "url": "https://funapps.ca/play/rockies-explorer/",
