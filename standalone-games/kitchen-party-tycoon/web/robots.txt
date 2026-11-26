@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://party-tycoon.funapps.ca/sitemap.xml

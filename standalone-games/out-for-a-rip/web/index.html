@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#082f49" />
+  <meta name="description" content="Out for a Rip: The Great Atlantic Errand Run — a funny, addictive browser game steeped in Atlantic Canadian culture." />
+  <title>Out for a Rip — Atlantic Errand Run</title>
+  
+  <link rel="stylesheet" href="style.css" />
+<link rel="canonical" href="https://rip.funapps.ca/">
+<meta name="funapps-game-id" content="out-for-a-rip">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" tabindex="0" aria-label="Out for a Rip game canvas"></canvas>
+
+    <header id="topbar" class="glass hidden" aria-live="polite">
+      <div class="brand-mini">OUT FOR A RIP</div>
+      <div class="hud-stat"><span>DELIVERIES</span><strong id="hudDeliveries">0</strong></div>
+      <div class="hud-stat"><span>SCORE</span><strong id="hudScore">0</strong></div>
+      <div class="hud-stat timer"><span>THE WEATHER</span><strong id="hudTime">2:00</strong></div>
+      <button id="pauseBtn" class="icon-btn" aria-label="Pause game">Ⅱ</button>
+    </header>
+
+    <aside id="missionCard" class="glass hidden">
+      <div class="eyebrow">CURRENT EMERGENCY</div>
+      <div id="cargoIcon" class="cargo-icon">🥔</div>
+      <h2 id="missionTitle">Get the storm chips there</h2>
+      <p id="missionRoute">From Somewhere to Somewhere Else</p>
+      <div class="bar-row"><span>Vehicle</span><div class="bar"><i id="healthBar"></i></div></div>
+      <div class="bar-row"><span>Coffee</span><div class="bar coffee"><i id="boostBar"></i></div></div>
+      <div class="status-row"><span id="weatherText">Suspiciously decent</span><span id="comboText">x1.0</span></div>
+    </aside>
+
+    <div id="toastStack" aria-live="assertive"></div>
+    <div id="radio" class="hidden" aria-live="polite"><span>📻</span><p id="radioText"></p></div>
+
+    <main id="menu" class="screen active">
+      <section class="hero-card glass-heavy">
+        <div class="flag-line"><span></span><b>ATLANTIC CANADA'S PREMIER QUESTIONABLE DRIVING SIMULATOR</b><span></span></div>
+        <h1>OUT FOR<br><em>A RIP</em></h1>
+        <p class="subtitle">The Great Atlantic Errand Run</p>
+        <p class="lede">Aunt Sheila said the kitchen party was “just a few people.” It is now spilling onto the deck, the weather is turning, and somebody forgot the storm chips.</p>
+
+        <div class="home-picker" role="group" aria-label="Choose home base">
+          <button class="home active" data-home="NS"><span>⚓</span><b>Nova Scotia</b><small>Road speed +5%</small></button>
+          <button class="home" data-home="NB"><span>🌲</span><b>New Brunswick</b><small>Longer delivery timers</small></button>
+          <button class="home" data-home="PE"><span>🥔</span><b>PEI</b><small>Better off-road grip</small></button>
+          <button class="home" data-home="NL"><span>🫖</span><b>Newfoundland & Labrador</b><small>Weather bothers you less</small></button>
+        </div>
+
+        <div class="menu-actions">
+          <button id="startBtn" class="big-btn primary">START THE CAR <span>→</span></button>
+          <button id="shedBtn" class="big-btn secondary">THE SOUVENIR SHED</button>
+        </div>
+
+        <div class="meta-strip">
+          <span>BEST <b id="bestScore">0</b></span>
+          <span>LONGEST RIP <b id="bestDeliveries">0 deliveries</b></span>
+          <span>BOTTLE REFUNDS <b id="bankCoins">0</b></span>
+        </div>
+
+        <div class="controls-hint">
+          <span><kbd>WASD</kbd> / <kbd>ARROWS</kbd> steer</span>
+          <span><kbd>SPACE</kbd> coffee boost</span>
+          <span><kbd>H</kbd> horn</span>
+        </div>
+      </section>
+      <footer>Made with salt air, road salt, and a worrying amount of instant coffee.</footer>
+    </main>
+
+    <section id="upgradeScreen" class="screen modal-screen" aria-hidden="true">
+      <div class="modal glass-heavy">
+        <div class="eyebrow">PULL OVER BY THE COMMUNITY HALL</div>
+        <h2>Choose one highly legitimate upgrade</h2>
+        <p>Dave knows a guy. No receipts.</p>
+        <div id="upgradeChoices" class="card-grid"></div>
+      </div>
+    </section>
+
+    <section id="shedScreen" class="screen modal-screen" aria-hidden="true">
+      <div class="modal glass-heavy wide">
+        <button class="close-btn" data-close="shedScreen" aria-label="Close">×</button>
+        <div class="eyebrow">PERMANENT, PROBABLY</div>
+        <h2>The Souvenir Shed</h2>
+        <p>Spend bottle refunds on upgrades that persist between runs. The economy is flawless.</p>
+        <div class="shed-balance">Bottle refunds: <strong id="shedCoins">0</strong></div>
+        <div id="shedChoices" class="card-grid"></div>
+      </div>
+    </section>
+
+    <section id="pauseScreen" class="screen modal-screen" aria-hidden="true">
+      <div class="modal glass-heavy compact">
+        <div class="eyebrow">FOUR-WAYS ARE ON</div>
+        <h2>Parked for a minute</h2>
+        <p>The weather will politely remain suspended.</p>
+        <button id="resumeBtn" class="big-btn primary">BACK AT 'ER</button>
+        <button id="quitBtn" class="big-btn secondary">HEAD HOME</button>
+      </div>
+    </section>
+
+    <section id="gameOverScreen" class="screen modal-screen" aria-hidden="true">
+      <div class="modal glass-heavy compact result-card">
+        <div id="resultStamp" class="result-stamp">SHE'S SOME WEATHER</div>
+        <h2 id="resultTitle">The rip has concluded</h2>
+        <p id="resultReason">You were defeated by infrastructure.</p>
+        <div class="result-grid">
+          <div><span>Score</span><strong id="resultScore">0</strong></div>
+          <div><span>Deliveries</span><strong id="resultDeliveries">0</strong></div>
+          <div><span>Best combo</span><strong id="resultCombo">x1.0</strong></div>
+          <div><span>Bottle refunds</span><strong id="resultCoins">+0</strong></div>
+        </div>
+        <div id="resultQuote" class="result-quote">“Could've been worse.” — every Atlantic Canadian, always</div>
+        <button id="againBtn" class="big-btn primary">ONE MORE RIP</button>
+        <button id="menuBtn" class="big-btn secondary">BACK TO THE KITCHEN</button>
+      </div>
+    </section>
+
+    <section id="helpScreen" class="screen modal-screen" aria-hidden="true">
+      <div class="modal glass-heavy wide">
+        <button class="close-btn" data-close="helpScreen" aria-label="Close">×</button>
+        <div class="eyebrow">THE ENTIRE DRIVER'S HANDBOOK</div>
+        <h2>How to survive the errand</h2>
+        <div class="help-grid">
+          <article><b>🚗 Deliver</b><p>Follow the big arrow and glowing community-hall beacon. Deliver before “The Weather” runs out.</p></article>
+          <article><b>☕ Boost</b><p>Hold Space or the coffee button. It is not medically responsible, but it is quick.</p></article>
+          <article><b>📯 Honk</b><p>Honk at gulls, moose, and indecisive RVs. It briefly clears a path.</p></article>
+          <article><b>🛣️ Use roads</b><p>Your beater is faster on pavement. PEI players are naturally less alarmed by red dirt.</p></article>
+          <article><b>🪙 Collect empties</b><p>Bottle refunds buy permanent upgrades in the Souvenir Shed.</p></article>
+          <article><b>🌦️ Adapt</b><p>Fog, sideways rain, blackflies, tourist season, and the occasional nice day rotate during a run.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <div id="cornerButtons">
+      <button id="helpBtn" class="round-btn" aria-label="How to play">?</button>
+      <button id="soundBtn" class="round-btn" aria-label="Toggle sound">🔊</button>
+    </div>
+
+    <div id="mobileControls" class="hidden" aria-hidden="true">
+      <div id="joystick" class="joystick"><div id="stick"></div></div>
+      <div class="mobile-actions">
+        <button id="mobileBoost">☕<small>BOOST</small></button>
+        <button id="mobileHorn">📯<small>HONK</small></button>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

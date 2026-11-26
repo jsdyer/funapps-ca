@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://yesby.funapps.ca/sitemap.xml

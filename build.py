@@ -2,6 +2,7 @@
 """Build the static FunApps hub from its editable catalogue. No dependencies."""
 
 import html
+from scripts.game_favicons import apply_favicons
 from datetime import date
 import json
 from pathlib import Path
@@ -212,6 +213,7 @@ def build():
         if game.get("local_bundle"):
             play_dir = DIST / "play" / game["slug"]
             shutil.copytree(ROOT / "standalone-games" / game["slug"] / "web", play_dir)
+            apply_favicons(game["slug"], play_dir)
             page = (play_dir / "index.html").read_text()
             page = re.sub(r'<link\b[^>]*rel=[\"\']canonical[\"\'][^>]*>\s*', '', page, flags=re.I)
             page = page.replace("</head>", f'<link rel="canonical" href="{esc(game["url"])}">\n<meta name="funapps-game-id" content="{game["slug"]}">\n</head>', 1)

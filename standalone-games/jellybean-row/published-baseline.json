@@ -1,0 +1,10 @@
+{
+  "note": "Production files downloaded before the favicon update on 2026-11-26. Gameplay is preserved; web/ is the maintained static release.",
+  "files": {
+    "favicon.svg": "d37629929a6643b31857ab04806145cf9d9eaa9f1c7ab0aadd2038c8b3406038",
+    "game.js": "ffbfce811a2f6b48510b0dfe92c73c6d28cf78e16a90e9cd0805cd18eec25d69",
+    "index.html": "2851b4d32293c64a44460cc70e0b30be62555e16bd712a126c34666d1db6c1ad",
+    "jellybean.css": "a920e2474be29e44a964ba9271bf99c9bfa47432cd35c4eb235136bc839d5aeb",
+    "netlify.toml": "0fbc8aaae7841296f0fe320e13b8f61c99db8e7b088ed4df28b2d4b8d61267bc"
+  }
+}

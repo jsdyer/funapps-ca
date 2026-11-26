@@ -1,0 +1,9 @@
+{
+  "note": "Production files downloaded before the favicon update on 2026-11-26. Gameplay is preserved; web/ is the maintained static release.",
+  "files": {
+    "_headers": "7adfc9d081df47326b338a222a5b2cc931d6dcafd75581391fe36380ca40a1ca",
+    "index.html": "6f9ba57cf4a47a7df99685b92ba8ea6e98de0abdd797b6cec48dda829ee6c99f",
+    "robots.txt": "0b4fa089ae72e06fc4168a2896f71e61b0382323c96bf1b7755edfee05abd827",
+    "sitemap.xml": "edbc971f7ca7c95f00817de1bf291ddb3985b1139d642108dfcccd3aa9ed27f7"
+  }
+}

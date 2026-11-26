@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Party Tycoon: The Way She Goes</title>
+    <style>
+        :root {
+            --tartan-red: #cc0000;
+            --tartan-green: #005500;
+            --ocean-blue: #004466;
+            --text-light: #f4f4f4;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--ocean-blue);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-style: italic;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            max-width: 1000px;
+            width: 100%;
+            justify-content: center;
+        }
+        .clicker-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #555;
+            flex: 1;
+            min-width: 300px;
+        }
+        .lobster-btn {
+            font-size: 80px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+        .lobster-btn:active {
+            transform: scale(0.9);
+        }
+        .score-board {
+            font-size: 24px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .upgrades-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #555;
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .upgrade-btn {
+            background-color: var(--tartan-green);
+            color: white;
+            border: 2px solid #fff;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .upgrade-btn:hover {
+            background-color: #007700;
+        }
+        .upgrade-btn:disabled {
+            background-color: #555;
+            border-color: #777;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        .upgrade-desc {
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 5px;
+            color: #ddd;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            background: rgba(204, 0, 0, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        * { box-sizing: border-box; }
+        .clicker-section, .upgrades-section { min-width: min(100%, 300px); }
+        .upgrade-desc { font-size: 14px; }
+        button { touch-action: manipulation; }
+        button:focus-visible { outline: 3px solid #ffd700; outline-offset: 3px; }
+        @media (max-width: 420px) { body { padding: 12px; } .clicker-section { padding: 20px; } .game-container { gap: 20px; } }
+        .save-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 12px 0; }
+        .save-controls button { min-height: 44px; padding: 10px 16px; border: 1px solid #b8e1dc; border-radius: 5px; background: #214e57; color: white; cursor: pointer; }
+        .save-help { max-width: 38rem; text-align: center; font-size: 14px; }
+        #save-dialog { width: min(550px, calc(100vw - 24px)); max-height: 85vh; overflow: auto; color: #eef8f9; background: #143640; border: 2px solid #b8e1dc; border-radius: 10px; }
+        #save-dialog::backdrop { background: #000a; }
+        #save-code { width: 100%; box-sizing: border-box; padding: 12px; font: 14px monospace; background: #fff; color: #102c33; }
+    </style>
+<meta name="description" content="Turn a kitchen party into a growing operation. Earn Sociables, spend them on upgrades, and keep the gathering getting bigger.">
+<link rel="canonical" href="https://party-tycoon.funapps.ca/">
+<meta name="funapps-game-id" content="kitchen-party-tycoon">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+
+    <h1>Kitchen Party Tycoon</h1>
+    <div class="subtitle">The Way She Goes, Boys. Fill yer boots!</div>
+
+    <div class="game-container">
+        <div class="clicker-section">
+            <h2>Pinch for Sociables!</h2>
+            <button class="lobster-btn" id="clickButton" aria-label="Pinch the lobster to earn one Sociable">🦞</button>
+            <div class="score-board">
+                <div>Sociables: <span id="score">0</span></div>
+                <div style="font-size: 16px; margin-top: 10px; color: #aaa;">
+                    Sociables per second: <span id="sps">0</span>
+                </div>
+            </div>
+            <button onclick="resetGame()" style="margin-top: 20px; padding: 5px 10px; background: #cc0000; color: white; border: none; border-radius: 4px; cursor: pointer;">Wipe Save (Too much Moosehead)</button>
+        </div>
+
+        <div class="upgrades-section" id="upgradesContainer">
+            <!-- Upgrades injected via JS -->
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Right on!</div>
+
+    <div class="save-controls"><button onclick="openSave('export')">Export save</button><button onclick="openSave('import')">Import save</button></div>
+    <p class="save-help">Move to a new device or address: export here, then import there.</p>
+    <dialog id="save-dialog" aria-labelledby="save-title">
+      <h2 id="save-title">Save code</h2>
+      <p id="save-instructions"></p>
+      <textarea id="save-code" aria-label="Save code" rows="7" spellcheck="false"></textarea>
+      <p id="save-feedback" role="status"></p>
+      <div class="save-controls"><button id="save-action" onclick="saveAction()">Copy save</button><button onclick="document.getElementById('save-dialog').close()">Close</button></div>
+    </dialog>
+
+    <script>
+        // Game State
+        let score = 0;
+        let sps = 0; // Sociables Per Second
+        
+        // Storage is optional: private browsing and malformed saves must not stop play.
+        let savedData = null;
+        try { savedData = JSON.parse(localStorage.getItem('kitchenPartySave')); } catch (_) {}
+        const validCount = n => Number.isInteger(n) && n >= 0 && n <= 1000;
+        if (savedData && Number.isFinite(savedData.score) && savedData.score >= 0) score = savedData.score;
+
+        // East Coast Upgrades Catalog
+        const upgrades = [
+            { id: 'donair', name: "Sweet Donair Sauce", cost: 15, sps: 1, count: 0, desc: "It's not tzatziki, by. +1 SPS" },
+            { id: 'chips', name: "Bag of Storm Chips", cost: 100, sps: 5, count: 0, desc: "Frankie said 'Be Prepared!' +5 SPS" },
+            { id: 'fiddle', name: "Uncle's Old Fiddle", cost: 500, sps: 20, count: 0, desc: "He only knows Barrett's Privateers, but it works. +20 SPS" },
+            { id: 'kayak', name: "Northwest Arm Kayak Rental", cost: 2000, sps: 75, count: 0, desc: "Watch out for the fog. +75 SPS" },
+            { id: 'ei', name: "EI Check Clears", cost: 7500, sps: 250, count: 0, desc: "Time to hit the NSLC. +250 SPS" },
+            { id: 'pothole', name: "Dodge a Bedford Pothole", cost: 25000, sps: 1000, count: 0, desc: "A true local hero. Your suspension survives. +1000 SPS" }
+        ];
+
+        upgrades.forEach(u => u.baseCost = u.cost);
+        function upgradeCost(u) {
+            let cost = u.baseCost;
+            for (let n = 0; n < u.count; n++) cost = Math.floor(cost * 1.15);
+            return cost;
+        }
+
+        // Restore upgrade counts from save
+        if (savedData && savedData.upgrades) {
+            upgrades.forEach((u, index) => {
+                u.count = validCount(savedData.upgrades[index]) ? savedData.upgrades[index] : 0;
+                u.cost = upgradeCost(u);
+            });
+            calculateSPS();
+        }
+
+        // DOM Elements
+        const scoreEl = document.getElementById('score');
+        const spsEl = document.getElementById('sps');
+        const clickBtn = document.getElementById('clickButton');
+        const upgradesContainer = document.getElementById('upgradesContainer');
+        const toast = document.getElementById('toast');
+
+        // Click Event
+        clickBtn.addEventListener('click', () => {
+            score++;
+            updateDisplay();
+            showRandomPhrase();
+        });
+
+        // Initialize Upgrades UI
+        function renderUpgrades() {
+            upgradesContainer.innerHTML = '<h2>Party Supplies</h2>';
+            upgrades.forEach((upgrade, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'upgrade-btn';
+                btn.id = `upgrade-${index}`;
+                btn.onclick = () => buyUpgrade(index);
+                
+                btn.innerHTML = `
+                    <div>
+                        <strong>${upgrade.name}</strong> (Own: ${upgrade.count})
+                        <div class="upgrade-desc">${upgrade.desc}</div>
+                    </div>
+                    <div>Cost: <span id="cost-${index}">${upgrade.cost}</span></div>
+                `;
+                upgradesContainer.appendChild(btn);
+            });
+            updateUpgradeButtons();
+        }
+
+        // Buy Logic
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            if (upgrade && score >= upgrade.cost) {
+                score -= upgrade.cost;
+                upgrade.count++;
+                upgrade.cost = Math.floor(upgrade.cost * 1.15); // Increase cost by 15%
+                calculateSPS();
+                renderUpgrades();
+                updateDisplay();
+                const purchasedButton = document.getElementById(`upgrade-${index}`);
+                (purchasedButton.disabled ? clickBtn : purchasedButton).focus();
+                saveGame();
+            }
+        }
+
+        // Calculate total Sociables per Second
+        function calculateSPS() {
+            sps = upgrades.reduce((total, upgrade) => total + (upgrade.count * upgrade.sps), 0);
+        }
+
+        // Update Text
+        function updateDisplay() {
+            scoreEl.innerText = Math.floor(score);
+            spsEl.innerText = sps;
+            updateUpgradeButtons();
+        }
+
+        // Enable/Disable buttons based on score
+        function updateUpgradeButtons() {
+            upgrades.forEach((upgrade, index) => {
+                const btn = document.getElementById(`upgrade-${index}`);
+                if (btn) {
+                    btn.disabled = score < upgrade.cost;
+                }
+            });
+        }
+
+        // Random Maritime Phrases on click
+        const phrases = ["Right on!", "Lord tunderin'!", "Who knit ya?", "G'wan by!", "Some good!", "Yes b'y!"];
+        function showRandomPhrase() {
+            if(Math.random() < 0.1) { // 10% chance
+                toast.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+                toast.style.opacity = 1;
+                setTimeout(() => toast.style.opacity = 0, 1500);
+            }
+        }
+
+        function saveGame() {
+            try { localStorage.setItem('kitchenPartySave', JSON.stringify({
+                score, upgrades: upgrades.map(u => u.count)
+            })); } catch (_) {}
+        }
+        // Use elapsed time so a throttled background tab does not lose its income.
+        let lastTick = Date.now();
+        setInterval(() => {
+            const now = Date.now();
+            score += sps * Math.max(0, Math.min(3600, (now - lastTick) / 1000));
+            lastTick = now;
+            updateDisplay(); saveGame();
+        }, 1000);
+        window.addEventListener('pagehide', saveGame);
+
+        function resetGame() {
+            if(confirm("Are you sure you want to pack 'er in? This resets all progress!")) {
+                score = 0;
+                upgrades.forEach(u => { u.count = 0; u.cost = u.baseCost; });
+                calculateSPS(); renderUpgrades(); updateDisplay(); saveGame();
+            }
+        }
+
+        let saveMode = 'export';
+        function openSave(mode) {
+            saveMode = mode;
+            const box = document.getElementById('save-code');
+            box.value = mode === 'export' ? JSON.stringify(portableSave()) : '';
+            box.readOnly = mode === 'export';
+            document.getElementById('save-title').textContent = mode === 'export' ? 'Export your save' : 'Import your save';
+            document.getElementById('save-instructions').textContent = mode === 'export' ? 'Copy this code into a note. On your other device or address, choose Import save and paste it.' : 'Paste a save code from this game. A valid import replaces your current progress.';
+            document.getElementById('save-feedback').textContent = '';
+            document.getElementById('save-action').textContent = mode === 'export' ? 'Copy save' : 'Load save';
+            document.getElementById('save-dialog').showModal(); box.focus(); box.select();
+        }
+        async function saveAction() {
+            const feedback = document.getElementById('save-feedback');
+            if (saveMode === 'export') {
+                const box = document.getElementById('save-code'); box.focus(); box.select();
+                try {
+                    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(box.value);
+                    else if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+                    feedback.textContent = 'Save copied. Keep it somewhere safe.';
+                } catch (_) { feedback.textContent = 'Use Copy or Ctrl/Cmd+C to copy the selected code.'; }
+                return;
+            }
+            try {
+                importSave(document.getElementById('save-code').value);
+                feedback.textContent = 'Save loaded successfully.';
+            } catch (_) { feedback.textContent = 'That is not a valid save for this game. Your current progress is unchanged.'; }
+        }
+
+        function portableSave() { return { game: 'kitchen-party-tycoon', version: 1, score, upgrades: upgrades.map(u => u.count) }; }
+        function importSave(raw) {
+            const data = JSON.parse(raw);
+            if (!data || data.game !== 'kitchen-party-tycoon' || data.version !== 1 ||
+                !Number.isFinite(data.score) || data.score < 0 || data.score > 1e100 ||
+                !Array.isArray(data.upgrades) || data.upgrades.length !== upgrades.length || !data.upgrades.every(validCount)) throw new Error('Invalid save');
+            score = data.score;
+            upgrades.forEach((u, i) => { u.count = data.upgrades[i]; u.cost = upgradeCost(u); });
+            calculateSPS(); renderUpgrades(); updateDisplay(); lastTick = Date.now(); saveGame();
+        }
+
+        // Init
+        renderUpgrades();
+        updateDisplay();
+    </script>
+</body>
+</html>

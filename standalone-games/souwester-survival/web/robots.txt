@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://souwester.funapps.ca/sitemap.xml

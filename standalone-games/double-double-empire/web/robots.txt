@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://double-double.funapps.ca/sitemap.xml

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Some Steep! A Maritimer Skis Banff — FunApps</title>
+<meta name="description" content="A Nova Scotian who learned to ski on a Maritime bump takes on a real Rocky Mountain run in Banff. Steer, dodge trees and elk, grab Timbits and donairs.">
+<meta name="theme-color" content="#2b4c6f">
+
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#2b4c6f;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(#5b86b3,#2b4c6f)}
+  canvas{display:block;box-shadow:0 0 40px rgba(0,0,0,.35);touch-action:none}
+  #ui{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:2}
+  #ui button,#ui a{font:600 14px system-ui;background:rgba(255,255,255,.85);color:#1e3550;border:0;border-radius:8px;padding:6px 10px;cursor:pointer;text-decoration:none}
+  #foot{position:fixed;bottom:4px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.75);pointer-events:none}
+</style>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+<div id="wrap"><canvas id="c" aria-label="Ski game: steer left and right to dodge trees and elk"></canvas></div>
+<div id="ui"><button id="pause" aria-label="Pause">⏸</button><button id="mute" aria-label="Sound">🔊</button><a href="https://funapps.ca/" aria-label="More games">More games</a></div>
+<div id="foot">A FunApps game · Just for fun, not affiliated with any park, town or resort</div>
+<script>
+(() => {
+"use strict";
+const W = 480, H = 800;
+const cv = document.getElementById('c'), cx = cv.getContext('2d');
+let scale = 1, dpr = Math.min(window.devicePixelRatio || 1, 2);
+function fit(){
+  scale = Math.min(innerWidth / W, innerHeight / H);
+  cv.style.width = (W*scale)+'px'; cv.style.height = (H*scale)+'px';
+  cv.width = W*dpr; cv.height = H*dpr;
+  cx.setTransform(dpr,0,0,dpr,0,0);
+}
+addEventListener('resize', fit); fit();
+
+// ---------- storage (safe) ----------
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+let best = +store.get('banff-best') || 0;
+let muted = store.get('banff-muted') === '1';
+
+// ---------- audio ----------
+let ac = null;
+function beep(freq, dur, type='square', vol=.06, slide=0){
+  if (muted) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.value = freq;
+    if (slide) o.frequency.linearRampToValueAtTime(freq+slide, ac.currentTime+dur);
+    g.gain.value = vol; g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime+dur);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+dur);
+  } catch(e){}
+}
+const sfx = {
+  bit(){ beep(880,.08,'square',.05); setTimeout(()=>beep(1320,.08,'square',.04),60); },
+  donair(){ [660,880,1100,1320].forEach((f,i)=>setTimeout(()=>beep(f,.1,'triangle',.07),i*60)); },
+  gate(){ beep(990,.12,'triangle',.06); },
+  crash(){ beep(180,.35,'sawtooth',.08,-120); },
+  jump(){ beep(300,.25,'sine',.07,400); },
+  over(){ [440,370,311,262].forEach((f,i)=>setTimeout(()=>beep(f,.22,'triangle',.08),i*160)); }
+};
+
+// ---------- lines from our Maritimer ----------
+const LINES = {
+  start: ["Martock was never like this!","Some steep, b'ys!","Down home we'd call this a mountain range.","Where's the ocean to?"],
+  crash: ["Holy dyin'!","Jeezly tree!","Ow, me knees!","That's some hard snow.","Wouldn't happen in Wentworth.","Lard tunderin'!"],
+  elk: ["That's no moose!","Smaller than a Cape Breton moose, mind.","Gidday, Mr. Elk!"],
+  tourist: ["Sorry, bud! Get a good one?","Don't post that!"],
+  donair: ["A DONAIR? Out here?","Sweet sauce in the Rockies!","Tastes like home."],
+  bits: ["Timbit!","Double-double fuel!"],
+  gate: ["Wicked!","Right on!","Look at me go, Mom!"],
+  air: ["Yeehaw!","Some air on that!","I'm flyin'!"],
+  fast: ["Too fast, too fast!","I'm some fast now.","Is there a brake on these things?"],
+  over: ["Back to the lodge for a hot chocolate.","I'll stick to the Wentworth bunny hill.","Some day. Let's go again!"]
+};
+const pick = a => a[Math.random()*a.length|0];
+let bubble = null;
+function say(kind, force){
+  if (!force && bubble && bubble.t > 0.6) return;
+  bubble = { text: pick(LINES[kind]), t: 2.2 };
+}
+
+// ---------- input ----------
+const keys = {};
+let pointerX = null, usedInput = false;
+function toWorldX(e){ const r = cv.getBoundingClientRect(); return (e.clientX - r.left) / scale; }
+cv.addEventListener('pointerdown', e => { pointerX = toWorldX(e); usedInput = true; tapAction(); cv.setPointerCapture && cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) { pointerX = toWorldX(e); if (e.pointerType==='mouse' && state==='play') usedInput = true; } });
+cv.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') pointerX = null; });
+addEventListener('keydown', e => {
+  if (['ArrowLeft','ArrowRight','a','d','A','D'].includes(e.key)) { keys[e.key.toLowerCase()] = true; pointerX = null; usedInput = true; e.preventDefault(); }
+  if (e.key === ' ' || e.key === 'Enter') { tapAction(); e.preventDefault(); }
+  if (e.key === 'p' || e.key === 'Escape') togglePause();
+});
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+document.getElementById('mute').onclick = e => { muted = !muted; store.set('banff-muted', muted?'1':'0'); e.target.textContent = muted?'🔇':'🔊'; };
+document.getElementById('mute').textContent = muted?'🔇':'🔊';
+document.getElementById('pause').onclick = () => togglePause();
+document.addEventListener('visibilitychange', () => { if (document.hidden && state==='play') { paused = true; updPause(); } });
+function togglePause(){ if (state!=='play') return; paused = !paused; updPause(); }
+function updPause(){ document.getElementById('pause').textContent = paused ? '▶' : '⏸'; }
+function tapAction(){
+  if (state === 'over' && overT > 0.8) reset();
+  else if (paused) { paused = false; updPause(); }
+}
+
+// ---------- game state ----------
+let state, paused = false, overT = 0;
+let P, objs, particles, tracks, dist, score, speed, lives, invuln, spawnY, combo, comboT, shake, flashT, signIdx, fastSaid, lastT;
+const SIGNS = ["Halifax 4,850 km →","No lobster past this point","Elk have the right of way","Banff Ave ↓ (hot chocolate)","Bow River below, not the Bay of Fundy","Yarmouth? Never heard of 'er","Moose sightings: 0, Elk: lots"];
+
+function reset(){
+  P = { x: W/2, y: 220, vx: 0, tilt: 0, air: 0, airMax: 0, tumble: 0 };
+  objs = []; particles = []; tracks = [];
+  dist = 0; score = 0; speed = 260; lives = 3; invuln = 1.5;
+  spawnY = H + 40; combo = 0; comboT = 0; shake = 0; flashT = 0; signIdx = 0; fastSaid = false;
+  state = 'play'; paused = false; updPause(); overT = 0;
+  say('start', true);
+}
+
+function rnd(a,b){ return a + Math.random()*(b-a); }
+
+function spawnRow(y){
+  const diff = Math.min(1, dist / 9000);
+  // trees along edges always
+  objs.push({ t:'tree', x: rnd(6, 34), y: y + rnd(-20,20), r: 11, s: rnd(.9,1.3) });
+  objs.push({ t:'tree', x: rnd(W-34, W-6), y: y + rnd(-20,20), r: 11, s: rnd(.9,1.3) });
+  if (dist < 350) { if (Math.random() < .5) objs.push({ t:'bit', x: rnd(90, W-90), y, r: 12 }); return; }
+  const roll = Math.random();
+  if (roll < 0.10 + diff*0.05 && dist > 600) {
+    // slalom gate
+    const gx = rnd(110, W-110), gap = 120 - diff*30;
+    objs.push({ t:'gate', x: gx, y, gap, done:false });
+    return;
+  }
+  const n = (dist < 1500 && Math.random() < .4 ? 0 : 1) + (Math.random() < 0.25 + diff*0.55 ? 1 : 0) + (Math.random() < diff*0.4 ? 1 : 0);
+  for (let i=0;i<n;i++){
+    const r = Math.random(), x = rnd(70, W-70), yy = y + rnd(-30,30);
+    if (r < 0.42) objs.push({ t:'tree', x, y: yy, r: 11, s: rnd(.9,1.25) });
+    else if (r < 0.54) objs.push({ t:'rock', x, y: yy, r: 14 });
+    else if (r < 0.66 && dist > 900) objs.push({ t:'elk', x, y: yy, r: 20, vx: (Math.random()<.5?-1:1)*rnd(40,90+diff*60), ph: 0, said:false });
+    else if (r < 0.74 && dist > 1500) objs.push({ t:'tourist', x, y: yy, r: 14 });
+    else if (r < 0.84) objs.push({ t:'mogul', x, y: yy, r: 22 });
+    else objs.push({ t:'bit', x, y: yy, r: 12 });
+  }
+  if (Math.random() < 0.04 + diff*0.02) objs.push({ t:'donair', x: rnd(80, W-80), y: y + 50, r: 15 });
+  if (Math.random() < 0.035) { objs.push({ t:'sign', x: Math.random()<.5? 70 : W-70, y: y+60, r: 0, text: SIGNS[signIdx++ % SIGNS.length] }); }
+}
+
+function puff(x,y,n,col){ for(let i=0;i<n;i++) particles.push({x,y,vx:rnd(-120,120),vy:rnd(-160,40),life:rnd(.4,.9),col}); }
+function popText(x,y,text,col){ particles.push({x,y,vx:0,vy:-60,life:1,text,col}); }
+
+function crash(o){
+  if (invuln > 0 || P.air > 0) return;
+  lives--; invuln = 2; P.tumble = 0.9; shake = 0.4; flashT = 0.15; combo = 0;
+  speed = Math.max(240, speed * 0.6);
+  sfx.crash(); puff(P.x, P.y, 18, '#fff');
+  if (o.t === 'elk') say('elk', true); else if (o.t === 'tourist') say('tourist', true); else say('crash', true);
+  if (lives <= 0) { state = 'over'; overT = 0; sfx.over(); if (Math.floor(score) > best) { best = Math.floor(score); store.set('banff-best', best); } say('over', true); }
+}
+
+function update(dt){
+  if (bubble) { bubble.t -= dt; if (bubble.t <= 0) bubble = null; }
+  for (const p of particles){ p.x += p.vx*dt; p.y += p.vy*dt; if(!p.text) p.vy += 300*dt; p.life -= dt; }
+  particles = particles.filter(p => p.life > 0);
+  if (state === 'over') { overT += dt; return; }
+
+  // speed ramps up
+  const target = 300 + Math.min(420, dist * 0.045);
+  speed += (target - speed) * dt * 0.6;
+  if (!fastSaid && speed > 560) { fastSaid = true; say('fast', true); }
+
+  // steering
+  let ax = 0;
+  if (keys['arrowleft'] || keys['a']) ax -= 1;
+  if (keys['arrowright'] || keys['d']) ax += 1;
+  if (P.tumble > 0) { P.tumble -= dt; P.vx *= 0.9; }
+  else if (pointerX !== null && !ax) {
+    const want = Math.max(60, Math.min(W-60, pointerX));
+    P.vx += ((want - P.x) * 9 - P.vx) * Math.min(1, dt*8);
+  } else {
+    P.vx += ax * 1800 * dt; P.vx *= Math.pow(0.02, dt);
+  }
+  P.vx = Math.max(-480, Math.min(480, P.vx));
+  P.x += P.vx * dt;
+  if (P.x < 60) { P.x = 60; P.vx = 0; }
+  if (P.x > W-60) { P.x = W-60; P.vx = 0; }
+  P.tilt += ((P.vx/480) - P.tilt) * Math.min(1, dt*10);
+  if (P.air > 0) { P.air -= dt; if (P.air <= 0) { P.air = 0; puff(P.x, P.y+14, 8, '#fff'); } }
+
+  invuln = Math.max(0, invuln - dt);
+  shake = Math.max(0, shake - dt); flashT = Math.max(0, flashT - dt);
+  if (comboT > 0) { comboT -= dt; if (comboT <= 0) combo = 0; }
+
+  const dy = speed * dt;
+  dist += dy / 4;
+  score += dy / 20;
+
+  // tracks
+  if (P.air <= 0 && P.tumble <= 0) tracks.push({ x: P.x, y: P.y + 12 });
+  for (const t of tracks) t.y -= dy;
+  tracks = tracks.filter(t => t.y > -10);
+  if (tracks.length > 400) tracks.splice(0, tracks.length - 400);
+
+  // world scroll
+  spawnY -= dy;
+  while (spawnY < H + 60) { spawnRow(spawnY + 60); spawnY += 95 - Math.min(25, dist/600); }
+
+  for (const o of objs){
+    o.y -= dy;
+    if (o.t === 'elk') { o.x += o.vx * dt; o.ph += dt*8; if (o.x < 60 || o.x > W-60) o.vx *= -1; if (!o.said && o.y < P.y + 200 && o.y > P.y) { o.said = true; if (Math.random()<.5) say('elk'); } }
+    if (o.dead) continue;
+    const ddx = o.x - P.x, ddy = o.y - P.y, d2 = ddx*ddx + ddy*ddy;
+    if (o.t === 'gate') {
+      if (!o.done && o.y < P.y) {
+        o.done = true;
+        if (Math.abs(P.x - o.x) < o.gap/2) {
+          combo++; comboT = 4; const pts = 25 * combo; score += pts; sfx.gate(); popText(o.x, P.y+30, '+'+pts+(combo>1?' x'+combo:''), '#1c6b2f');
+          if (combo >= 2) say('gate');
+        } else combo = 0;
+      }
+      // flag poles are solid
+      for (const fx of [o.x - o.gap/2, o.x + o.gap/2]) {
+        const fdx = fx - P.x, fdy = o.y - P.y;
+        if (fdx*fdx + fdy*fdy < 15*15) { crash(o); o.dead = true; }
+      }
+      continue;
+    }
+    const rr = (o.r + 10);
+    if (d2 < rr*rr) {
+      if (o.t === 'bit') { o.dead = true; score += 10; sfx.bit(); popText(o.x, o.y, '+10', '#7a4a1c'); if (Math.random()<.15) say('bits'); }
+      else if (o.t === 'donair') { o.dead = true; score += 100; sfx.donair(); popText(o.x, o.y, '+100 DONAIR!', '#b5361b'); puff(o.x,o.y,14,'#f3e3b3'); say('donair', true); if (lives < 3 && Math.random() < .5) { lives++; popText(o.x, o.y+24, '+1 toque', '#2b4c6f'); } }
+      else if (o.t === 'mogul') { if (P.air <= 0 && P.tumble <= 0) { P.air = 0.75; P.airMax = 0.75; score += 15; sfx.jump(); popText(o.x, o.y, 'AIR +15', '#2b4c6f'); if (Math.random()<.35) say('air'); } }
+      else if (o.t === 'sign') {}
+      else if (o.t === 'tree' || o.t === 'rock' || o.t === 'elk' || o.t === 'tourist') { if (P.air <= 0 && invuln <= 0) { crash(o); o.dead = o.t !== 'tree'; if (o.t==='tourist') o.dead = true; } }
+    }
+  }
+  objs = objs.filter(o => o.y > -80 && !(o.dead && (o.t==='bit'||o.t==='donair'||o.t==='tourist')));
+}
+
+// ---------- drawing ----------
+function drawTree(o){
+  const s = o.s, x = o.x, y = o.y;
+  cx.fillStyle = 'rgba(60,80,110,.18)'; cx.beginPath(); cx.ellipse(x+6, y+20*s, 18*s, 7*s, 0, 0, 7); cx.fill();
+  cx.fillStyle = '#5a3a22'; cx.fillRect(x-3*s, y+10*s, 6*s, 10*s);
+  const g = ['#1f5a3a','#246b44','#2c7c4f'];
+  for (let i=0;i<3;i++){
+    const ty = y - 28*s + i*12*s, w = (12 + i*6)*s;
+    cx.fillStyle = g[i]; cx.beginPath(); cx.moveTo(x, ty-10*s); cx.lineTo(x+w, ty+14*s); cx.lineTo(x-w, ty+14*s); cx.closePath(); cx.fill();
+    cx.fillStyle = 'rgba(255,255,255,.85)'; cx.beginPath(); cx.moveTo(x, ty-10*s); cx.lineTo(x+w*.45, ty+2*s); cx.lineTo(x-w*.45, ty+2*s); cx.closePath(); cx.fill();
+  }
+}
+function drawRock(o){
+  cx.fillStyle = '#6f7682'; cx.beginPath(); cx.ellipse(o.x, o.y, 17, 12, 0, 0, 7); cx.fill();
+  cx.fillStyle = '#8d95a1'; cx.beginPath(); cx.ellipse(o.x-4, o.y-4, 9, 6, 0, 0, 7); cx.fill();
+  cx.fillStyle = '#fff'; cx.beginPath(); cx.ellipse(o.x-2, o.y-9, 10, 4, 0, 0, 7); cx.fill();
+}
+function drawMogul(o){
+  const g = cx.createRadialGradient(o.x-6, o.y-8, 2, o.x, o.y, 26);
+  g.addColorStop(0,'#ffffff'); g.addColorStop(1,'#bcd3ea');
+  cx.fillStyle = g; cx.beginPath(); cx.ellipse(o.x, o.y, 28, 15, 0, 0, 7); cx.fill();
+  cx.strokeStyle = 'rgba(80,120,170,.35)'; cx.lineWidth = 2; cx.stroke();
+  cx.fillStyle = '#2b4c6f'; cx.font = 'bold 11px system-ui'; cx.textAlign='center'; cx.fillText('JUMP', o.x, o.y+4);
+}
+function drawElk(o){
+  const x = o.x, y = o.y, d = o.vx > 0 ? 1 : -1, leg = Math.sin(o.ph)*4;
+  cx.fillStyle = 'rgba(60,80,110,.18)'; cx.beginPath(); cx.ellipse(x, y+18, 24, 6, 0, 0, 7); cx.fill();
+  cx.strokeStyle = '#4a2f1a'; cx.lineWidth = 3;
+  cx.beginPath(); cx.moveTo(x-12, y+4); cx.lineTo(x-12+leg, y+18); cx.moveTo(x+12, y+4); cx.lineTo(x+12-leg, y+18); cx.stroke();
+  cx.fillStyle = '#9a6a3c'; cx.beginPath(); cx.ellipse(x, y, 20, 10, 0, 0, 7); cx.fill();
+  cx.fillStyle = '#e8d6b0'; cx.beginPath(); cx.ellipse(x - d*16, y-1, 6, 7, 0, 0, 7); cx.fill(); // rump patch
+  cx.fillStyle = '#6b4424'; cx.beginPath(); cx.ellipse(x + d*20, y-10, 7, 6, 0, 0, 7); cx.fill(); // head
+  cx.strokeStyle = '#d9c39a'; cx.lineWidth = 2.5; cx.beginPath();
+  const hx = x + d*20, hy = y-14;
+  cx.moveTo(hx, hy); cx.lineTo(hx - d*6, hy-16); cx.moveTo(hx-d*3, hy-8); cx.lineTo(hx-d*12, hy-12); cx.moveTo(hx-d*5, hy-13); cx.lineTo(hx+d*2, hy-20);
+  cx.moveTo(hx, hy); cx.lineTo(hx + d*8, hy-14); cx.moveTo(hx+d*5, hy-9); cx.lineTo(hx+d*13, hy-10);
+  cx.stroke();
+}
+function drawTourist(o){
+  const x=o.x,y=o.y;
+  cx.fillStyle='rgba(60,80,110,.18)'; cx.beginPath(); cx.ellipse(x,y+16,12,5,0,0,7); cx.fill();
+  cx.fillStyle='#e0447a'; cx.fillRect(x-8,y-6,16,20);
+  cx.fillStyle='#f1c9a0'; cx.beginPath(); cx.arc(x,y-12,7,0,7); cx.fill();
+  cx.fillStyle='#222'; cx.fillRect(x-7,y-20,14,5);
+  cx.strokeStyle='#333'; cx.lineWidth=2; cx.beginPath(); cx.moveTo(x+6,y-2); cx.lineTo(x+22,y-26); cx.stroke();
+  cx.fillStyle='#111'; cx.fillRect(x+19,y-33,8,11);
+  cx.fillStyle='#fff'; cx.font='10px system-ui'; cx.textAlign='center';
+  cx.fillStyle='rgba(255,255,255,.9)'; cx.fillText('📸', x+23, y-36);
+}
+function drawBit(o){
+  cx.fillStyle='rgba(60,80,110,.15)'; cx.beginPath(); cx.ellipse(o.x+3,o.y+10,10,4,0,0,7); cx.fill();
+  cx.fillStyle='#a8692e'; cx.beginPath(); cx.arc(o.x,o.y,10,0,7); cx.fill();
+  cx.fillStyle='#c88a48'; cx.beginPath(); cx.arc(o.x-3,o.y-3,4,0,7); cx.fill();
+  cx.fillStyle='rgba(255,255,255,.8)'; for(const [a,b] of [[-4,2],[3,-4],[4,4],[-1,-6]]) cx.fillRect(o.x+a,o.y+b,2,2);
+}
+function drawDonair(o){
+  const t = performance.now()/300;
+  cx.save(); cx.translate(o.x, o.y + Math.sin(t)*3); cx.rotate(-0.3);
+  cx.fillStyle='rgba(255,230,120,.35)'; cx.beginPath(); cx.arc(0,0,24,0,7); cx.fill();
+  cx.fillStyle='#f0d9a4'; cx.beginPath(); cx.moveTo(-16,10); cx.lineTo(16,10); cx.lineTo(10,-14); cx.lineTo(-10,-14); cx.closePath(); cx.fill();
+  cx.fillStyle='#8a3b1e'; cx.fillRect(-9,-14,18,6);
+  cx.fillStyle='#fff8e8'; cx.fillRect(-8,-17,16,4);
+  cx.fillStyle='#c94b4b'; cx.fillRect(-6,-19,4,3); cx.fillRect(2,-19,4,3);
+  cx.restore();
+}
+function drawGate(o){
+  for (const [fx,col] of [[o.x-o.gap/2,'#d33'],[o.x+o.gap/2,'#2a5bd7']]){
+    cx.strokeStyle='#333'; cx.lineWidth=3; cx.beginPath(); cx.moveTo(fx,o.y+10); cx.lineTo(fx,o.y-26); cx.stroke();
+    cx.fillStyle = o.done ? 'rgba(150,150,150,.8)' : col; cx.beginPath(); cx.moveTo(fx,o.y-26); cx.lineTo(fx+(fx<o.x?16:-16),o.y-20); cx.lineTo(fx,o.y-14); cx.fill();
+  }
+  if (!o.done){ cx.strokeStyle='rgba(43,76,111,.25)'; cx.setLineDash([6,6]); cx.lineWidth=2; cx.beginPath(); cx.moveTo(o.x-o.gap/2+4,o.y); cx.lineTo(o.x+o.gap/2-4,o.y); cx.stroke(); cx.setLineDash([]); }
+}
+function drawSign(o){
+  cx.fillStyle='#5a3a22'; cx.fillRect(o.x-2,o.y-6,4,24);
+  cx.font='bold 11px system-ui'; const w = Math.min(190, cx.measureText(o.text).width + 14);
+  cx.fillStyle='#7b4b25'; cx.fillRect(o.x-w/2, o.y-26, w, 22);
+  cx.fillStyle='#f6e7c8'; cx.textAlign='center'; cx.fillText(o.text, o.x, o.y-11, w-8);
+}
+function drawSkier(){
+  const x = P.x, y = P.y, a = P.air > 0 ? Math.sin((1 - P.air/P.airMax) * Math.PI) : 0;
+  const lift = a * 26, sc = 1 + a*0.25;
+  cx.fillStyle='rgba(40,60,90,.25)'; cx.beginPath(); cx.ellipse(x+lift*0.4, y+16, 16 - a*5, 6 - a*2, 0, 0, 7); cx.fill();
+  if (invuln > 0 && Math.floor(invuln*10)%2===0 && state==='play') return;
+  cx.save(); cx.translate(x, y - lift); cx.scale(sc, sc);
+  if (P.tumble > 0) cx.rotate(P.tumble * 14);
+  else cx.rotate(P.tilt * 0.5);
+  // skis
+  cx.strokeStyle='#d6402b'; cx.lineWidth=4; cx.lineCap='round';
+  const sp = P.tilt * 6;
+  cx.beginPath(); cx.moveTo(-7+sp, -4); cx.lineTo(-7-sp, 22); cx.moveTo(7+sp, -4); cx.lineTo(7-sp, 22); cx.stroke();
+  // poles
+  cx.strokeStyle='#444'; cx.lineWidth=2; cx.beginPath(); cx.moveTo(-12, 0); cx.lineTo(-18, 16); cx.moveTo(12,0); cx.lineTo(18,16); cx.stroke();
+  // body: Nova Scotia tartan-ish jacket (blue/green/white)
+  cx.fillStyle='#1f5fa8'; cx.beginPath(); cx.ellipse(0, 2, 11, 13, 0, 0, 7); cx.fill();
+  cx.strokeStyle='rgba(255,255,255,.7)'; cx.lineWidth=1.5; cx.beginPath(); cx.moveTo(-10,0); cx.lineTo(10,0); cx.moveTo(-3,-10); cx.lineTo(-3,14); cx.stroke();
+  cx.strokeStyle='#2f8a4a'; cx.beginPath(); cx.moveTo(-10,6); cx.lineTo(10,6); cx.moveTo(4,-10); cx.lineTo(4,14); cx.stroke();
+  // head + toque
+  cx.fillStyle='#f1c9a0'; cx.beginPath(); cx.arc(0,-12,7,0,7); cx.fill();
+  cx.fillStyle='#c62f2f'; cx.beginPath(); cx.arc(0,-14,7.5,Math.PI,0); cx.fill(); cx.fillRect(-7.5,-15,15,3);
+  cx.fillStyle='#fff'; cx.beginPath(); cx.arc(0,-22,3.5,0,7); cx.fill();
+  cx.restore();
+}
+
+function drawBg(){
+  cx.fillStyle = '#f4f8fd'; cx.fillRect(0,0,W,H);
+  // subtle snow texture scrolling
+  const off = (dist*4) % 80;
+  cx.fillStyle = 'rgba(150,180,215,.18)';
+  for (let yy = -off; yy < H; yy += 80) for (let xx = 0; xx < W; xx += 60) {
+    cx.beginPath(); cx.ellipse(xx + ((yy/80|0)%2)*30 + 15, yy+20, 14, 3, 0, 0, 7); cx.fill();
+  }
+  // ski tracks
+  cx.strokeStyle='rgba(120,150,190,.35)'; cx.lineWidth=2; cx.beginPath();
+  for (let i=1;i<tracks.length;i++){ const a=tracks[i-1], b=tracks[i]; if (Math.abs(a.y-b.y) > 30) continue; cx.moveTo(a.x-5,a.y); cx.lineTo(b.x-5,b.y); cx.moveTo(a.x+5,a.y); cx.lineTo(b.x+5,b.y); }
+  cx.stroke();
+}
+
+function drawHeader(){
+  // mountain panorama strip at top
+  const g = cx.createLinearGradient(0,0,0,92); g.addColorStop(0,'#7fb1e0'); g.addColorStop(1,'#cfe3f5');
+  cx.fillStyle = g; cx.fillRect(0,0,W,92);
+  const par = (dist*0.02) % W;
+  cx.fillStyle='#6b7f99';
+  cx.beginPath(); cx.moveTo(0,92);
+  const pk = [[0,70],[60,30],[110,60],[170,14],[230,58],[290,24],[350,62],[410,20],[480,55]];
+  for (const [px,py] of pk) cx.lineTo(px, py);
+  cx.lineTo(W,92); cx.closePath(); cx.fill();
+  cx.fillStyle='#fff';
+  for (const [px,py] of pk) if (py < 40) { cx.beginPath(); cx.moveTo(px,py); cx.lineTo(px+14,py+14); cx.lineTo(px-14,py+14); cx.closePath(); cx.fill(); }
+  cx.fillStyle='rgba(255,255,255,.85)'; cx.fillRect(0,88,W,6);
+  // HUD
+  cx.fillStyle='#1e3550'; cx.textAlign='left'; cx.font='bold 22px system-ui';
+  cx.fillText(Math.floor(score).toLocaleString(), 12, 30);
+  cx.font='12px system-ui'; cx.fillText('Best ' + best.toLocaleString(), 12, 48);
+  for (let i=0;i<3;i++){ const tx = 22 + i*24, ty = 72; cx.globalAlpha = i<lives ? 1 : 0.2;
+    cx.fillStyle='#c62f2f'; cx.beginPath(); cx.arc(tx,ty,9,Math.PI,0); cx.fill(); cx.fillRect(tx-9,ty-1,18,5);
+    cx.fillStyle='#fff'; cx.beginPath(); cx.arc(tx,ty-10,3.5,0,7); cx.fill(); cx.globalAlpha = 1; }
+  cx.textAlign='right'; cx.font='bold 13px system-ui';
+  cx.fillText(Math.round(speed/6.2) + ' km/h', W-12, 74);
+  if (combo > 1) { cx.fillStyle='#1c6b2f'; cx.fillText('Gate combo x'+combo, W-12, 56); }
+}
+
+function drawBubble(){
+  if (!bubble) return;
+  const alpha = Math.min(1, bubble.t*3);
+  cx.globalAlpha = alpha;
+  cx.font='bold 15px system-ui';
+  const w = Math.min(320, cx.measureText(bubble.text).width + 22), h = 30;
+  let bx = Math.max(8, Math.min(W - w - 8, P.x - w/2)), by = P.y - 78;
+  cx.fillStyle='#fff'; cx.strokeStyle='#1e3550'; cx.lineWidth=2;
+  roundRect(bx, by, w, h, 10); cx.fill(); cx.stroke();
+  cx.beginPath(); cx.moveTo(P.x-6, by+h); cx.lineTo(P.x, by+h+10); cx.lineTo(P.x+6, by+h); cx.fill();
+  cx.fillStyle='#1e3550'; cx.textAlign='center'; cx.fillText(bubble.text, bx + w/2, by + 20, w-12);
+  cx.globalAlpha = 1;
+}
+function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+
+function drawHint(){
+  if (usedInput || state !== 'play') return;
+  const t = performance.now()/400;
+  cx.globalAlpha = 0.9;
+  cx.fillStyle='rgba(30,53,80,.82)'; roundRect(W/2-170, H-150, 340, 78, 16); cx.fill();
+  cx.fillStyle='#fff'; cx.textAlign='center'; cx.font='bold 22px system-ui';
+  cx.fillText('◀  Steer  ▶', W/2 + Math.sin(t)*14, H-115);
+  cx.font='14px system-ui'; cx.fillText('Drag, move the mouse, or use the arrow keys', W/2, H-90);
+  cx.globalAlpha = 1;
+}
+
+function drawLegend(){
+  // tiny legend in first seconds
+  if (dist > 500 || state!=='play') return;
+  cx.globalAlpha = Math.max(0, 1 - dist/500);
+  cx.fillStyle='rgba(255,255,255,.92)'; roundRect(W/2-150, 104, 300, 34, 10); cx.fill();
+  cx.fillStyle='#1e3550'; cx.font='bold 13px system-ui'; cx.textAlign='center';
+  cx.fillText('Dodge 🌲 & elk · Grab Timbits & donairs · Hit bumps to jump', W/2, 126, 290);
+  cx.globalAlpha = 1;
+}
+
+function drawOver(){
+  if (state !== 'over') return;
+  const a = Math.min(1, overT*2);
+  cx.fillStyle = `rgba(20,35,55,${0.6*a})`; cx.fillRect(0,0,W,H);
+  cx.globalAlpha = a;
+  cx.fillStyle='#fff'; roundRect(40, 250, W-80, 280, 20); cx.fill();
+  cx.fillStyle='#1e3550'; cx.textAlign='center';
+  cx.font='bold 30px system-ui'; cx.fillText('Wiped out!', W/2, 300);
+  cx.font='16px system-ui'; cx.fillText('You made it ' + Math.floor(dist).toLocaleString() + ' m down the mountain', W/2, 332);
+  cx.font='bold 46px system-ui'; cx.fillText(Math.floor(score).toLocaleString(), W/2, 392);
+  cx.font='14px system-ui';
+  const nb = Math.floor(score) >= best && best > 0;
+  cx.fillText(nb ? '🎉 New best!' : 'Best: ' + best.toLocaleString(), W/2, 418);
+  cx.font='italic 14px system-ui'; cx.fillText('"' + (bubble ? bubble.text : pick(LINES.over)) + '"', W/2, 448, W-110);
+  if (overT > 0.8){
+    const pulse = 1 + Math.sin(performance.now()/250)*0.04;
+    cx.save(); cx.translate(W/2, 492); cx.scale(pulse,pulse);
+    cx.fillStyle='#c62f2f'; roundRect(-110,-24,220,46,23); cx.fill();
+    cx.fillStyle='#fff'; cx.font='bold 20px system-ui'; cx.fillText('Tap to go again', 0, 7);
+    cx.restore();
+  }
+  cx.globalAlpha = 1;
+}
+
+function drawPaused(){
+  if (!paused) return;
+  cx.fillStyle='rgba(20,35,55,.55)'; cx.fillRect(0,0,W,H);
+  cx.fillStyle='#fff'; cx.textAlign='center'; cx.font='bold 30px system-ui'; cx.fillText('Paused', W/2, H/2);
+  cx.font='16px system-ui'; cx.fillText('Tap to keep skiing', W/2, H/2+30);
+}
+
+function render(){
+  cx.save();
+  if (shake > 0) cx.translate(rnd(-6,6)*shake*2, rnd(-6,6)*shake*2);
+  drawBg();
+  const sorted = objs.slice().sort((a,b)=>a.y-b.y);
+  let skierDrawn = false;
+  for (const o of sorted){
+    if (!skierDrawn && o.y > P.y) { drawSkier(); skierDrawn = true; }
+    if (o.dead && o.t!=='tree' && o.t!=='rock' && o.t!=='gate' && o.t!=='elk') continue;
+    switch(o.t){
+      case 'tree': drawTree(o); break; case 'rock': drawRock(o); break; case 'mogul': drawMogul(o); break;
+      case 'elk': drawElk(o); break; case 'tourist': drawTourist(o); break; case 'bit': drawBit(o); break;
+      case 'donair': drawDonair(o); break; case 'gate': drawGate(o); break; case 'sign': drawSign(o); break;
+    }
+  }
+  if (!skierDrawn) drawSkier();
+  for (const p of particles){
+    cx.globalAlpha = Math.max(0, Math.min(1, p.life*1.5));
+    if (p.text){ cx.fillStyle=p.col; cx.font='bold 16px system-ui'; cx.textAlign='center'; cx.fillText(p.text,p.x,p.y); }
+    else { cx.fillStyle=p.col; cx.beginPath(); cx.arc(p.x,p.y,3,0,7); cx.fill(); }
+  }
+  cx.globalAlpha = 1;
+  drawBubble();
+  cx.restore();
+  if (flashT > 0){ cx.fillStyle=`rgba(255,80,60,${flashT*2})`; cx.fillRect(0,0,W,H); }
+  drawHeader(); drawLegend(); drawHint(); drawOver(); drawPaused();
+}
+
+function loop(t){
+  const dt = Math.min(0.05, (t - (lastT||t)) / 1000); lastT = t;
+  if (!paused) update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+reset();
+requestAnimationFrame(loop);
+// expose for testing
+window.__banff = { get state(){ return state; }, get score(){ return score; }, get lives(){ return lives; }, get dist(){ return dist; } };
+})();
+</script>
+</body>
+</html>

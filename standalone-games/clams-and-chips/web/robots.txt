@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://clams.funapps.ca/sitemap.xml

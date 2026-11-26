@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://one-more-tune.funapps.ca/sitemap.xml

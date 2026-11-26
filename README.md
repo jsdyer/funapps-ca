@@ -157,6 +157,16 @@ The original activities and their registry live in `games.js`; individual activi
 
 ## Standalone game maintenance
 
-The 18 Netlify games are maintained in `standalone-games/`, with per-game audit notes and regression checks. The hub build excludes this directory. Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matching ZIP to the existing project. These games remain Netlify Drop projects, so a hub Git push does not deploy their code.
+The 22 standalone Netlify games are maintained as complete static releases in `standalone-games/<slug>/web/`. These releases were synchronized with their published Netlify files for the favicon update; earlier root-level source and audit files remain available for reference. Edit the maintained `web/` release, or rebuild it from the relevant source when intentionally changing a game. `published-baseline.json` records the hashes of the original downloaded production files.
+
+Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matching ZIP to the existing project. The packager preserves the release's existing metadata, redirects and game files. These games remain Netlify Drop projects, so a hub Git push does not deploy their code. The 13 bundled games continue to publish through the hub under `/play/<slug>/`.
+
+### Game icons
+
+Each of the 35 games has its own artwork in `game-icons/<slug>/`: `source.png` (256 px), `favicon.png` (96 px), `favicon.ico` (16, 32, 48 and 64 px), and `apple-touch-icon.png` (180 px). The artwork uses recognizable game-specific subjects and contains no text. `game-icons/designs.json` records the illustration brief for each game.
+
+Both `build.py` and `scripts/build_standalone.py` apply these icons through `scripts/game_favicons.py`. The regional rebuild script also reapplies them after regenerating framework bundles. Icon URLs are relative to each release, so they work at a `/play/` path, a Netlify address or a future custom subdomain. Existing game-specific SVG files remain available for old bookmarks, while page declarations prefer the new PNG/ICO files.
+
+Regenerate the sizes from the committed source images with `python scripts/render_game_icons.py` (Pillow is needed only for this artwork step; production builds still use Python's standard library). Keep the filenames stable. Google selects one favicon per hostname, so games under the same `funapps.ca` hostname retain the hub icon in Google Search even though browser tabs can show their own game icons.
 
 See [the November 2026 audit and domain setup guide](docs/FUNAPPS-AUDIT-2026-11-23.md) and [DNS mapping](docs/funapps-dns.csv). The hub keeps working Netlify launch URLs while new domains await setup. Once DNS and HTTPS are ready, `python scripts/activate_domains.py --apply` verifies each game identity, changes ready links and rebuilds the sitemap; commit and push afterward.

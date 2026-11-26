@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Keep 'Er Goin'! — A Kitchen Party Survival Game</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0f1828; --night2:#182742;
+  --panel:#7a563a; --panel-d:#5e4128; --trim:#3c2a18;
+  --lino:#cdb98f; --lino2:#c0aa7d;
+  --cream:#f7ecd6; --cream2:#efdfc0;
+  --ink:#33210f;
+  --red:#c3402f; --red-d:#8e2b1f;
+  --spruce:#3c6b4d; --spruce-d:#2b503a;
+  --lamp:#ffc86b; --lamp2:#ffdf9e;
+  --sky:#16233d;
+  font-family:"Baloo 2", ui-rounded, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;background:var(--night);overflow:hidden;touch-action:manipulation;}
+button{font-family:inherit;}
+#wrap{position:fixed;inset:0;display:grid;place-items:center;
+  background:radial-gradient(1200px 700px at 50% 30%, var(--night2), var(--night) 70%);}
+#stage{width:960px;height:600px;position:relative;overflow:hidden;border-radius:18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 6px #23180d, 0 0 0 9px #0a0704;
+  background:var(--panel); user-select:none;}
+#stage, #stage *{user-select:none;-webkit-user-select:none;}
+
+/* ---------- SCENERY ---------- */
+.backwall{position:absolute;inset:0 0 auto 0;height:360px;
+  background:
+    linear-gradient(rgba(255,205,120,.10), rgba(0,0,0,.22)),
+    repeating-linear-gradient(90deg, var(--panel) 0 78px, var(--panel-d) 78px 82px);}
+.backwall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;
+  background:var(--trim);box-shadow:0 -2px 0 rgba(255,255,255,.08) inset;}
+.floor{position:absolute;left:0;right:0;top:360px;bottom:0;
+  background:
+    linear-gradient(rgba(0,0,0,.14), rgba(0,0,0,.34)),
+    repeating-conic-gradient(var(--lino) 0% 25%, var(--lino2) 0% 50%) 0 0/72px 72px;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:6;
+  background:radial-gradient(720px 480px at 50% 34%, rgba(255,205,120,.16), rgba(0,0,0,0) 55%, rgba(0,0,0,.38));}
+
+#windowEl{position:absolute;left:598px;top:46px;width:252px;height:168px;border:9px solid #4a3016;
+  border-radius:8px;overflow:hidden;background:linear-gradient(var(--sky), #0c1526);
+  box-shadow:0 6px 18px rgba(0,0,0,.4), 0 0 0 3px #2a1c0d;}
+#windowEl .moon{position:absolute;right:22px;top:18px;width:30px;height:30px;border-radius:50%;
+  background:#f4f0dc;box-shadow:0 0 24px 6px rgba(244,240,220,.35);}
+#windowEl .drift{position:absolute;left:-6px;right:-6px;bottom:-8px;height:26px;border-radius:50% 50% 0 0/100% 100% 0 0;background:#e9eef4;opacity:.95;}
+.flake{position:absolute;top:-8px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.85;
+  animation:fall linear infinite;}
+@keyframes fall{to{transform:translate(-14px,190px);}}
+.win-cross{position:absolute;inset:0;pointer-events:none;}
+.win-cross::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3.5px;background:#4a3016;}
+.win-cross::after{content:"";position:absolute;top:50%;left:0;right:0;height:7px;margin-top:-3.5px;background:#4a3016;}
+
+#wallclock{position:absolute;left:506px;top:62px;width:62px;height:62px;border-radius:50%;
+  background:var(--cream);border:6px solid var(--trim);box-shadow:0 4px 10px rgba(0,0,0,.35);}
+#wallclock .hand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;background:var(--ink);border-radius:3px;}
+#wallclock .h{width:5px;height:15px;margin-left:-2.5px;}
+#wallclock .m{width:3px;height:21px;margin-left:-1.5px;background:var(--red);}
+#wallclock .dot{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:var(--ink);}
+
+#shelf{position:absolute;left:318px;top:96px;width:168px;height:40px;font-size:24px;line-height:44px;text-align:center;letter-spacing:8px;}
+#shelf::after{content:"";position:absolute;left:-8px;right:-8px;bottom:-4px;height:10px;background:var(--trim);border-radius:3px;box-shadow:0 4px 8px rgba(0,0,0,.3);}
+
+#fridge{position:absolute;left:20px;top:84px;width:122px;height:238px;border-radius:14px 14px 6px 6px;
+  background:linear-gradient(160deg,#e9efe7,#c9d6cc);border:5px solid #9fb0a4;box-shadow:6px 8px 16px rgba(0,0,0,.35);}
+#fridge .f-split{position:absolute;left:0;right:0;top:74px;height:5px;background:#a9baae;}
+#fridge .f-handle{position:absolute;right:8px;top:20px;width:7px;height:40px;border-radius:4px;background:#8b9c90;box-shadow:0 62px 0 #8b9c90;}
+.magnet{position:absolute;font-weight:800;font-size:14px;line-height:1;padding:2px 4px;border-radius:5px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.3);box-shadow:0 2px 3px rgba(0,0,0,.3);}
+#fridge .f-note{position:absolute;left:12px;bottom:26px;width:56px;padding:6px 4px;background:#fff;color:#c3402f;
+  font-size:11px;font-weight:700;text-align:center;transform:rotate(-4deg);box-shadow:0 3px 6px rgba(0,0,0,.25);border-radius:2px;}
+
+#stove{position:absolute;left:176px;top:212px;width:96px;height:118px;background:linear-gradient(#3a3a3f,#232327);
+  border-radius:8px 8px 4px 4px;border:4px solid #17171a;box-shadow:0 10px 20px rgba(0,0,0,.45);}
+#stove .s-pipe{position:absolute;left:34px;top:-212px;width:24px;height:214px;background:linear-gradient(90deg,#2a2a2e,#4a4a50,#2a2a2e);border-radius:4px;}
+#stove .s-door{position:absolute;left:16px;top:30px;width:60px;height:44px;border-radius:8px;border:4px solid #101013;
+  background:radial-gradient(circle at 50% 60%, #ffb151, #e0641f 55%, #7d2c0a);overflow:hidden;}
+#stove .s-door::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 8px,#101013 8px 12px);}
+#stove .s-legs{position:absolute;left:8px;right:8px;bottom:-10px;height:10px;background:
+  linear-gradient(90deg,#17171a 0 10px,transparent 10px calc(100% - 10px),#17171a calc(100% - 10px));}
+#stoveGlow{position:absolute;left:150px;top:250px;width:160px;height:130px;pointer-events:none;z-index:5;
+  background:radial-gradient(closest-side, rgba(255,150,60,.4), transparent 70%);
+  animation:flick 2.2s ease-in-out infinite alternate;}
+@keyframes flick{from{opacity:.55;transform:scale(1);}to{opacity:.95;transform:scale(1.12);}}
+
+/* ---------- STATIONS ---------- */
+.station{position:absolute;bottom:34px;z-index:8;background:linear-gradient(#8a6342,#6d4b2e);
+  border:5px solid var(--trim);border-radius:16px;padding:8px 10px 9px;text-align:center;cursor:pointer;
+  box-shadow:0 8px 0 #241708, 0 14px 22px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,220,160,.35);
+  transition:transform .08s;}
+.station:active{transform:translateY(3px);box-shadow:0 5px 0 #241708, 0 10px 16px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,220,160,.35);}
+.station .st-emoji{font-size:36px;line-height:1.15;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35));}
+.station .st-label{font-weight:800;font-size:14px;letter-spacing:.08em;color:var(--lamp2);text-transform:uppercase;text-shadow:0 2px 0 rgba(0,0,0,.45);}
+.station .st-state{font-weight:700;font-size:12px;color:var(--cream);min-height:16px;opacity:.95;}
+#stKettle{left:24px;width:158px;}
+#stTable{left:50%;transform:translateX(-50%);width:238px;}
+#stTable:active{transform:translateX(-50%) translateY(3px);}
+#stCorner{right:24px;width:172px;}
+.station.ready{animation:readyPulse 1s ease-in-out infinite;}
+@keyframes readyPulse{0%,100%{box-shadow:0 8px 0 #241708, 0 14px 22px rgba(0,0,0,.4), 0 0 0 0 rgba(255,200,107,.0), inset 0 2px 0 rgba(255,220,160,.35);}
+  50%{box-shadow:0 8px 0 #241708, 0 14px 22px rgba(0,0,0,.4), 0 0 26px 6px rgba(255,200,107,.55), inset 0 2px 0 rgba(255,220,160,.35);}}
+.station.disabled{filter:grayscale(.7) brightness(.75);}
+
+#handChip{position:absolute;left:50%;bottom:158px;transform:translateX(-50%);z-index:9;
+  background:rgba(30,18,8,.88);color:var(--lamp2);border:3px solid var(--trim);border-radius:999px;
+  padding:5px 16px;font-weight:700;font-size:14px;white-space:nowrap;box-shadow:0 6px 14px rgba(0,0,0,.4);}
+
+/* ---------- HUD ---------- */
+#hud{position:absolute;left:10px;right:10px;top:8px;z-index:30;display:flex;align-items:flex-start;gap:12px;}
+#moodWrap{flex:0 0 300px;}
+#moodWrap .lbl{font-weight:800;font-size:12px;letter-spacing:.14em;color:var(--lamp2);text-shadow:0 2px 3px rgba(0,0,0,.6);}
+#moodBar{height:20px;border-radius:999px;background:#2a1a0c;border:3px solid var(--trim);overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.4);}
+#moodFill{height:100%;width:100%;border-radius:999px;background:linear-gradient(90deg,#e0642f,var(--lamp));transition:width .3s;}
+#moodBar.low #moodFill{background:linear-gradient(90deg,#8e2b1f,#e0642f);animation:moodBlink .7s steps(2) infinite;}
+@keyframes moodBlink{50%{filter:brightness(1.6);}}
+#clockBlock{flex:1;text-align:center;color:var(--cream);text-shadow:0 2px 4px rgba(0,0,0,.6);}
+#clockTxt{font-weight:800;font-size:24px;line-height:1;}
+#hourTxt{font-weight:700;font-size:12.5px;color:var(--lamp2);opacity:.95;}
+#scoreBlock{flex:0 0 auto;text-align:right;color:var(--cream);text-shadow:0 2px 4px rgba(0,0,0,.6);}
+#scoreTxt{font-weight:800;font-size:24px;line-height:1;}
+#comboChip{display:inline-block;margin-top:2px;background:var(--lamp);color:var(--ink);border:3px solid var(--trim);
+  border-radius:999px;padding:1px 10px;font-weight:800;font-size:13px;visibility:hidden;}
+#hudBtns{flex:0 0 auto;display:flex;gap:6px;}
+.hudBtn{width:36px;height:36px;border-radius:10px;border:3px solid var(--trim);background:linear-gradient(#8a6342,#6d4b2e);
+  color:var(--cream);font-size:17px;cursor:pointer;box-shadow:0 4px 0 #241708;line-height:1;}
+.hudBtn:active{transform:translateY(2px);box-shadow:0 2px 0 #241708;}
+.hudBtn.off{filter:grayscale(1) brightness(.7);}
+
+/* ---------- TICKER / TOASTS / FLOATERS ---------- */
+#ticker{position:absolute;left:0;right:0;bottom:0;height:26px;z-index:12;background:rgba(16,10,4,.82);
+  color:#e8d9b8;display:flex;align-items:center;justify-content:center;
+  font:italic 500 13.5px Georgia, "Times New Roman", serif;letter-spacing:.02em;}
+#tickerTxt{opacity:1;transition:opacity .5s;}
+#toasts{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:35;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;width:640px;}
+.toast{background:var(--cream);color:var(--ink);border:4px solid var(--trim);border-radius:13px;padding:7px 16px;
+  font-weight:700;font-size:15px;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,.45);
+  animation:toastIn .22s ease-out;max-width:640px;}
+.toast.fade{opacity:0;transition:opacity .45s, transform .45s;transform:translateY(-8px);}
+@keyframes toastIn{from{transform:translateY(-10px) scale(.92);opacity:0;}to{transform:none;opacity:1;}}
+.floater{position:absolute;z-index:20;font-weight:800;font-size:17px;color:var(--lamp);
+  text-shadow:0 2px 0 rgba(0,0,0,.55);pointer-events:none;animation:rise 1.1s ease-out forwards;white-space:nowrap;transform:translateX(-50%);}
+.floater.word{color:#fff;font-size:14px;}
+.floater.bad{color:#ff9b8a;}
+@keyframes rise{to{transform:translateX(-50%) translateY(-46px);opacity:0;}}
+
+/* ---------- GUESTS ---------- */
+#guests{position:absolute;inset:0;z-index:7;}
+.guest{position:absolute;width:96px;height:172px;transform:translate(-50%,-100%);cursor:pointer;}
+.guest .gsvg{position:absolute;left:2px;bottom:0;animation:bob 2.6s ease-in-out infinite alternate;transform-origin:50% 100%;}
+@keyframes bob{from{transform:translateY(0) rotate(-.6deg);}to{transform:translateY(-3px) rotate(.6deg);}}
+.guest .gname{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);z-index:2;
+  background:rgba(30,18,8,.85);color:var(--cream);font-weight:700;font-size:11.5px;padding:1px 8px;border-radius:999px;white-space:nowrap;}
+.guest .pbar{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:56px;height:7px;z-index:2;
+  background:#22150a;border:2px solid var(--trim);border-radius:999px;overflow:hidden;visibility:hidden;}
+.guest .pfill{height:100%;width:100%;background:linear-gradient(90deg,#7fd08a,#cfe37f);}
+.guest.want .pbar{visibility:visible;}
+.guest.urgent .pfill{background:linear-gradient(90deg,#e0642f,#ffb151);}
+.guest .bubble{position:absolute;left:50%;top:-2px;transform:translateX(-50%) scale(0);z-index:3;
+  background:var(--cream);border:3px solid var(--trim);border-radius:12px;padding:3px 9px;display:flex;align-items:center;gap:5px;
+  box-shadow:0 5px 10px rgba(0,0,0,.35);transition:transform .18s cubic-bezier(.5,1.6,.5,1);white-space:nowrap;}
+.guest .bubble::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:var(--trim);}
+.guest.want .bubble{transform:translateX(-50%) scale(1);}
+.guest .b-icon{font-size:17px;line-height:1;}
+.guest .b-txt{font-weight:800;font-size:12px;color:var(--ink);}
+.guest.shake .gsvg{animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px) rotate(-2deg);}75%{transform:translateX(4px) rotate(2deg);}}
+.guest .m-h,.guest .m-f,.guest .m-m{display:none;}
+.guest.exp-h .m-h{display:inline;}
+.guest.exp-f .m-f{display:inline;}
+.guest.exp-m .m-m{display:inline;}
+.guest.leaving{transition:opacity .8s, transform .8s;opacity:0;}
+#dog{position:absolute;z-index:9;font-size:38px;cursor:pointer;display:none;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35));
+  transform:translate(-50%,-100%);}
+#dog .dogTimer{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font-size:13px;font-weight:800;color:#ffd98a;text-shadow:0 2px 0 rgba(0,0,0,.6);}
+
+/* ---------- OVERLAY & MODALS ---------- */
+#overlay{position:absolute;inset:0;z-index:40;display:none;place-items:center;background:rgba(12,8,4,.55);}
+#overlay.show{display:grid;}
+#overlay.dark{background:rgba(4,5,10,.93);}
+.modal{width:min(560px,92%);background:var(--cream);border:6px solid var(--trim);border-radius:18px;
+  box-shadow:0 24px 60px rgba(0,0,0,.6), inset 0 3px 0 #fff8;padding:18px 22px 20px;text-align:center;color:var(--ink);display:none;}
+.modal.show{display:block;animation:modalIn .22s ease-out;}
+@keyframes modalIn{from{transform:scale(.9);opacity:0;}to{transform:none;opacity:1;}}
+.modal h3{margin:0 0 6px;font-size:23px;font-weight:800;letter-spacing:.01em;}
+.modal .mbody{font-size:15px;font-weight:500;line-height:1.45;margin-bottom:12px;}
+.btnBig{display:block;width:100%;margin:8px 0 0;padding:12px 14px;border:4px solid var(--trim);border-radius:13px;
+  background:var(--red);color:#fff;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 5px 0 var(--red-d);}
+.btnBig:active{transform:translateY(3px);box-shadow:0 2px 0 var(--red-d);}
+.btnBig.alt{background:var(--spruce);box-shadow:0 5px 0 var(--spruce-d);}
+.btnBig.alt:active{box-shadow:0 2px 0 var(--spruce-d);}
+.btnBig.small{font-size:14px;padding:9px 12px;}
+
+#spTrack{position:relative;height:30px;background:#e8d9bd;border:4px solid var(--trim);border-radius:999px;margin:16px 6px 10px;}
+#spZone{position:absolute;top:-4px;bottom:-4px;background:rgba(127,208,138,.85);border-inline:3px dashed var(--spruce-d);border-radius:6px;}
+#spMarker{position:absolute;top:-9px;width:12px;height:40px;background:var(--red);border:3px solid var(--red-d);border-radius:6px;margin-left:-6px;}
+#spHits{font-size:22px;letter-spacing:6px;margin:2px 0 6px;min-height:28px;}
+#spHits .dim{opacity:.22;}
+#spMsg{font-weight:700;font-size:14px;min-height:20px;color:var(--red-d);}
+
+#candleBtn{width:120px;height:120px;border-radius:50%;border:6px solid var(--trim);cursor:pointer;font-size:48px;margin:8px auto;
+  background:radial-gradient(circle at 50% 38%, var(--lamp2), var(--lamp) 55%, #b06a1a);display:block;box-shadow:0 0 0 0 rgba(255,200,107,.4);}
+#candleBtn:active{transform:scale(.94);}
+#candleWax{height:16px;border:3px solid var(--trim);border-radius:999px;background:#2a1a0c;overflow:hidden;margin:6px 30px;}
+#candleFill{height:100%;width:0%;background:linear-gradient(90deg,var(--lamp),#fff2cf);transition:width .1s;}
+
+#upRow{display:flex;gap:12px;margin-top:10px;}
+.upCard{flex:1;background:#fffaf0;border:4px solid var(--trim);border-radius:14px;padding:13px 12px;cursor:pointer;transition:transform .1s;}
+.upCard:hover{transform:translateY(-3px);}
+.upCard .upT{font-weight:800;font-size:15.5px;margin-bottom:4px;color:var(--red-d);}
+.upCard .upD{font-weight:500;font-size:13px;line-height:1.35;}
+
+#banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.9);z-index:45;display:none;
+  background:var(--cream);border:6px solid var(--trim);border-radius:18px;padding:16px 34px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);}
+#banner.show{display:block;animation:bannerIn .3s cubic-bezier(.5,1.5,.5,1) forwards;}
+@keyframes bannerIn{to{transform:translate(-50%,-50%) scale(1);}}
+#banner .bT{font-weight:800;font-size:30px;color:var(--ink);}
+#banner .bS{font-weight:700;font-size:15px;color:var(--red-d);}
+
+/* ---------- SCREENS ---------- */
+.screen{position:absolute;inset:0;z-index:60;display:none;place-items:center;
+  background:radial-gradient(900px 600px at 50% 20%, #1d2c49, var(--night) 75%);}
+.screen.show{display:grid;}
+#titleCard{text-align:center;color:var(--cream);width:min(680px,94%);}
+#titleCard h1{font-size:58px;margin:0;line-height:1;font-weight:800;letter-spacing:.01em;color:var(--lamp2);
+  text-shadow:0 4px 0 var(--red-d), 0 10px 24px rgba(0,0,0,.7);transform:rotate(-2deg);}
+#titleCard .tag{font-weight:700;font-size:17px;margin:10px 0 2px;}
+#titleCard .tag2{font:italic 500 14.5px Georgia, serif;opacity:.9;}
+#door{position:relative;width:190px;height:270px;margin:22px auto 8px;border-radius:10px 10px 4px 4px;
+  background:repeating-linear-gradient(0deg,#6d4b2e 0 62px,#5e4128 62px 66px);border:6px solid var(--trim);
+  box-shadow:0 18px 40px rgba(0,0,0,.6), inset 0 0 0 4px rgba(255,220,160,.12);transition:transform .7s, opacity .7s;}
+#door .knob{position:absolute;right:14px;top:128px;width:16px;height:16px;border-radius:50%;background:var(--lamp);box-shadow:0 2px 4px rgba(0,0,0,.5);}
+#door .wreath{position:absolute;left:50%;top:44px;transform:translateX(-50%);font-size:44px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));}
+#door .glowline{position:absolute;left:6px;right:6px;bottom:-2px;height:6px;background:var(--lamp);filter:blur(3px);opacity:.9;}
+#door.open{transform:perspective(700px) rotateY(-72deg) ;transform-origin:left;opacity:.25;}
+#mat{width:230px;margin:0 auto;background:#8e2b1f;border:4px solid var(--trim);border-radius:10px;padding:7px 8px 9px;
+  color:var(--lamp2);font-weight:800;font-size:13px;letter-spacing:.06em;box-shadow:0 8px 18px rgba(0,0,0,.5);}
+#boots{display:flex;justify-content:center;gap:16px;margin-top:8px;min-height:52px;}
+.boot{font-size:40px;background:none;border:none;cursor:pointer;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5));transition:transform .3s, opacity .3s;padding:0;}
+.boot:hover{transform:translateY(-4px) rotate(-4deg);}
+.boot.gone{transform:translateY(26px) rotate(94deg);opacity:0;pointer-events:none;}
+#bootHint{font-weight:700;font-size:14px;color:var(--lamp2);margin-top:6px;min-height:20px;}
+#titleBtns{margin-top:14px;display:none;gap:10px;justify-content:center;}
+#titleBtns.show{display:flex;animation:modalIn .3s ease-out;}
+#titleBtns .btnBig{width:auto;padding:12px 26px;font-size:18px;}
+#howCard{display:none;margin:14px auto 0;width:min(560px,94%);background:var(--cream);color:var(--ink);
+  border:5px solid var(--trim);border-radius:16px;padding:14px 20px;text-align:left;font-size:14.5px;font-weight:500;line-height:1.55;}
+#howCard.show{display:block;animation:modalIn .25s ease-out;}
+#howCard b{color:var(--red-d);}
+.credit{margin-top:14px;font:italic 500 12.5px Georgia, serif;opacity:.7;}
+
+#screenEnd .modal{display:block;width:min(600px,94%);}
+#endStats{display:grid;grid-template-columns:1fr 1fr;gap:3px 18px;margin:10px auto;width:fit-content;text-align:left;font-size:14px;font-weight:600;}
+#endStats span b{color:var(--red-d);}
+#endRank{font-size:24px;font-weight:800;color:var(--red-d);margin:8px 0 2px;transform:rotate(-1.5deg);}
+#endRankSub{font:italic 500 13.5px Georgia,serif;margin-bottom:8px;}
+#bestTxt{font-weight:700;font-size:13px;color:var(--spruce-d);margin-top:4px;}
+
+@media (prefers-reduced-motion: reduce){
+  .guest .gsvg,.flake,#stoveGlow,.station.ready,#moodBar.low #moodFill{animation:none !important;}
+}
+#focusPause{position:fixed;inset:0;z-index:1000;background:rgba(20,15,10,.94);color:#fff3d7;display:grid;place-content:center;text-align:center;padding:24px;gap:16px}
+#focusPause[hidden]{display:none} #focusResume{font:inherit;min-height:48px;padding:12px 24px;cursor:pointer}
+[role="button"]:focus-visible,button:focus-visible{outline:4px solid #ffd166;outline-offset:3px}
+</style>
+<meta name="description" content="The kettle, the food, the music—somebody has to keep track of it all. Deal with party emergencies and keep this gathering going.">
+<link rel="canonical" href="https://keep-er-goin.funapps.ca/">
+<meta name="funapps-game-id" content="keep-er-goin">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+<div id="focusPause" hidden role="dialog" aria-modal="true" aria-labelledby="focusPauseTitle"><h2 id="focusPauseTitle">Party paused</h2><p>Your guests and current challenge can wait.</p><button id="focusResume">Resume party</button></div>
+<div id="wrap">
+  <div id="stage">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <pattern id="pl0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="#b03a2c"/><rect width="22" height="9" y="7" fill="rgba(30,20,15,.45)"/>
+          <rect width="9" height="22" x="7" fill="rgba(30,20,15,.45)"/><rect width="2" height="22" x="1" fill="rgba(255,235,200,.5)"/>
+          <rect width="22" height="2" y="1" fill="rgba(255,235,200,.5)"/></pattern>
+        <pattern id="pl1" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="#3c6b4d"/><rect width="22" height="9" y="7" fill="rgba(15,25,20,.5)"/>
+          <rect width="9" height="22" x="7" fill="rgba(15,25,20,.5)"/><rect width="2" height="22" x="1" fill="rgba(240,255,230,.45)"/>
+          <rect width="22" height="2" y="1" fill="rgba(240,255,230,.45)"/></pattern>
+        <pattern id="pl2" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="#31507e"/><rect width="22" height="9" y="7" fill="rgba(180,50,40,.55)"/>
+          <rect width="9" height="22" x="7" fill="rgba(180,50,40,.55)"/><rect width="2" height="22" x="1" fill="rgba(235,240,255,.5)"/>
+          <rect width="22" height="2" y="1" fill="rgba(235,240,255,.5)"/></pattern>
+        <pattern id="pl3" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="#b7861f"/><rect width="22" height="9" y="7" fill="rgba(90,55,15,.5)"/>
+          <rect width="9" height="22" x="7" fill="rgba(90,55,15,.5)"/><rect width="2" height="22" x="1" fill="rgba(255,245,220,.55)"/>
+          <rect width="22" height="2" y="1" fill="rgba(255,245,220,.55)"/></pattern>
+        <pattern id="pl4" width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill="#6b4a7e"/><rect width="22" height="9" y="7" fill="rgba(25,20,35,.5)"/>
+          <rect width="9" height="22" x="7" fill="rgba(25,20,35,.5)"/><rect width="2" height="22" x="1" fill="rgba(240,230,255,.5)"/>
+          <rect width="22" height="2" y="1" fill="rgba(240,230,255,.5)"/></pattern>
+        <pattern id="nanCard" width="12" height="12" patternUnits="userSpaceOnUse">
+          <rect width="12" height="12" fill="#c98da2"/><circle cx="3" cy="3" r="1.4" fill="#f2dbe4"/><circle cx="9" cy="9" r="1.4" fill="#f2dbe4"/></pattern>
+      </defs>
+    </svg>
+
+    <div class="backwall"></div>
+    <div class="floor"></div>
+    <div id="windowEl"><div class="win-sky"></div><div class="moon"></div><div id="flakes"></div><div class="drift"></div><div class="win-cross"></div></div>
+    <div id="wallclock"><div class="hand h"></div><div class="hand m"></div><div class="dot"></div></div>
+    <div id="shelf">🫙📻🧂🏒</div>
+    <div id="fridge"><div class="f-split"></div><div class="f-handle"></div><div id="magnets"></div><div class="f-note">nan ♥</div></div>
+    <div id="stove"><div class="s-pipe"></div><div class="s-door"></div><div class="s-legs"></div></div>
+    <div id="stoveGlow"></div>
+    <div id="vignette"></div>
+
+    <div id="guests"></div>
+    <div id="dog"><span id="dogEmoji">🐕</span><span class="dogTimer" id="dogTimer"></span></div>
+
+    <div class="station" id="stKettle">
+      <div class="st-emoji" id="kettleEmoji">🫖</div>
+      <div class="st-label">The Kettle</div>
+      <div class="st-state" id="kettleState">Put 'er on</div>
+    </div>
+    <div class="station" id="stTable">
+      <div class="st-emoji">🥧🍲🥪</div>
+      <div class="st-label">The Scoff Table</div>
+      <div class="st-state" id="tableState">Fill yer boots</div>
+    </div>
+    <div class="station" id="stCorner">
+      <div class="st-emoji">🎻</div>
+      <div class="st-label">The Corner</div>
+      <div class="st-state" id="cornerState">Angus is limbered up</div>
+    </div>
+    <div id="handChip">Hands free</div>
+
+    <div id="hud">
+      <div id="moodWrap"><div class="lbl">THE MOOD</div><div id="moodBar"><div id="moodFill"></div></div></div>
+      <div id="clockBlock"><div id="clockTxt">7:00 P.M.</div><div id="hourTxt">Doors open, kettle's on</div></div>
+      <div id="scoreBlock"><div id="scoreTxt">0</div><div id="comboChip">×2 on a tear</div></div>
+      <div id="hudBtns">
+        <button class="hudBtn" id="btnMusic" title="Music">🎻</button>
+        <button class="hudBtn" id="btnSfx" title="Sound">🔔</button>
+        <button class="hudBtn" id="btnPause" title="Pause">⏸</button>
+      </div>
+    </div>
+
+    <div id="ticker"><span id="tickerTxt"></span></div>
+    <div id="toasts"></div>
+
+    <div id="banner"><div class="bT" id="bannerT"></div><div class="bS" id="bannerS"></div></div>
+
+    <div id="overlay">
+      <div class="modal" id="modalChoice">
+        <h3 id="chTitle"></h3><div class="mbody" id="chBody"></div><div id="chBtns"></div>
+      </div>
+      <div class="modal" id="modalSpoons">
+        <h3 id="spTitle">GIVE US A TUNE</h3>
+        <div class="mbody" id="spWhy"></div>
+        <div id="spTrack"><div id="spZone"></div><div id="spMarker"></div></div>
+        <div id="spHits"></div>
+        <button class="btnBig" id="spTap">TAP THE SPOONS &nbsp;🥄🥄&nbsp; <span style="font-size:12px;opacity:.85">(or Space)</span></button>
+        <div id="spMsg"></div>
+      </div>
+      <div class="modal" id="modalCandles">
+        <h3>POWER'S OUT!</h3>
+        <div class="mbody" id="cdBody">She's really blowin' out there. Tap the candle — quick, before someone barks a shin on the coffee table!</div>
+        <button id="candleBtn">🕯️</button>
+        <div id="candleWax"><div id="candleFill"></div></div>
+        <div id="spMsgC" style="font-weight:700;font-size:14px;min-height:20px;color:var(--red-d);"></div>
+      </div>
+      <div class="modal" id="modalUp">
+        <h3 id="upTitle"></h3><div class="mbody">Word's gettin' around. Pick one — you've earned it.</div>
+        <div id="upRow"></div>
+      </div>
+      <div class="modal" id="modalPause">
+        <h3>Havin' a breather</h3>
+        <div class="mbody">The party waits. (They're fine. They're talkin' about the weather.)</div>
+        <button class="btnBig alt" id="btnResume">Back at it</button>
+      </div>
+    </div>
+
+    <div class="screen show" id="screenTitle">
+      <div id="titleCard">
+        <h1>KEEP 'ER GOIN'!</h1>
+        <div class="tag">A Kitchen Party Survival Game</div>
+        <div class="tag2">Straight outta Atlantic Canada — all of Canada welcome. Yes, even Toronto. Grab a plate.</div>
+        <div id="door"><span class="wreath">🌲</span><div class="knob"></div><div class="glowline"></div></div>
+        <div id="mat">WELCOME &nbsp;·&nbsp; mind the step</div>
+        <div id="boots">
+          <button class="boot" id="bootL">🥾</button>
+          <button class="boot" id="bootR">🥾</button>
+        </div>
+        <div id="bootHint">Boots off first. You know better.</div>
+        <div id="titleBtns">
+          <button class="btnBig" id="btnStart">Start the party</button>
+          <button class="btnBig alt" id="btnHow">How she works</button>
+        </div>
+        <div id="howCard">
+          <b>The kettle:</b> click to put 'er on, click again when she whistles, then click whoever's askin' for tea.<br>
+          <b>The scoff table:</b> grab a plate, hand it to the hungry.<br>
+          <b>A tune:</b> somebody'll ask. Hit the corner and keep time on the spoons — one tune serves everyone who wanted one.<br>
+          <b>A yarn:</b> if someone's got a story, click 'em and stand there and listen. That's the law.<br>
+          <b>THE MOOD:</b> keep 'er up. Slow service makes 'em cranky. If the mood dies, the party dies. Make it to 3 A.M. and you're a legend.
+        </div>
+        <div class="credit">Made with tea, love, and a questionable fiddle synth. High score lasts as long as the party does.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenEnd">
+      <div class="modal">
+        <h3 id="endTitle"></h3>
+        <div class="mbody" id="endBody"></div>
+        <div id="endRank"></div>
+        <div id="endRankSub"></div>
+        <div id="endStats"></div>
+        <div id="bestTxt"></div>
+        <button class="btnBig" id="btnAgain">Go again</button>
+        <button class="btnBig alt" id="btnKeep" style="display:none">Keep 'er goin' (endless)</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+"use strict";
+/* ============ HELPERS ============ */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rand=(a,b)=>a+Math.random()*(b-a);
+const randi=(a,b)=>Math.floor(rand(a,b+1));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+const fmt=n=>n.toLocaleString("en-CA");
+
+/* ============ AUDIO (all original, all synth) ============ */
+const AUDIO={ctx:null,master:null,musicGain:null,sfxOn:true,musicOn:true,jigTimer:null,jigIdx:0,jigNext:0,
+  init(){ if(this.ctx) return;
+    try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      this.ctx=new AC(); this.master=this.ctx.createGain(); this.master.gain.value=.9; this.master.connect(this.ctx.destination);
+      this.musicGain=this.ctx.createGain(); this.musicGain.gain.value=.5; this.musicGain.connect(this.master);
+    }catch(e){}
+  },
+  resume(){ if(this.ctx&&this.ctx.state==="suspended") this.ctx.resume(); },
+  tone(freq,dur,type,vol,dest,slideTo){ if(!this.ctx) return;
+    const t=this.ctx.currentTime, o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type||"triangle"; o.frequency.setValueAtTime(freq,t);
+    if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||.08,t+.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(dest||this.master); o.start(t); o.stop(t+dur+.05);
+  },
+  noise(dur,vol,hp){ if(!this.ctx) return;
+    const t=this.ctx.currentTime, n=Math.floor(this.ctx.sampleRate*dur),
+      buf=this.ctx.createBuffer(1,n,this.ctx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+    const src=this.ctx.createBufferSource(); src.buffer=buf;
+    const f=this.ctx.createBiquadFilter(); f.type=hp?"highpass":"lowpass"; f.frequency.value=hp||900;
+    const g=this.ctx.createGain(); g.gain.value=vol||.1;
+    src.connect(f); f.connect(g); g.connect(this.master); src.start(t);
+  },
+  sfx(name){ if(!this.ctx||!this.sfxOn) return;
+    switch(name){
+      case "serve": this.tone(620,.12,"triangle",.09,null,930); break;
+      case "tea": this.tone(740,.1,"sine",.08,null,1180); break;
+      case "whistle": this.tone(880,.55,"sine",.05,null,1560); break;
+      case "clack": this.noise(.06,.16,2600); break;
+      case "thunk": this.tone(120,.1,"square",.07); break;
+      case "grumble": this.tone(150,.28,"sawtooth",.055,null,95); break;
+      case "knock": this.noise(.05,.14,500); setTimeout(()=>this.noise(.05,.14,500),140); break;
+      case "cheer": this.noise(.35,.09,1400); this.tone(523,.3,"triangle",.05); this.tone(659,.3,"triangle",.05); this.tone(784,.3,"triangle",.05); break;
+      case "pet": this.tone(500,.09,"sine",.07,null,760); break;
+      case "tick": this.noise(.03,.08,3200); break;
+      case "sad": this.tone(392,.4,"triangle",.06,null,196); break;
+      case "candle": this.noise(.05,.1,2000); break;
+    }
+  },
+  noteFreq:{E2:82.41,G2:98,A2:110,B2:123.47,E4:329.63,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880},
+  jigMel:["A4","C5","E5","A5","E5","C5","D5","B4","G4","B4","D5","F5","E5","C5","A4","C5","E5","G5",["A5",3],["E5",3],
+          "A4","C5","E5","A5","E5","C5","G4","B4","D5","G5","D5","B4","C5","E5","A5","G5","E5","C5",["A4",3],["E4",3]],
+  jigBass:["A2","A2","G2","G2","A2","A2","A2","E2","A2","A2","G2","G2","A2","E2","A2","A2"],
+  startJig(){ if(!this.ctx||!this.musicOn||this.jigTimer) return;
+    this.jigIdx=0; this.jigNext=this.ctx.currentTime+.1; const EIGHTH=.158;
+    let bassIdx=0, eighthCount=0;
+    this.jigTimer=setInterval(()=>{ if(!this.ctx) return;
+      while(this.jigNext<this.ctx.currentTime+.25){
+        const item=this.jigMel[this.jigIdx%this.jigMel.length];
+        const note=Array.isArray(item)?item[0]:item, len=(Array.isArray(item)?item[1]:1)*EIGHTH;
+        const t=this.jigNext, o=this.ctx.createOscillator(), g=this.ctx.createGain();
+        o.type="sawtooth"; o.frequency.value=this.noteFreq[note];
+        g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.045,t+.02);
+        g.gain.exponentialRampToValueAtTime(.0001,t+len*.92);
+        o.connect(g); g.connect(this.musicGain); o.start(t); o.stop(t+len);
+        if(eighthCount%3===0){ const b=this.ctx.createOscillator(), bg=this.ctx.createGain();
+          b.type="triangle"; b.frequency.value=this.noteFreq[this.jigBass[bassIdx%this.jigBass.length]];
+          bg.gain.setValueAtTime(.0001,t); bg.gain.exponentialRampToValueAtTime(.06,t+.03);
+          bg.gain.exponentialRampToValueAtTime(.0001,t+EIGHTH*2.8);
+          b.connect(bg); bg.connect(this.musicGain); b.start(t); b.stop(t+EIGHTH*3); bassIdx++; }
+        const it=Array.isArray(item)?item[1]:1;
+        this.jigNext+=it*EIGHTH; this.jigIdx++; eighthCount+=it;
+      }
+    },100);
+  },
+  stopJig(){ if(this.jigTimer){clearInterval(this.jigTimer); this.jigTimer=null;} }
+};
+
+/* ============ DATA ============ */
+const NAMES=["Marlene","Dave","Doreen","Wade","Cecil","Flossie","Junior","Tammy","Blanche","Murray","Eunice","Gordie","Pearl","Dwight","Sherry","Alfie","Bernice","Gary","Angus","Verna","Clarence","Kayla","Lloyd","Rhonda"];
+const ARRIVALS=[
+ "{n}'s here! Didn't even knock. As is right.",
+ "{n} kicked the snow off on the step and let themselves in.",
+ "{n} brought a two-litre of pop and zero explanation.",
+ "{n} says they can't stay long. They will be here five hours.",
+ "{n} saw the cars in the driveway.",
+ "{n} says it's really comin' down out there.",
+ "{n}'s here — parked half in the ditch, they'll deal with it later.",
+ "{n} came across on the ferry for this.",
+ "{n} showed up with a casserole dish. It's comin' back empty or not at all.",
+ "{n}'s in! There's PEI plates in the driveway now.",
+ "{n} just walked in sayin' 'only me!'",
+ "{n} arrived mid-sentence. The sentence started at their place.",
+ "{n} took two hours to leave their last party to get to this one.",
+ "{n}'s here, still in their rink clothes.",
+ "{n} pulled in blastin' the radio. Left the car runnin'. It's fine."
+];
+const SERVED_WORDS=["Some good!","Best kind.","Right on.","Deadly.","Lovely.","God love ya.","That's the stuff.","Now we're cookin'.","Oh, you're too good.","Perfect, b'y.","Yes b'y!","Whatta treat.","She's a beauty."];
+const CRANKY_LINES=[
+ "{n}'s givin' you the look.",
+ "{n} said 'no worries' in a way that means worries.",
+ "{n} just sighed The Sigh.",
+ "{n}'s gone quiet. That's worse.",
+ "{n} started tidying up. Out of spite.",
+ "{n} checked the time on the stove AND the microwave.",
+ "{n} muttered somethin' about 'back in my day.'",
+ "{n} is now aggressively fine. Everything's fine."
+];
+const YARNS=[
+ "…the price of gas up home…","…now whose boy is that?…","…the winter the power was out nine days…",
+ "…a fella he knows in Bridgewater…","…how the harbour used to freeze right over…","…her hip. No, the OTHER one…",
+ "…the deer that keeps eatin' the hostas…","…the time the ferry turned back TWICE…","…what the wharf used to look like…",
+ "…forty dollars for that? At the Superstore?…","…the moose on the highway by the exit…","…the camp vs. cottage debate, round nine…"
+];
+const FOODS=["a lobster roll","garlic fingers (with donair sauce)","a donair — careful now","a bowl of hodge podge","fish cakes with chow","rappie pie","a touton with molasses","blueberry grunt","Cape Breton oatcakes","a butter tart","a Nanaimo bar","mustard pickles on a Ritz","pea soup","a date square","storm chips","ketchup chips","a pinwheel sandwich","cheezies","biscuits and molasses","a fried bologna sandwich","a plate of squares","dulse (for the brave)","hot turkey sandwich","a Timbit or six"];
+const TUNES=["Nan's Kitchen Jig","The Tantallon Reel","Herring Choker's Hornpipe","Up the Shore and Back","The Wharf Rat's Wedding","Big Feelin's at the Legion","The Crossin' at Caribou","Fog on the Line","The Two-Stove Two-Step","Mackerel Sky Reel"];
+const OVERHEARD=[
+ "…so I says to him, that's not a two-stroke problem…",
+ "…she's from away, but she's lovely…",
+ "…forty dollars?! At the Superstore?!…",
+ "…flurries turned to freezin' rain by the overpass…",
+ "…he put the boat in early this year, mind…",
+ "…you can't get parts for that anymore…",
+ "…I knows your father…",
+ "…roads were terrible comin' up from the valley…",
+ "…Canadian Tire had 'em half price, I got three…",
+ "…darts night got moved to Thursdays, don't ask…",
+ "…that's her third kettle this year…",
+ "…the Leafs? I mean… sure… anything's possible…",
+ "…we'll just say it was a moose and leave it at that…",
+ "…double-double, and whatever he's havin'…",
+ "…they paved it, then they dug it right back up…",
+ "…it's not a shed, it's a WORKSHOP…",
+ "…sock feet on the linoleum, that's a lifestyle…",
+ "…anyway, long story short — it wasn't even his tractor…",
+ "…the wind took the trampoline. Again…",
+ "…tide was right out, so we just waited…"
+];
+const HOUR_TITLES=["Doors open, kettle's on","The neighbours heard","Somebody found the good chips","Peak scoff","The singin' hour","Nan's headin' out (bless her)","The die-hards","Runnin' on tea fumes"];
+const RANKS=[
+ [0,"Sock Feet","You tried, and the fridge magnet says that's what matters."],
+ [1500,"Come From Away (Honourary)","Give it time. The tea takes years to get in your blood."],
+ [3500,"Some Good Host","People are already asking when the next one is."],
+ [6500,"Right Some Good","The neighbours are telling THEIR neighbours."],
+ [10000,"Best Kind","There will be talk of this at the post office."],
+ [14000,"Kitchen Party Legend","Three counties know. A song may be written."],
+ [19000,"The Stuff of Legend","They'll be talkin' about this one at the rink for years."]
+];
+const UPGRADES=[
+ {id:"kettle2",t:"The Second Kettle",d:"Dug out of the cupboard. The kettle now holds two cups at a time."},
+ {id:"bernice",t:"Bernice's Back Batch",d:"She made a double batch 'just in case.' Grabbing scoff is instant."},
+ {id:"angus",t:"Angus Tuned Up",d:"He found his good bow. The sweet spot on tunes gets wider."},
+ {id:"settle",t:"Nan Said Settle Down",d:"And they DID. Everyone's patience lasts 25% longer."},
+ {id:"teapot",t:"The Good Teapot",d:"From the china cabinet. This is serious. Tea is worth +50% points."},
+ {id:"buddy",t:"Buddy's Behavin'",d:"Somebody gave the dog a bone. He'll never raid the squares, and pettin' him is worth more."},
+ {id:"thermos",t:"The Big Thermos",d:"Pre-boiled backup. The kettle boils a full second faster."},
+ {id:"chairs",t:"Extra Chairs From The Basement",d:"Folding ones. Cranky guests sting the mood 25% less."}
+];
+
+/* ============ STATE ============ */
+const HOUR_LEN=55, MAX_HOURS=8;
+let bestScore=0; // session best — the party remembers while she's runnin'
+const S={};
+let gameTimers=[];
+function gameAfter(fn,ms){gameTimers.push({fn,left:ms/1000});}
+function tickGameTimers(dt){
+  if(S.paused||document.hidden||S.screen!=="play")return;
+  const pending=gameTimers;gameTimers=[];
+  pending.forEach(t=>{t.left-=dt;if(t.left<=0)t.fn();else gameTimers.push(t)});
+}
+function freshState(){
+  gameTimers=[];
+  Object.assign(S,{screen:"title",paused:false,hour:1,hourT:0,mood:100,score:0,combo:1,bestCombo:1,comboT:0,
+    carrying:null,carryDish:"",kettle:{state:"idle",t:0,cups:0,disabled:0},tableBusy:false,tableDisabled:0,
+    guests:[],gid:1,spawnT:4,eventT:34,lastEvent:"",needsFrozen:0,endless:false,
+    mods:{},onceEvents:{},nan:null,dogState:null,
+    stats:{serves:0,teas:0,plates:0,tunes:0,yarns:0,pets:0,cranky:0}});
+}
+freshState();
+const usedNames=new Set();
+function freezeOn(){return document.hidden||S.paused||S.screen!=="play"||overlayOpen()||bannerOn;}
+
+/* ============ GUEST SPRITES ============ */
+const SKINS=["#f1c8a5","#e0aa80","#c98a5e","#9c6b45","#7a4f33","#f6d7bb"];
+const HAIRC=["#3a2a1a","#191512","#7a5230","#b7b3ad","#8a3d20","#d8c48e"];
+function guestSVG(g){
+  const skin=g.skin, hair=g.hairC, plaid=`url(#pl${g.plaid})`;
+  let hairSVG="";
+  switch(g.hairStyle){
+    case 0: hairSVG=`<path d="M30 26 a18 16 0 0 1 36 0 l0 6 -36 0 z" fill="#c3402f"/><rect x="28" y="30" width="40" height="7" rx="3.5" fill="#8e2b1f"/><circle cx="48" cy="12" r="6" fill="#f7ecd6"/>`; break; // toque
+    case 1: hairSVG=`<path d="M31 28 a17 15 0 0 1 34 0 l-4 2 a14 12 0 0 0 -26 0 z" fill="${hair}"/>`; break;
+    case 2: hairSVG=`<circle cx="34" cy="22" r="7" fill="${hair}"/><circle cx="48" cy="17" r="8" fill="${hair}"/><circle cx="62" cy="22" r="7" fill="${hair}"/>`; break;
+    case 3: hairSVG=`<path d="M31 30 q3 -6 8 -7 M65 30 q-3 -6 -8 -7" stroke="${hair}" stroke-width="5" fill="none" stroke-linecap="round"/>`; break;
+    case 4: hairSVG=`<path d="M31 28 a17 15 0 0 1 34 0 l-4 2 a14 12 0 0 0 -26 0 z" fill="${hair}"/><circle cx="48" cy="12" r="7.5" fill="${hair}"/>`; break;
+    case 5: hairSVG=`<path d="M30 26 a18 15 0 0 1 36 0 l0 4 -36 0 z" fill="#31507e"/><rect x="46" y="26" width="26" height="6" rx="3" fill="#26406a"/>`; break; // ballcap
+  }
+  if(g.isNan){
+    return `<svg class="gsvg" width="92" height="126" viewBox="0 0 96 132">
+      <rect x="34" y="108" width="10" height="18" rx="4" fill="#cfd6dd"/><rect x="52" y="108" width="10" height="18" rx="4" fill="#cfd6dd"/>
+      <rect x="34" y="118" width="10" height="4" fill="#8e2b1f"/><rect x="52" y="118" width="10" height="4" fill="#8e2b1f"/>
+      <rect x="24" y="56" width="48" height="56" rx="14" fill="url(#nanCard)" stroke="#8a5a6d" stroke-width="2"/>
+      <path d="M36 60 a14 10 0 0 0 24 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="1 5" stroke-linecap="round"/>
+      <rect x="14" y="62" width="12" height="30" rx="6" fill="url(#nanCard)"/><rect x="70" y="62" width="12" height="30" rx="6" fill="url(#nanCard)"/>
+      <circle cx="20" cy="95" r="5.5" fill="${skin}"/><circle cx="76" cy="95" r="5.5" fill="${skin}"/>
+      <circle cx="48" cy="34" r="17" fill="${skin}"/>
+      <path d="M30 32 a18 16 0 0 1 36 0 l-3 2 a15 13 0 0 0 -30 0 z" fill="#d9d5cd"/><circle cx="48" cy="14" r="7" fill="#d9d5cd"/>
+      <circle cx="41" cy="34" r="6" fill="none" stroke="#6b5a4a" stroke-width="2"/><circle cx="55" cy="34" r="6" fill="none" stroke="#6b5a4a" stroke-width="2"/><path d="M47 34 h2" stroke="#6b5a4a" stroke-width="2"/>
+      <circle cx="41" cy="34" r="1.8" fill="#33210f"/><circle cx="55" cy="34" r="1.8" fill="#33210f"/>
+      <g class="m-h"><path d="M42 44 q6 5 12 0" stroke="#33210f" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+      <g class="m-f"><path d="M43 45 h10" stroke="#33210f" stroke-width="2.4" stroke-linecap="round"/></g>
+      <g class="m-m"><path d="M42 47 q6 -5 12 0" stroke="#33210f" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M36 27 l8 3 M60 27 l-8 3" stroke="#33210f" stroke-width="2.2" stroke-linecap="round"/></g>
+    </svg>`;
+  }
+  return `<svg class="gsvg" width="92" height="132" viewBox="0 0 96 138">
+    <rect x="32" y="110" width="12" height="22" rx="5" fill="#b9c0c9"/><rect x="52" y="110" width="12" height="22" rx="5" fill="#b9c0c9"/>
+    <rect x="32" y="121" width="12" height="5" fill="${g.sockStripe}"/><rect x="52" y="121" width="12" height="5" fill="${g.sockStripe}"/>
+    <rect x="30" y="112" width="16" height="5" rx="2.5" fill="#9aa3ad" opacity=".55"/><rect x="50" y="112" width="16" height="5" rx="2.5" fill="#9aa3ad" opacity=".55"/>
+    <rect x="22" y="52" width="52" height="62" rx="14" fill="${plaid}" stroke="rgba(20,12,6,.5)" stroke-width="2"/>
+    <path d="M38 54 l10 10 10 -10" fill="none" stroke="rgba(255,248,230,.75)" stroke-width="4" stroke-linecap="round"/>
+    <rect x="11" y="58" width="13" height="34" rx="6.5" fill="${plaid}"/><rect x="72" y="58" width="13" height="34" rx="6.5" fill="${plaid}"/>
+    <circle cx="17" cy="96" r="6" fill="${skin}"/><circle cx="79" cy="96" r="6" fill="${skin}"/>
+    <circle cx="48" cy="32" r="18" fill="${skin}"/>
+    ${hairSVG}
+    <circle cx="41" cy="32" r="2.1" fill="#33210f"/><circle cx="55" cy="32" r="2.1" fill="#33210f"/>
+    <circle cx="37" cy="39" r="2.6" fill="rgba(220,90,70,.35)"/><circle cx="59" cy="39" r="2.6" fill="rgba(220,90,70,.35)"/>
+    <g class="m-h"><path d="M41 42 q7 6 14 0" stroke="#33210f" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+    <g class="m-f"><path d="M42 44 h12" stroke="#33210f" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g class="m-m"><path d="M41 46 q7 -6 14 0" stroke="#33210f" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M35 24 l9 4 M61 24 l-9 4" stroke="#33210f" stroke-width="2.4" stroke-linecap="round"/></g>
+  </svg>`;
+}
+
+/* ============ SLOTS & SPAWN ============ */
+const SLOTS=[ [200,356],[320,356],[440,356],[560,356],[680,356],[800,356], [260,452],[400,450],[540,450],[690,452] ];
+function freeSlot(){const used=new Set(S.guests.map(g=>g.slot));const open=[];for(let i=0;i<SLOTS.length;i++)if(!used.has(i))open.push(i);return open.length?pick(open):-1;}
+function maxGuests(){return clamp(2+S.hour,3,SLOTS.length);}
+function newName(){let tries=0;while(tries++<40){const n=pick(NAMES);if(!usedNames.has(n)){usedNames.add(n);return n;}}return pick(NAMES)+" Jr.";}
+function spawnGuest(opts={}){
+  const slot=freeSlot(); if(slot<0) return null;
+  const g={id:S.gid++,name:opts.name||newName(),slot,x:SLOTS[slot][0]+randi(-12,12),y:SLOTS[slot][1],
+    skin:pick(SKINS),hairC:pick(HAIRC),hairStyle:opts.isNan?0:randi(0,5),plaid:randi(0,4),
+    sockStripe:pick(["#c3402f","#3c6b4d","#31507e","#b7861f"]),
+    need:null,patience:0,patMax:0,nextNeed:opts.isNan?rand(2,4):rand(3,7),listening:0,yarnLine:"",
+    isNan:!!opts.isNan,crankyCount:0,expT:0,el:null};
+  const d=el("div","guest exp-h");
+  d.style.left=g.x+"px"; d.style.top=g.y+"px"; d.style.zIndex=(g.y>400?9:7);
+  d.innerHTML=guestSVG(g)+`<div class="bubble"><span class="b-icon"></span><span class="b-txt"></span></div>
+    <div class="pbar"><div class="pfill"></div></div><div class="gname">${g.isNan?"NAN":g.name}</div>`;
+  d.querySelector(".gsvg").style.animationDelay=(-rand(0,2.5))+"s";
+  d.setAttribute("role","button");d.tabIndex=0;d.setAttribute("aria-label","Talk to "+g.name);
+  d.addEventListener("click",ev=>{ev.stopPropagation();clickGuest(g);});
+  d.addEventListener("keydown",ev=>{if((ev.code==="Enter"||ev.code==="Space")&&!ev.repeat){ev.preventDefault();ev.stopPropagation();clickGuest(g);}});
+  $("#guests").appendChild(d); g.el=d; S.guests.push(g);
+  if(!opts.quiet){AUDIO.sfx("knock"); toast(pick(ARRIVALS).replace("{n}",g.name));}
+  return g;
+}
+function removeGuest(g,slow){
+  const i=S.guests.indexOf(g); if(i>=0)S.guests.splice(i,1);
+  if(slow){g.el.classList.add("leaving"); setTimeout(()=>g.el.remove(),850);} else g.el.remove();
+}
+
+/* ============ UI FX ============ */
+let toastQ=0;
+function toast(txt,ms=2600){
+  const box=$("#toasts"); if(box.children.length>=3) box.firstChild.remove();
+  const t=el("div","toast",txt); box.appendChild(t);
+  setTimeout(()=>{t.classList.add("fade"); setTimeout(()=>t.remove(),480);},ms);
+}
+function floater(x,y,txt,cls){
+  const f=el("div","floater"+(cls?" "+cls:""),txt); f.style.left=x+"px"; f.style.top=y+"px";
+  $("#stage").appendChild(f); setTimeout(()=>f.remove(),1150);
+}
+let tickerI=0;
+function rotateTicker(){
+  const t=$("#tickerTxt"); t.style.opacity=0;
+  setTimeout(()=>{t.textContent=OVERHEARD[tickerI++%OVERHEARD.length]; t.style.opacity=1;},520);
+}
+setInterval(rotateTicker,6500);
+
+/* scenery bits */
+(function(){
+  const fl=$("#flakes");
+  for(let i=0;i<16;i++){const f=el("div","flake");f.style.left=rand(2,96)+"%";
+    f.style.animationDuration=rand(2.2,4.5)+"s";f.style.animationDelay=(-rand(0,4))+"s";
+    f.style.opacity=rand(.4,.95);fl.appendChild(f);}
+  const letters="KEEPERGOIN", cols=["#c3402f","#3c6b4d","#31507e","#b7861f","#6b4a7e"];
+  const mg=$("#magnets");
+  for(let i=0;i<letters.length;i++){const m=el("span","magnet",letters[i]);
+    m.style.left=(8+(i%4)*26+rand(-3,3))+"px"; m.style.top=(12+Math.floor(i/4)*24+rand(-2,2))+"px";
+    m.style.background=cols[i%cols.length]; m.style.transform=`rotate(${rand(-14,14)}deg)`; mg.appendChild(m);}
+  rotateTicker();
+})();
+
+/* ============ HUD ============ */
+function setMood(d){
+  S.mood=clamp(S.mood+d,0,100);
+  $("#moodFill").style.width=S.mood+"%";
+  $("#moodBar").classList.toggle("low",S.mood<30);
+  if(S.mood<=0&&S.screen==="play") endGame(false);
+}
+function hourMult(){return 1+(S.hour-1)*.15;}
+function addScore(pts,x,y,word){
+  pts=Math.round(pts); S.score+=pts; $("#scoreTxt").textContent=fmt(S.score);
+  if(x!=null){floater(x,y,"+"+fmt(pts)); if(word)setTimeout(()=>floater(x,y-6,word,"word"),160);}
+}
+function bumpCombo(){
+  S.combo=Math.min(S.combo+1,8); S.bestCombo=Math.max(S.bestCombo,S.combo); S.comboT=8;
+  const c=$("#comboChip"); c.textContent="×"+S.combo+" on a tear"; c.style.visibility=S.combo>1?"visible":"hidden";
+}
+function resetCombo(){S.combo=1;S.comboT=0;$("#comboChip").style.visibility="hidden";}
+function updateClock(){
+  const mins=(S.hour-1)*60 + (S.hourT/HOUR_LEN)*60;
+  let h=7+Math.floor(mins/60), m=Math.floor(mins%60); const pm=h<12; if(h>12)h-=12;
+  $("#clockTxt").textContent=(S.endless&&S.hour>MAX_HOURS)?"WHO KNOWS A.M.":`${h}:${String(m).padStart(2,"0")} ${pm?"P.M.":"A.M."}`;
+  $("#hourTxt").textContent=S.hour<=MAX_HOURS?HOUR_TITLES[S.hour-1]:"After hours. Nobody's leavin'.";
+  const wc=$("#wallclock"); const hh=(h%12)+m/60;
+  wc.querySelector(".h").style.transform=`rotate(${hh*30}deg)`;
+  wc.querySelector(".m").style.transform=`rotate(${m*6}deg)`;
+}
+function setHand(){
+  const c=$("#handChip");
+  if(S.carrying==="tea") c.textContent="In hand: 🫖 a cuppa (mind, it's hot)";
+  else if(S.carrying==="snack") c.textContent="In hand: 🍽️ "+S.carryDish;
+  else c.textContent="Hands free";
+}
+
+/* ============ OVERLAY PLUMBING ============ */
+const ov=$("#overlay");
+let bannerOn=false;
+function overlayOpen(){return ov.classList.contains("show");}
+function openModal(id,dark){
+  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
+  $(id).classList.add("show"); ov.classList.add("show"); ov.classList.toggle("dark",!!dark);
+}
+function closeOverlay(){ov.classList.remove("show","dark");document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
+function choice(title,body,btns){
+  $("#chTitle").textContent=title; $("#chBody").innerHTML=body;
+  const box=$("#chBtns"); box.innerHTML="";
+  btns.forEach((b,i)=>{const btn=el("button","btnBig"+(i?" alt":""),b.label);
+    btn.onclick=()=>{closeOverlay(); b.fn&&b.fn();}; box.appendChild(btn);});
+  openModal("#modalChoice");
+}
+function showBanner(t,s,ms=1700){
+  bannerOn=true; $("#bannerT").textContent=t; $("#bannerS").textContent=s;
+  $("#banner").classList.add("show");
+  return new Promise(res=>setTimeout(()=>{$("#banner").classList.remove("show"); bannerOn=false; res();},ms));
+}
+
+/* ============ NEEDS / SERVE / EXPIRE ============ */
+const NEED_DEF={tea:{icon:"🫖",words:["Tea?","Cuppa?","What's in the pot?"]},
+  snack:{icon:"🍽️",words:["Any scoff on?","I could eat.","What's goin'?"]},
+  tune:{icon:"🎻",words:["Give us a tune!","Play somethin'!","A jig, b'y!"]},
+  yarn:{icon:"💬",words:["Got a sec?","C'mere till I tells ya","Quick story—"]}};
+function assignNeed(g){
+  const pool=["tea","tea","tea","snack","snack","snack","yarn","yarn"];
+  if(S.hour>=2) pool.push("tune","tune");
+  const kind=pick(pool);
+  g.need=kind; g.patMax=(13-S.hour*.6)*(S.mods.settle?1.25:1)*(g.isNan?.72:1);
+  g.patience=g.patMax; g.yarnLine=pick(YARNS);
+  const b=g.el.querySelector(".bubble");
+  b.querySelector(".b-icon").textContent=NEED_DEF[kind].icon;
+  b.querySelector(".b-txt").textContent=g.isNan&&kind==="tea"?"Tea. When you can, dear.":pick(NEED_DEF[kind].words);
+  g.el.classList.add("want");
+  updateCorner();
+}
+function clearNeed(g,happy){
+  g.need=null; g.el.classList.remove("want","urgent");
+  g.el.classList.remove("exp-h","exp-f","exp-m");
+  g.el.classList.add(happy?"exp-h":"exp-m");
+  g.expT=happy?2.5:4;
+  g.nextNeed=happy?rand(4.5,9):rand(3,6);
+  updateCorner();
+}
+function serve(g,kind){
+  let base=kind==="tea"?55:kind==="yarn"?75:55;
+  if(kind==="tea"&&S.mods.teapot) base*=1.5;
+  let pts=base*S.combo*hourMult()*(g.isNan?2:1);
+  addScore(pts,g.x,g.y-150,pick(SERVED_WORDS));
+  setMood((kind==="yarn"?5:4)*(g.isNan?2:1));
+  AUDIO.sfx(kind==="tea"?"tea":"serve");
+  bumpCombo(); clearNeed(g,true);
+  S.stats.serves++; if(kind==="tea")S.stats.teas++; if(kind==="snack")S.stats.plates++; if(kind==="yarn")S.stats.yarns++;
+  if(kind!=="yarn"){S.carrying=null; setHand();}
+  if(g.isNan) floater(g.x,g.y-170,"NAN APPROVES","word");
+}
+function expire(g){
+  S.stats.cranky++; g.crankyCount++;
+  setMood(-10*(g.isNan?2:1)*(S.mods.chairs?.75:1));
+  resetCombo(); AUDIO.sfx("grumble");
+  g.el.classList.add("shake"); setTimeout(()=>g.el.classList.remove("shake"),450);
+  toast(g.isNan?"Nan's not sayin' anything. She's just thinkin' it, loudly.":pick(CRANKY_LINES).replace("{n}",g.name));
+  floater(g.x,g.y-150,"the mood…","bad");
+  clearNeed(g,false);
+}
+function updateCorner(){
+  const n=S.guests.filter(g=>g.need==="tune").length;
+  $("#cornerState").textContent=n?`${n} waitin' on a tune!`:"Angus is limbered up";
+  $("#stCorner").classList.toggle("ready",n>0);
+}
+
+/* ============ CLICKS ============ */
+let hintCd=0, sorryCd=0;
+function clickGuest(g){
+  if(freezeOn()||g.listening>0) return;
+  AUDIO.resume();
+  if(g.need==="yarn"&&!S.carrying){
+    g.listening=2.1; g.el.querySelector(".b-txt").textContent="…"+g.yarnLine.replace(/…/g,"").slice(0,22)+"…";
+    toast(`${g.name}: “${g.yarnLine}” (you nod)`,2000); AUDIO.sfx("tick"); return;
+  }
+  if(S.carrying&&g.need===S.carrying){serve(g,S.carrying); return;}
+  if(S.carrying&&g.need&&g.need!==S.carrying){
+    g.el.classList.add("shake"); setTimeout(()=>g.el.classList.remove("shake"),450); AUDIO.sfx("thunk");
+    if(sorryCd<=0){sorryCd=9; toast(`Not what ${g.name} asked for. You both said sorry. Twice. No one's fault.`);}
+    return;
+  }
+  if(g.need==="tune"){ if(hintCd<=0){hintCd=5; toast("A tune's a job for THE CORNER, b'y →");} return;}
+  if(g.need&&!S.carrying){ if(hintCd<=0){hintCd=5;
+    toast(g.need==="tea"?`That's a tea face. The kettle's right there.`:`${g.name}'s peckish — grab somethin' off the table.`);} return;}
+  if(!g.need&&Math.random()<.2) toast(`${g.name} says you're doin' great, and to try the squares.`);
+}
+$("#stKettle").addEventListener("click",()=>{
+  if(freezeOn())return; AUDIO.resume();
+  const k=S.kettle;
+  if(k.disabled>0){toast("Kettle's unplugged — crockpot's got the outlet. Give 'er a sec.");AUDIO.sfx("thunk");return;}
+  if(k.state==="ready"&&k.cups>0){
+    if(S.carrying==="tea"){toast("You've a cup in hand already, b'y.");return;}
+    S.carrying="tea"; setHand(); k.cups--; AUDIO.sfx("tea");
+    if(k.cups<=0){k.state="idle";$("#stKettle").classList.remove("ready");}
+    updateKettleUI(); return;
+  }
+  if(k.state==="idle"){k.state="boiling"; k.t=3-(S.mods.thermos?1:0); AUDIO.sfx("tick"); updateKettleUI(); return;}
+  if(k.state==="boiling"){toast("She's workin' on it. A watched pot, and all that.");}
+});
+function updateKettleUI(){
+  const k=S.kettle, st=$("#kettleState");
+  if(k.disabled>0){st.textContent="unplugged (the crockpot)";return;}
+  if(k.state==="idle")st.textContent="Put 'er on";
+  else if(k.state==="boiling")st.textContent="Boilin'…";
+  else st.textContent=`SHE'S WHISTLIN' ×${k.cups}`;
+}
+$("#stTable").addEventListener("click",()=>{
+  if(freezeOn())return; AUDIO.resume();
+  if(S.tableDisabled>0){toast("The dog got the squares. Bernice is regrouping.");AUDIO.sfx("thunk");return;}
+  if(S.carrying==="snack"){toast("One plate at a time — you're a host, not a waiter.");return;}
+  if(S.tableBusy)return;
+  const grab=()=>{S.carrying="snack"; S.carryDish=pick(FOODS); setHand(); AUDIO.sfx("serve");
+    $("#tableState").textContent="Fill yer boots";};
+  if(S.mods.bernice){grab();}
+  else{S.tableBusy=true; $("#tableState").textContent="loadin' a plate…";
+    gameAfter(()=>{S.tableBusy=false; if(S.screen==="play")grab();},450);}
+});
+$("#stCorner").addEventListener("click",()=>{
+  if(freezeOn())return; AUDIO.resume();
+  const wanting=S.guests.filter(g=>g.need==="tune").length;
+  if(!wanting){toast("Angus is savin' the arm. Nobody's asked for a tune… yet.");return;}
+  openSpoons({notes:6,why:`${wanting} soul${wanting>1?"s":""} demandin' “${pick(TUNES)}”. Tap when the marker's in the green.`});
+});
+
+/* ============ SPOONS MINIGAME ============ */
+const SP={active:false};
+function openSpoons(cfg){
+  SP.active=true; SP.notes=cfg.notes||6; SP.taps=0; SP.hits=0;
+  SP.pos=0; SP.dirn=1; SP.speed=.5+S.hour*.035; SP.zw=.17+(S.mods.angus?.07:0); SP.zc=rand(.3,.7);
+  SP.sing=!!cfg.sing; SP.results=[];
+  $("#spTitle").textContent=SP.sing?"SING-ALONG BROKE OUT":"GIVE US A TUNE";
+  $("#spWhy").textContent=cfg.why; $("#spMsg").textContent="";
+  renderSpoons(); openModal("#modalSpoons");
+}
+function renderSpoons(){
+  const W=$("#spTrack").clientWidth||480;
+  $("#spZone").style.left=((SP.zc-SP.zw/2)*W)+"px"; $("#spZone").style.width=(SP.zw*W)+"px";
+  $("#spMarker").style.left=(SP.pos*W)+"px";
+  let s=""; for(let i=0;i<SP.notes;i++){ s+= i<SP.results.length ? (SP.results[i]?"🥄":"<span class='dim'>✖</span>") : "<span class='dim'>·</span>"; }
+  $("#spHits").innerHTML=s;
+}
+function spTap(){
+  if(S.paused||document.hidden||!SP.active||SP.taps>=SP.notes)return;
+  const hit=Math.abs(SP.pos-SP.zc)<=SP.zw/2;
+  SP.results.push(hit); SP.taps++;
+  if(hit){SP.hits++; AUDIO.sfx("clack"); SP.speed*=1.07;}
+  else{AUDIO.sfx("thunk"); const m=$("#modalSpoons");
+    if(m.animate) m.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:180});}
+  renderSpoons();
+  if(SP.taps>=SP.notes) gameAfter(resolveSpoons,600);
+}
+function resolveSpoons(){
+  const perfect=SP.hits>=SP.notes, good=SP.hits>=Math.ceil(SP.notes*.66);
+  $("#spMsg").textContent=perfect?"NAILED IT. The floor's takin' a poundin'.":good?"Not bad at all! Feet are tappin'.":"Bit rusty. Angus winced, but nobody said nothin'.";
+  const wanters=S.guests.filter(g=>g.need==="tune");
+  gameAfter(()=>{
+    SP.active=false; closeOverlay();
+    if(S.screen!=="play")return;
+    let pts=(50+SP.hits*30)*hourMult()*S.combo;
+    wanters.forEach(g=>{pts+=45*hourMult(); setMood(3.5*(g.isNan?2:1)); clearNeed(g,true); floater(g.x,g.y-150,pick(SERVED_WORDS),"word");});
+    setMood(perfect?5:good?2:-2);
+    addScore(pts,480,300,perfect?"Encore!":null);
+    if(SP.hits>0){bumpCombo(); AUDIO.sfx("cheer");} else AUDIO.sfx("sad");
+    S.stats.tunes++; S.stats.serves+=wanters.length;
+  },900);
+}
+$("#spTap").addEventListener("click",e=>{e.preventDefault();spTap();});
+
+/* ============ CANDLES MINIGAME ============ */
+const CD={active:false};
+function openCandles(){
+  CD.active=true; CD.taps=0; CD.need=12; CD.t=6.5; CD.done=false;
+  $("#candleFill").style.width="0%"; $("#spMsgC").textContent="";
+  $("#candleBtn").style.boxShadow="0 0 0 0 rgba(255,200,107,.4)";
+  openModal("#modalCandles",true);
+}
+function cdTap(){
+  if(S.paused||document.hidden||!CD.active||CD.done)return;
+  CD.taps++; AUDIO.sfx("candle");
+  $("#candleFill").style.width=(CD.taps/CD.need*100)+"%";
+  $("#candleBtn").style.boxShadow=`0 0 ${CD.taps*4}px ${CD.taps*1.5}px rgba(255,200,107,.5)`;
+  if(CD.taps>=CD.need) resolveCandles(true);
+}
+function resolveCandles(win){
+  CD.done=true;
+  $("#spMsgC").textContent=win?"There she is. Crisis averted, party intact.":"…the breaker got it first. Someone barked a shin.";
+  gameAfter(()=>{CD.active=false; closeOverlay();
+    if(S.screen!=="play")return;
+    if(win){setMood(8); addScore(150*hourMult(),480,300,"Lit 'er up!"); AUDIO.sfx("cheer");}
+    else{setMood(-8); AUDIO.sfx("sad"); toast("Ten seconds of chaos. Somebody stepped on the cat. There is no cat.");}
+  },1000);
+}
+function cdUpdate(dt){ if(CD.done)return; CD.t-=dt; if(CD.t<=0) resolveCandles(false); }
+$("#candleBtn").addEventListener("click",e=>{e.preventDefault();cdTap();});
+
+/* ============ THE DOG ============ */
+function startDog(mode){
+  if(S.dogState)return;
+  S.dogState={mode,x:-30,y:508,eatT:0};
+  const d=$("#dog"); d.style.display="block";
+  $("#dogTimer").textContent=mode==="steal"?"👀":"";
+  if(mode==="steal")toast("Buddy's eyein' the squares. BUDDY. <b>Click him!</b>",3200);
+}
+function dogUpdate(dt){
+  const st=S.dogState; if(!st)return;
+  const d=$("#dog");
+  if(st.mode==="cameo"||st.mode==="exit"){ st.x+=dt*(st.mode==="exit"?260:95); if(st.x>1010){d.style.display="none";S.dogState=null;return;} }
+  else if(st.mode==="steal"){
+    if(st.x<452) st.x+=dt*78;
+    else{ st.eatT+=dt; $("#dogTimer").textContent="😋";
+      if(st.eatT>1.1){ S.tableDisabled=8; $("#stTable").classList.add("disabled"); $("#tableState").textContent="…he got the squares";
+        setMood(-6); toast("He got the squares. He is not even a little bit sorry."); AUDIO.sfx("sad");
+        st.mode="exit"; $("#dogTimer").textContent=""; } }
+  }
+  d.style.left=st.x+"px"; d.style.top=st.y+"px";
+}
+$("#dog").addEventListener("click",e=>{
+  e.stopPropagation(); const st=S.dogState; if(!st||freezeOn())return;
+  const stealing=st.mode==="steal";
+  setMood(stealing?4:(S.mods.buddy?5:2)); S.stats.pets++; AUDIO.sfx("pet");
+  floater(st.x,st.y-50,stealing?"BUDDY! Down!":"good boy","word");
+  if(stealing)toast("Intercepted. He's playin' innocent. The squares live on.");
+  st.mode="exit"; $("#dogTimer").textContent="";
+});
+
+/* ============ EVENTS ============ */
+const EVENTS=[
+ {id:"power",w:3,minH:2,run(){toast("The lights just flickered—");gameAfter(openCandles,700);}},
+ {id:"sing",w:3,minH:3,run(){openSpoons({notes:8,sing:true,why:`Somebody started “${pick(TUNES)}” and now it's everyone's problem. Keep time!`});}},
+ {id:"chips",w:2,minH:2,once:true,run(){
+   choice("STORM'S PICKIN' UP","Wade's willing to make a run to the store before she really lets go. For storm chips. It's a risk.",[
+     {label:"Send Wade. Godspeed.",fn(){toast("Wade's gone. Headlights swallowed by the snow…");
+       gameAfter(()=>{if(S.screen!=="play")return; toast("WADE'S BACK. Three bags of chips and a story. What a man.");
+         S.guests.forEach(g=>{if(g.need)g.patience=g.patMax;}); setMood(10); AUDIO.sfx("cheer");},9000);}},
+     {label:"Too risky. We ration the bowl.",fn(){toast("Wise. The bowl gets rationed. Somebody's countin' cheezies out loud.");setMood(2);}}]);}},
+ {id:"mountie",w:2,minH:3,once:true,run(){
+   choice("KNOCK AT THE DOOR","It's the RCMP. Somethin' about 'the noise.' They look cold.",[
+     {label:"Hand 'em a plate",fn(){toast("Turns out the constable's cousin married a MacNeil. They're STAYIN'."); setMood(9); AUDIO.sfx("cheer"); spawnGuest({quiet:true}); toast("The cruiser's in the driveway like a lawn ornament.");}},
+     {label:"Turn 'er down a notch",fn(){toast("Fair enough. Volume's down. Somebody's whisper-singin' out of respect."); setMood(-3);}}]);}},
+ {id:"timbits",w:2,minH:1,run(){toast("SOMEBODY MADE A TIMMIES RUN. A box of Timbits hits the table like a meteor of joy.");
+   S.guests.forEach(g=>{if(g.need)g.patience=g.patMax;}); setMood(4); AUDIO.sfx("cheer");}},
+ {id:"hockey",w:2,minH:1,run(){toast(pick(["📺 “SCOOOORES!” — the living room erupts. Nobody saw it. Everyone cheered.","📺 The game's gone to overtime. Nobody's leavin' now.","📺 “The Leafs are actually winning?!” — a hush. Then chaos."]));
+   setMood(6); AUDIO.sfx("cheer");}},
+ {id:"moose",w:1.5,minH:1,run(){S.needsFrozen=4.5; toast("“There's a moose in the yard.”",1900);
+   setTimeout(()=>toast("“Yep.”",1600),1900); setTimeout(()=>toast("“Big fella.” — everyone returns to the party.",2000),3400);}},
+ {id:"dogsteal",w:2,minH:2,cond:()=>!S.mods.buddy&&!S.dogState,run(){startDog("steal");}},
+ {id:"dogcameo",w:1.5,minH:1,cond:()=>!S.dogState,run(){startDog("cameo");toast("Buddy's makin' the rounds. He accepts pets and dropped food.");}},
+ {id:"donair",w:1.5,minH:1,once:true,run(){toast("Someone from away just asked what's IN a donair.",2200);
+   setTimeout(()=>toast("The room goes quiet. Three people answer at once. None agree. All are correct.",2600),2200);
+   gameAfter(()=>{toast("Education is its own reward. (+200)"); addScore(200);},4800);}},
+ {id:"fortmac",w:1.5,minH:3,once:true,run(){const g=spawnGuest({name:"Kayla",quiet:true});
+   if(g){toast("HOLD ON. KAYLA'S HOME FROM FORT MAC?! Nobody knew! Her mother's cryin'!"); setMood(10); AUDIO.sfx("cheer");}
+   else{toast("Word is Kayla's home from Fort Mac — she's makin' the rounds, comin' here last."); setMood(5);}}},
+ {id:"sorry",w:1.5,minH:1,run(){toast("Two guests bumped elbows and said sorry six times. Order is restored. It was no one's fault."); setMood(4);}},
+ {id:"unplug",w:1.5,minH:3,cond:()=>S.kettle.disabled<=0,run(){S.kettle.disabled=8; S.kettle.state="idle"; S.kettle.cups=0;
+   $("#stKettle").classList.remove("ready"); updateKettleUI();
+   toast("Someone unplugged the kettle to plug in a crockpot. We live in a society.");}}
+];
+function fireEvent(){
+  const elig=EVENTS.filter(e=>S.hour>=e.minH&&e.id!==S.lastEvent&&!(e.once&&S.onceEvents[e.id])&&(!e.cond||e.cond()));
+  if(!elig.length)return;
+  let tot=elig.reduce((a,e)=>a+e.w,0), r=Math.random()*tot, chosen=elig[0];
+  for(const e of elig){ if((r-=e.w)<=0){chosen=e;break;} }
+  S.lastEvent=chosen.id; if(chosen.once)S.onceEvents[chosen.id]=true;
+  chosen.run();
+}
+
+/* ============ HOURS / NAN / UPGRADES ============ */
+function hourLabel(h){const c=7+(h-1); if(c===12)return "MIDNIGHT"; return c>12?(c-12)+" A.M.":c+" P.M.";}
+async function hourBreak(){
+  updateClock();
+  if(S.hour===6) nanDepart();
+  await showBanner(hourLabel(S.hour), S.hour<=MAX_HOURS?HOUR_TITLES[S.hour-1]:"After hours");
+  const remaining=UPGRADES.filter(u=>!S.mods[u.id]);
+  if(S.hour>=2&&remaining.length){
+    const picks=[]; const poolCopy=[...remaining];
+    while(picks.length<2&&poolCopy.length) picks.push(poolCopy.splice(randi(0,poolCopy.length-1),1)[0]);
+    $("#upTitle").textContent=hourLabel(S.hour)+" — small mercies";
+    const row=$("#upRow"); row.innerHTML="";
+    picks.forEach(u=>{const c=el("div","upCard",`<div class="upT">${u.t}</div><div class="upD">${u.d}</div>`);
+      c.onclick=()=>{S.mods[u.id]=true; closeOverlay(); toast("Locked in: "+u.t); updateKettleUI();}; row.appendChild(c);});
+    openModal("#modalUp");
+  }
+  if(S.hour===2) gameAfter(nanArrive,600);
+}
+function nanArrive(){
+  const g=spawnGuest({isNan:true,quiet:true}); if(!g)return;
+  S.nan=g; AUDIO.sfx("knock");
+  toast("<b>NAN'S HERE.</b>",1800); setTimeout(()=>toast("Look after Nan. Double points, half the patience. No pressure."),1800);
+}
+function nanDepart(){
+  if(!S.nan)return; const g=S.nan; S.nan=null;
+  if(g.need)clearNeed(g,true);
+  if(g.crankyCount===0){setMood(15); addScore(500,g.x,g.y-150,"NAN HAD A TIME"); toast("Nan's headin' out. She said — out loud, in front of everyone — “that was some good.”"); AUDIO.sfx("cheer");}
+  else toast("Nan's off. “Thanks for havin' me.” The 'me' carried a lot of weight there.");
+  removeGuest(g,true);
+}
+
+/* ============ SIM LOOP ============ */
+function guestTick(g,dt){
+  if(g.expT>0){g.expT-=dt; if(g.expT<=0&&!g.need){g.el.classList.remove("exp-f","exp-m");g.el.classList.add("exp-h");}}
+  if(g.listening>0){
+    g.listening-=dt;
+    if(g.listening<=0){g.el.querySelector(".b-txt").textContent="…and THAT'S why."; serve(g,"yarn");}
+    return;
+  }
+  if(g.need){
+    if(S.needsFrozen<=0){
+      g.patience-=dt;
+      const r=g.patience/g.patMax;
+      g.el.querySelector(".pfill").style.width=Math.max(0,r*100)+"%";
+      g.el.classList.toggle("urgent",r<.38);
+      g.el.classList.remove("exp-h","exp-f","exp-m");
+      g.el.classList.add(r>.5?"exp-h":r>.22?"exp-f":"exp-m");
+      if(g.patience<=0) expire(g);
+    }
+  }else{
+    g.nextNeed-=dt;
+    if(g.nextNeed<=0) assignNeed(g);
+  }
+}
+function sim(dt){
+  hintCd-=dt; sorryCd-=dt;
+  if(S.combo>1){S.comboT-=dt; if(S.comboT<=0)resetCombo();}
+  const k=S.kettle;
+  if(k.disabled>0){k.disabled-=dt; if(k.disabled<=0)updateKettleUI();}
+  else if(k.state==="boiling"){k.t-=dt; if(k.t<=0){k.state="ready"; k.cups=1+(S.mods.kettle2?1:0);
+    AUDIO.sfx("whistle"); $("#stKettle").classList.add("ready"); updateKettleUI();}}
+  if(S.tableDisabled>0){S.tableDisabled-=dt; if(S.tableDisabled<=0){$("#stTable").classList.remove("disabled");$("#tableState").textContent="Fill yer boots";}}
+  if(S.needsFrozen>0)S.needsFrozen-=dt;
+  dogUpdate(dt);
+  [...S.guests].forEach(g=>guestTick(g,dt));
+  if(S.guests.length<maxGuests()){
+    S.spawnT-=dt;
+    if(S.spawnT<=0){spawnGuest(); S.spawnT=Math.max(3.5,rand(6,11)-S.hour*.35);}
+  }
+  S.eventT-=dt;
+  if(S.eventT<=0){fireEvent(); S.eventT=rand(26,44);}
+  S.hourT+=dt;
+  if(S.hourT>=HOUR_LEN){
+    S.hourT=0; S.hour++;
+    if(!S.endless&&S.hour>MAX_HOURS){endGame(true); return;}
+    hourBreak();
+  }
+  updateClock();
+}
+let lastTs=0;
+function loop(ts){
+  const dt=Math.min((ts-lastTs)/1000||0,.05); lastTs=ts;
+  if(S.screen==="play"&&!freezeOn()) sim(dt);
+  tickGameTimers(dt);
+  if(SP.active&&!S.paused&&!document.hidden){SP.pos+=SP.dirn*SP.speed*dt;
+    if(SP.pos>1){SP.pos=1;SP.dirn=-1;} if(SP.pos<0){SP.pos=0;SP.dirn=1;}
+    renderSpoons();}
+  if(CD.active&&!S.paused&&!document.hidden) cdUpdate(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ============ START / END ============ */
+function startGame(){
+  S.screen="play"; updateClock(); setHand(); updateKettleUI();
+  AUDIO.init(); AUDIO.resume(); if(AUDIO.musicOn)AUDIO.startJig();
+  toast("Kettle's cold, floor's swept — first knock any second now.");
+  gameAfter(()=>{if(S.screen==="play")spawnGuest();},900);
+  gameAfter(()=>{if(S.screen==="play")spawnGuest();},2300);
+}
+function endGame(win){
+  if(S.screen==="end")return;
+  S.screen="end";gameTimers=[];setPaused(false); AUDIO.stopJig(); closeOverlay(); SP.active=false; CD.active=false;
+  bestScore=Math.max(bestScore,S.score);
+  $("#endTitle").textContent=win?"3 A.M. — YOU MADE IT.":"Well… that's it, then.";
+  $("#endBody").innerHTML=win
+    ?"The last car's leavin' the driveway… no wait — they stopped, windows down, still talkin'. …THERE they go. Taillights in the snow. The kitchen's a glorious disaster and the kettle's earned a rest."
+    :"The mood gave out and they've headed home. Somebody's still idling in the driveway talkin', but the kitchen's gone quiet. The kettle clicks as she cools. There's always next weekend.";
+  let rank=RANKS[0];
+  for(const r of RANKS) if(S.score>=r[0]) rank=r;
+  $("#endRank").textContent="RANK: "+rank[1];
+  $("#endRankSub").textContent=rank[2];
+  const st=S.stats;
+  $("#endStats").innerHTML=
+    `<span>Score: <b>${fmt(S.score)}</b></span><span>Guests served: <b>${st.serves}</b></span>`+
+    `<span>Teas poured: <b>${st.teas}</b></span><span>Plates of scoff: <b>${st.plates}</b></span>`+
+    `<span>Tunes played: <b>${st.tunes}</b></span><span>Yarns heard: <b>${st.yarns}</b></span>`+
+    `<span>Buddy pets: <b>${st.pets}</b></span><span>Best streak: <b>×${S.bestCombo}</b></span>`;
+  $("#bestTxt").textContent="Best this session: "+fmt(bestScore)+(S.score>=bestScore&&S.score>0?" — that's YOU, just now.":"");
+  $("#btnKeep").style.display=win?"block":"none";
+  $("#screenEnd").classList.add("show");
+  AUDIO.sfx(win?"cheer":"sad");
+}
+function restartAll(){
+  gameTimers=[];SP.active=false;CD.active=false;setPaused(false);
+  S.guests.forEach(g=>g.el.remove()); $("#dog").style.display="none";
+  closeOverlay(); $("#banner").classList.remove("show"); bannerOn=false;
+  $("#toasts").innerHTML=""; usedNames.clear(); freshState();
+  $("#moodFill").style.width="100%"; $("#moodBar").classList.remove("low");
+  $("#scoreTxt").textContent="0"; resetCombo();
+  $("#stTable").classList.remove("disabled"); $("#tableState").textContent="Fill yer boots";
+  $("#stKettle").classList.remove("ready"); $("#stCorner").classList.remove("ready");
+  $("#cornerState").textContent="Angus is limbered up";
+  $("#screenEnd").classList.remove("show");
+  startGame();
+}
+$("#btnAgain").addEventListener("click",restartAll);
+$("#btnKeep").addEventListener("click",()=>{
+  S.endless=true; S.screen="play"; $("#screenEnd").classList.remove("show");
+  if(AUDIO.musicOn)AUDIO.startJig();
+  toast("ENDLESS MODE. The night has no clock now. Only tea.");
+});
+
+/* ============ TITLE / BOOTS ============ */
+let bootsOff=0;
+function bootClick(b){
+  if(b.classList.contains("gone"))return;
+  AUDIO.init(); AUDIO.resume(); AUDIO.sfx("thunk");
+  b.classList.add("gone"); bootsOff++;
+  if(bootsOff===1)$("#bootHint").textContent="One more. You're not an animal.";
+  if(bootsOff>=2){
+    $("#bootHint").textContent="That's better. In you come — smells like woodsmoke and biscuits.";
+    $("#door").classList.add("open"); AUDIO.sfx("knock");
+    setTimeout(()=>$("#titleBtns").classList.add("show"),450);
+  }
+}
+$("#bootL").addEventListener("click",e=>bootClick(e.currentTarget));
+$("#bootR").addEventListener("click",e=>bootClick(e.currentTarget));
+$("#btnStart").addEventListener("click",()=>{$("#screenTitle").classList.remove("show"); startGame();});
+$("#btnHow").addEventListener("click",()=>$("#howCard").classList.toggle("show"));
+
+/* ============ HUD BUTTONS / KEYS / MISC ============ */
+$("#btnMusic").addEventListener("click",()=>{
+  AUDIO.init(); AUDIO.resume(); AUDIO.musicOn=!AUDIO.musicOn;
+  $("#btnMusic").classList.toggle("off",!AUDIO.musicOn);
+  if(AUDIO.musicOn&&S.screen==="play")AUDIO.startJig(); else AUDIO.stopJig();
+});
+$("#btnSfx").addEventListener("click",()=>{
+  AUDIO.init(); AUDIO.sfxOn=!AUDIO.sfxOn; $("#btnSfx").classList.toggle("off",!AUDIO.sfxOn);
+});
+function setPaused(value){
+  if(value&&S.screen!=="play")return;
+  S.paused=value;$("#focusPause").hidden=!value;lastTs=performance.now();
+  if(value){AUDIO.stopJig();$("#focusResume").focus();}
+  else if(S.screen==="play"&&AUDIO.musicOn){AUDIO.resume();AUDIO.startJig();}
+}
+$("#btnPause").addEventListener("click",()=>setPaused(true));
+$("#btnResume").addEventListener("click",()=>{setPaused(false);closeOverlay()});
+$("#focusResume").addEventListener("click",()=>setPaused(false));
+window.addEventListener("blur",()=>setPaused(true));
+document.addEventListener("visibilitychange",()=>{if(document.hidden)setPaused(true)});
+window.addEventListener("keydown",e=>{
+  if(e.repeat){if((SP.active||CD.active)&&(e.code==="Space"||e.code==="Enter"))e.preventDefault();return;}
+  if(e.code==="KeyP"||e.code==="Escape"){e.preventDefault();setPaused(!S.paused);return;}
+  if(S.paused)return;
+  if(e.code==="Space"||e.code==="Enter"){
+    if(SP.active){e.preventDefault();spTap();}
+    else if(CD.active){e.preventDefault();cdTap();}
+  }
+});
+// Make each illustrated station available to keyboard players.
+["stKettle","stTable","stCorner"].forEach(id=>{
+  const button=$("#"+id);button.setAttribute("role","button");button.tabIndex=0;
+  button.addEventListener("keydown",e=>{if((e.code==="Enter"||e.code==="Space")&&!e.repeat){e.preventDefault();e.stopPropagation();button.click()}});
+});
+// Give the dog the same keyboard access as the stations and guests.
+$("#dog").setAttribute("role","button");$("#dog").tabIndex=0;$("#dog").setAttribute("aria-label","Pet Buddy");
+$("#dog").addEventListener("keydown",e=>{if((e.code==="Enter"||e.code==="Space")&&!e.repeat){e.preventDefault();e.stopPropagation();$("#dog").click()}});
+$("#stage").addEventListener("contextmenu",e=>e.preventDefault());
+function fit(){
+  const s=Math.min(window.innerWidth/972, window.innerHeight/612);
+  $("#stage").style.transform=`scale(${Math.min(s,1.25)})`;
+}
+window.addEventListener("resize",fit); window.addEventListener("orientationchange",fit); fit();
+
+/* test hooks */
+window.__G={S,spawnGuest,serve,expire,fireEvent,startGame,endGame,AUDIO,assignNeed};
+</script>
+</body>
+</html>

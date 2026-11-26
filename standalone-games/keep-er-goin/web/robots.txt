@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://keep-er-goin.funapps.ca/sitemap.xml

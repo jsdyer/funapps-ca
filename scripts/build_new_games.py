@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+from game_favicons import apply_favicons
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,6 +34,7 @@ def main():
             subprocess.run(['npm', 'run', 'build'], cwd=directory, check=True)
         if not (directory / 'web' / 'index.html').is_file():
             raise SystemExit(f"Missing release for {game['slug']}")
+        apply_favicons(game["slug"], directory / "web")
 
 
 if __name__ == '__main__':

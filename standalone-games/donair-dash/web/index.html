@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Donair Drop — FunApps</title>
+<meta name="description" content="Donair Drop: one pita, sixty seconds. Catch the toppings in ticket order and build Halifax donairs.">
+<style>
+  :root{--bg:#141826;--panel:#1f2538;--ink:#fff7e6;--muted:#b9b3a6;--accent:#ffcc3d;--bad:#ff5a4f;--good:#6fdc8c}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  body{display:flex;flex-direction:column;align-items:center}
+  header{width:100%;max-width:560px;padding:10px 12px 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  h1{margin:0;font-size:1.3rem;letter-spacing:.5px}
+  h1 span{color:var(--accent)}
+  .tag{color:var(--muted);font-size:.85rem}
+  .hud{width:100%;max-width:560px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 12px}
+  .hud div{background:var(--panel);border-radius:10px;padding:6px 4px;text-align:center}
+  .hud b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}
+  .hud small{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.6px}
+  #wrap{position:relative;width:100%;max-width:560px;flex:1;min-height:420px;padding:6px 12px 0}
+  canvas{display:block;width:100%;height:100%;border-radius:14px;touch-action:none;background:#20283f}
+  .overlay{position:absolute;inset:6px 12px 0;border-radius:14px;background:rgba(14,17,28,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px}
+  .overlay h2{margin:0;font-size:2rem}
+  .overlay p{margin:0;color:var(--muted);max-width:340px;line-height:1.4}
+  .big{font-size:1.15rem;font-weight:700;background:var(--accent);color:#2a1d00;border:0;border-radius:999px;padding:14px 34px;cursor:pointer}
+  .big:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .hidden{display:none}
+  footer{width:100%;max-width:560px;padding:8px 12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted)}
+  footer a{color:var(--accent)}
+  footer{flex-wrap:wrap;gap:6px}
+  .links{text-align:right}
+  label{cursor:pointer;user-select:none}
+</style>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+<header>
+  <h1>Donair <span>Drop</span></h1>
+  <div class="tag">One pita. Sixty seconds.</div>
+</header>
+<div class="hud" aria-live="polite">
+  <div><b id="score">0</b><small>Score</small></div>
+  <div><b id="time">60</b><small>Time</small></div>
+  <div><b id="served">0</b><small>Served</small></div>
+  <div><b id="best">0</b><small>Best</small></div>
+</div>
+<div id="wrap">
+  <canvas id="c" aria-label="Donair Drop game area"></canvas>
+  <div class="overlay" id="start">
+    <h2>Donair Drop</h2>
+    <p>Slide the tray. Catch what the ticket says, in order — pita first. Wrong catch costs 2 seconds.</p>
+    <button class="big" id="go">Play</button>
+    <p style="font-size:.8rem">← → or A / D · or drag</p>
+  </div>
+  <div class="overlay hidden" id="end">
+    <h2>Closing time!</h2>
+    <p id="endText"></p>
+    <button class="big" id="again">Play again</button>
+  </div>
+</div>
+<footer>
+  <label><input type="checkbox" id="lessMotion"> Less motion</label>
+  <span class="links"><a href="https://coolcode.ca/donairafterdark/">Donair After Dark</a> · <a href="https://clams-funapps.netlify.app/">Play Clams &amp; Chips</a> · <a href="https://funapps.ca/">More FunApps</a></span>
+</footer>
+<noscript><p style="text-align:center">Donair Drop needs JavaScript.</p></noscript>
+
+<script>
+(() => {
+'use strict';
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} } };
+
+/* ---------- Ingredient art (all drawn centred at 0,0 in a box of size s) ---------- */
+function rng(seed){ return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+function drawPita(c, s){
+  const r = s * 0.46;
+  c.save(); c.scale(1, 0.92);
+  const g = c.createRadialGradient(-r*0.2, -r*0.25, r*0.1, 0, 0, r);
+  g.addColorStop(0, '#fbeccb'); g.addColorStop(0.75, '#efd39a'); g.addColorStop(1, '#d9b06a');
+  c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, Math.PI*2); c.fill();
+  c.strokeStyle = '#c4934f'; c.lineWidth = s*0.03; c.stroke();
+  const R = rng(7);
+  for (let i = 0; i < 9; i++){            // grill char spots
+    const a = R()*Math.PI*2, d = R()*r*0.75, w = s*(0.04+R()*0.05);
+    c.fillStyle = `rgba(${120+R()*40|0},${70+R()*20|0},30,${0.35+R()*0.35})`;
+    c.beginPath(); c.ellipse(Math.cos(a)*d, Math.sin(a)*d, w, w*0.6, a, 0, Math.PI*2); c.fill();
+  }
+  c.restore();
+}
+
+function drawBeef(c, s){
+  // a pile of thin, wide shaved donair slices (like off the cone) with crisp curled edges, not a steak
+  const r = s / 2, R = rng(11);
+  c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(0, r*0.38, r*0.9, r*0.13, 0, 0, Math.PI*2); c.fill();
+  // [x, y, rotation, width, height] back-to-front, mound wider than tall
+  const slices = [
+    [-0.5,0.12,-0.35,0.42,0.2],[0.5,0.12,0.4,0.42,0.2],[-0.25,-0.18,0.25,0.45,0.18],[0.28,-0.2,-0.3,0.45,0.18],
+    [0.0,-0.34,0.05,0.4,0.15],[-0.42,0.26,0.15,0.4,0.15],[0.38,0.25,-0.15,0.42,0.16],[-0.05,0.05,-0.12,0.5,0.2],
+    [-0.2,0.28,0.1,0.42,0.14],[0.18,0.3,-0.08,0.42,0.14],[0.1,-0.06,0.5,0.4,0.15]
+  ];
+  slices.forEach(([dx, dy, rot, ww, hh]) => {
+    c.save(); c.translate(dx*r, dy*r); c.rotate(rot);
+    const w = r*ww, h = r*hh, n = 16, pts = [];
+    for (let k = 0; k < n; k++){                         // ragged, thin sheet outline
+      const a = k / n * Math.PI * 2, j = 0.78 + R()*0.32;
+      pts.push([Math.cos(a)*w*j, Math.sin(a)*h*j + Math.sin(a*2 + dx*5)*h*0.35]);
+    }
+    c.beginPath(); c.moveTo((pts[0][0]+pts[n-1][0])/2, (pts[0][1]+pts[n-1][1])/2);
+    for (let k = 0; k < n; k++){ const q = pts[(k+1)%n]; c.quadraticCurveTo(pts[k][0], pts[k][1], (pts[k][0]+q[0])/2, (pts[k][1]+q[1])/2); }
+    c.closePath();
+    const t = 0.92 + R()*0.16;
+    const g = c.createLinearGradient(0, -h, 0, h);
+    g.addColorStop(0, `rgb(${160*t|0},${112*t|0},${82*t|0})`);
+    g.addColorStop(1, `rgb(${118*t|0},${76*t|0},${52*t|0})`);
+    c.fillStyle = g; c.fill();
+    c.strokeStyle = '#a65a28'; c.lineWidth = Math.max(0.8, s*0.016); c.stroke();     // thin crispy rim
+    c.save(); c.clip();                                                               // curled, browned lip along one edge
+    c.strokeStyle = 'rgba(206,120,48,.85)'; c.lineWidth = Math.max(1, h*0.5);
+    c.beginPath(); c.moveTo(-w*1.1, h*0.95); c.quadraticCurveTo(0, h*0.55, w*1.1, h*0.9); c.stroke();
+    c.fillStyle = 'rgba(70,40,24,.45)';                                               // grainy texture + pepper
+    for (let k = 0; k < 9; k++){ c.beginPath(); c.arc((R()-0.5)*w*1.7, (R()-0.5)*h*1.4, Math.max(0.4, s*(0.003+R()*0.004)), 0, Math.PI*2); c.fill(); }
+    c.restore();
+    c.restore();
+  });
+}
+
+function drawOnion(c, s){
+  const r = s/2;
+  c.lineCap = 'round';
+  [[-0.18,0.05,0.55,-0.3],[0.15,-0.08,0.45,0.6],[0.02,0.2,0.4,2.4]].forEach(([dx,dy,rad,rot]) => {
+    c.save(); c.translate(dx*r, dy*r); c.rotate(rot);
+    c.strokeStyle = '#a99cb8'; c.lineWidth = s*0.14; c.beginPath(); c.arc(0,0,rad*r,Math.PI*1.05,Math.PI*1.95); c.stroke();
+    c.strokeStyle = '#fbf8ff'; c.lineWidth = s*0.08; c.beginPath(); c.arc(0,0,rad*r,Math.PI*1.05,Math.PI*1.95); c.stroke();
+    c.restore();
+  });
+}
+
+function drawTomato(c, s){
+  const r = s/2, d = r*0.42;
+  [[-0.38,-0.3],[0.12,-0.36],[-0.2,0.18],[0.3,0.1]].forEach(([dx,dy],i) => {
+    c.save(); c.translate(dx*r, dy*r); c.rotate((i-1.5)*0.25);
+    c.fillStyle = '#d8322a'; roundRect(c, 0, 0, d, d, d*0.18); c.fill();
+    c.fillStyle = '#f25a45'; roundRect(c, d*0.12, d*0.12, d*0.76, d*0.76, d*0.14); c.fill();
+    c.fillStyle = '#ffd9a0'; c.beginPath(); c.ellipse(d*0.5, d*0.55, d*0.1, d*0.06, 0.5, 0, Math.PI*2); c.fill();
+    c.restore();
+  });
+}
+
+function drawSauce(c, s){
+  // sweet donair sauce: glossy cream drizzle blob
+  const r = s/2;
+  c.fillStyle = '#fbf1d6';
+  c.beginPath();
+  c.moveTo(-r*0.7, r*0.05);
+  c.bezierCurveTo(-r*0.75, -r*0.55, r*0.7, -r*0.6, r*0.72, 0);
+  c.bezierCurveTo(r*0.74, r*0.3, r*0.4, r*0.3, r*0.35, r*0.62);   // drip
+  c.bezierCurveTo(r*0.3, r*0.82, r*0.12, r*0.82, r*0.12, r*0.55);
+  c.bezierCurveTo(r*0.1, r*0.3, -r*0.2, r*0.42, -r*0.35, r*0.38);
+  c.bezierCurveTo(-r*0.6, r*0.36, -r*0.68, r*0.25, -r*0.7, r*0.05);
+  c.fill();
+  c.strokeStyle = '#e6d3a6'; c.lineWidth = s*0.025; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.9)';
+  c.beginPath(); c.ellipse(-r*0.22, -r*0.2, r*0.2, r*0.07, -0.3, 0, Math.PI*2); c.fill();
+}
+
+function drawMozz(c, s){
+  const r = s/2, R = rng(23);
+  c.lineCap = 'round';
+  for (let i = 0; i < 22; i++){
+    const x = (R()-0.5)*r*1.3, y = (R()-0.5)*r*0.9 + r*0.05, a = R()*Math.PI, l = r*(0.25+R()*0.25);
+    const x1 = x - Math.cos(a)*l/2, y1 = y - Math.sin(a)*l/2, x2 = x + Math.cos(a)*l/2, y2 = y + Math.sin(a)*l/2;
+    c.strokeStyle = '#d9bf62'; c.lineWidth = s*0.085; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+    c.strokeStyle = i%3 ? '#fff6d2' : '#f7e8a6'; c.lineWidth = s*0.05; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+  }
+}
+
+function drawLettuce(c, s){
+  const r = s/2, R = rng(5);
+  c.lineCap = 'round';
+  for (let i = 0; i < 16; i++){
+    const x = (R()-0.5)*r*1.35, y = (R()-0.5)*r*1.0, a = R()*Math.PI, l = r*(0.35+R()*0.3);
+    c.strokeStyle = i%2 ? '#5fbf4a' : '#8ad86a'; c.lineWidth = s*0.09;
+    c.beginPath(); c.moveTo(x - Math.cos(a)*l/2, y - Math.sin(a)*l/2);
+    c.quadraticCurveTo(x + R()*4, y - r*0.12, x + Math.cos(a)*l/2, y + Math.sin(a)*l/2); c.stroke();
+  }
+  c.strokeStyle = 'rgba(230,255,210,.7)'; c.lineWidth = s*0.025;
+  for (let i = 0; i < 6; i++){ const x=(R()-0.5)*r, y=(R()-0.5)*r*0.7; c.beginPath(); c.moveTo(x-r*0.12,y); c.lineTo(x+r*0.12,y+r*0.03); c.stroke(); }
+}
+
+function drawBanana(c, s){
+  const r = s/2;
+  [[-0.3,-0.15],[0.3,-0.1],[0,0.25]].forEach(([dx,dy]) => {
+    c.save(); c.translate(dx*r, dy*r);
+    c.fillStyle = '#f6eda0'; c.beginPath(); c.arc(0,0,r*0.27,0,Math.PI*2); c.fill();
+    c.strokeStyle = '#b9a62a'; c.lineWidth = s*0.11; c.beginPath(); c.arc(0,0,r*0.27,0,Math.PI*2); c.stroke();
+    c.strokeStyle = '#f2e45a'; c.lineWidth = s*0.06; c.beginPath(); c.arc(0,0,r*0.27,0,Math.PI*2); c.stroke();
+    c.fillStyle = '#e3d36a';
+    for (let k=0;k<3;k++){ c.beginPath(); c.arc(Math.cos(k*2.1)*r*0.08, Math.sin(k*2.1)*r*0.08, s*0.018, 0, Math.PI*2); c.fill(); }
+    c.restore();
+  });
+}
+
+function drawTzatziki(c, s){
+  const r = s/2;
+  c.fillStyle = '#3a77c9';                                // little blue bowl
+  c.beginPath(); c.moveTo(-r*0.75,-r*0.02); c.lineTo(r*0.75,-r*0.02); c.quadraticCurveTo(r*0.6, r*0.7, 0, r*0.7); c.quadraticCurveTo(-r*0.6, r*0.7, -r*0.75, -r*0.02); c.fill();
+  c.fillStyle = '#f7fbf4';
+  c.beginPath(); c.ellipse(0, -r*0.05, r*0.72, r*0.3, 0, Math.PI, 0); c.ellipse(0, -r*0.02, r*0.75, r*0.12, 0, 0, Math.PI); c.fill();
+  const R = rng(31); c.fillStyle = '#4e9a3c';
+  for (let i=0;i<10;i++){ c.fillRect((R()-0.5)*r*1.1, -r*0.25 + R()*r*0.22, s*0.035, s*0.02); }
+}
+
+function drawPineapple(c, s){
+  const r = s/2;
+  [[-0.32,0.05,-0.3],[0.22,-0.15,0.4],[0.12,0.3,1.2]].forEach(([dx,dy,rot]) => {
+    c.save(); c.translate(dx*r, dy*r); c.rotate(rot);
+    c.fillStyle = '#f7c73b';
+    c.beginPath(); c.moveTo(-r*0.3,-r*0.18); c.lineTo(r*0.3,-r*0.18); c.lineTo(r*0.22,r*0.2); c.lineTo(-r*0.22,r*0.2); c.closePath(); c.fill();
+    c.strokeStyle = '#d99a1c'; c.lineWidth = s*0.022;
+    for (let k=-1;k<=1;k++){ c.beginPath(); c.moveTo(k*r*0.12, -r*0.16); c.lineTo(k*r*0.1, r*0.18); c.stroke(); }
+    c.fillStyle = '#fde58a'; c.fillRect(-r*0.3, -r*0.18, r*0.6, r*0.06);
+    c.restore();
+  });
+}
+
+function roundRect(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+
+const ING = {
+  pita:      { name:'Pita',          draw:drawPita },
+  beef:      { name:'Beef',          draw:drawBeef },
+  mozz:      { name:'Mozza',         draw:drawMozz },
+  onion:     { name:'Onion',         draw:drawOnion },
+  tomato:    { name:'Tomato',        draw:drawTomato },
+  lettuce:   { name:'Lettuce',       draw:drawLettuce },
+  banana:    { name:'Banana peppers',draw:drawBanana },
+  pineapple: { name:'Pineapple',     draw:drawPineapple },
+  tzatziki:  { name:'Tzatziki',      draw:drawTzatziki },
+  sauce:     { name:'Sauce',         draw:drawSauce },
+};
+const KEYS = Object.keys(ING);
+function drawIng(key, x, y, s, alpha=1){ ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, y); ING[key].draw(ctx, s); ctx.restore(); }
+
+/* ---------- Tickets ---------- */
+let ticketCount = 0;
+function newTicket(){
+  ticketCount++;
+  const t = ['pita', 'beef'];
+  if (ticketCount > 1 && Math.random() < 0.35) t.push('mozz');           // some like cheese, some don't
+  t.push('onion', 'tomato');
+  if (ticketCount > 1){
+    if (Math.random() < 0.45) t.push('lettuce');                          // lettuce is the common extra
+    if (Math.random() < 0.25) t.push(['banana','tzatziki','pineapple'][Math.random()*3|0]);
+  }
+  t.push('sauce');
+  return t;
+}
+function ticketLabel(t){
+  const fancy = t.some(k => ['lettuce','banana','tzatziki','pineapple'].includes(k));
+  if (fancy) return 'Come From Away special';
+  if (t.includes('mozz')) return 'Classic + mozza';
+  return 'Halifax classic';
+}
+
+/* ---------- Game state ---------- */
+let W = 0, H = 0, DPR = 1;
+let state = 'menu';
+let ticket, step, stack, items, pops, score, timeLeft, served, streak, spawnT, elapsed, shake, flash, serving;
+let tray = { x: 0, target: 0, w: 110 };
+let keys = { left:false, right:false };
+let best = +(store.get('donairDashBest') || 0);
+let lessMotion = store.get('donairDashLessMotion') === '1';
+$('lessMotion').checked = lessMotion;
+$('best').textContent = best;
+
+function resize(){
+  const r = cv.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  tray.w = Math.max(90, Math.min(130, W * 0.26));
+  if (!tray.x) tray.x = tray.target = W/2;
+  tray.x = clamp(tray.x, tray.w/2, W - tray.w/2); tray.target = clamp(tray.target, tray.w/2, W - tray.w/2);
+}
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+const itemSize = () => Math.max(40, Math.min(58, W * 0.12));
+const trayY = () => H - 58;
+
+function start(){
+  ticketCount = 0; ticket = newTicket(); step = 0; stack = [];
+  items = []; pops = []; score = 0; timeLeft = 60; served = 0; streak = 0;
+  spawnT = 0.2; elapsed = 0; shake = 0; flash = 0; serving = null;
+  tray.x = tray.target = W/2;
+  state = 'play';
+  $('start').classList.add('hidden'); $('end').classList.add('hidden');
+  updateHud();
+}
+
+function end(){
+  state = 'over';
+  if (score > best){ best = score; store.set('donairDashBest', best); }
+  $('endText').innerHTML = `You served <b>${served}</b> donair${served===1?'':'s'} for <b>${score}</b> points.<br>Best: ${best}`;
+  $('end').classList.remove('hidden');
+  updateHud();
+  setTimeout(() => $('again').focus(), 50);
+}
+
+function updateHud(){
+  $('score').textContent = score;
+  $('time').textContent = Math.max(0, Math.ceil(timeLeft));
+  $('served').textContent = served;
+  $('best').textContent = best;
+}
+
+function spawn(){
+  const need = ticket[step];
+  let key;
+  if (Math.random() < 0.5) key = need;
+  else { do { key = KEYS[Math.random()*KEYS.length|0]; } while (key === need && Math.random() < 0.5); }
+  const s = itemSize();
+  const speed = (150 + Math.min(elapsed, 60) * 3.2) * (H / 640) * (0.85 + Math.random()*0.3);
+  items.push({ key, x: s/2 + Math.random()*(W - s), y: -s, vy: speed, s, phase: Math.random()*6, rot: (Math.random()-0.5)*0.6 });
+}
+
+function pop(text, x, y, color){ pops.push({ text, x, y, color, t: 0 }); }
+
+function catchItem(it){
+  const need = ticket[step];
+  if (it.key === need){
+    streak++;
+    const pts = 10 + Math.min(streak, 20);
+    score += pts; stack.push(it.key); step++;
+    pop('+' + pts, it.x, trayY() - 40, '#6fdc8c');
+    if (step >= ticket.length){
+      const bonus = 50 + ticket.length * 5;
+      score += bonus; served++;
+      pop('Donair! +' + bonus, W/2, H*0.45, '#ffcc3d');
+      serving = { stack: stack.slice(), x: tray.x, t: 0 };
+      ticket = newTicket(); step = 0; stack = [];
+    }
+  } else {
+    streak = 0; timeLeft -= 2;
+    pop('Oops, ' + ING[it.key].name.toLowerCase() + '! −2s', it.x, trayY() - 40, '#ff5a4f');
+    flash = 0.35; if (!lessMotion) shake = 0.25;
+  }
+  updateHud();
+}
+
+/* ---------- Loop ---------- */
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (state === 'play') update(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+
+function update(dt){
+  elapsed += dt; timeLeft -= dt;
+  if (timeLeft <= 0){ timeLeft = 0; end(); return; }
+
+  const kspeed = W * 1.5;
+  if (keys.left)  tray.target -= kspeed * dt;
+  if (keys.right) tray.target += kspeed * dt;
+  tray.target = clamp(tray.target, tray.w/2, W - tray.w/2);
+  tray.x += (tray.target - tray.x) * Math.min(1, dt * 18);
+
+  spawnT -= dt;
+  if (spawnT <= 0){ spawn(); spawnT = Math.max(0.34, 0.55 - elapsed * 0.004); }
+
+  const ty = trayY();
+  for (let i = items.length - 1; i >= 0; i--){
+    const it = items[i];
+    const prevY = it.y;
+    it.y += it.vy * dt;
+    if (!lessMotion) it.phase += dt * 3;
+    const ix = it.x + (lessMotion ? 0 : Math.sin(it.phase) * 6);
+    if (prevY + it.s*0.3 < ty && it.y + it.s*0.3 >= ty && Math.abs(ix - tray.x) < tray.w/2 + it.s*0.2){
+      it.x = ix; catchItem(it); items.splice(i, 1); continue;
+    }
+    if (it.y > H + it.s) items.splice(i, 1);
+  }
+  for (let i = pops.length - 1; i >= 0; i--){ pops[i].t += dt; if (pops[i].t > 1) pops.splice(i, 1); }
+  if (serving){ serving.t += dt; if (serving.t > 0.6) serving = null; }
+  shake = Math.max(0, shake - dt); flash = Math.max(0, flash - dt);
+  $('time').textContent = Math.max(0, Math.ceil(timeLeft));
+}
+
+function render(){
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+  if (shake > 0) ctx.translate((Math.random()-0.5)*8, (Math.random()-0.5)*6);
+
+  // shop backdrop
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#1b2236'); g.addColorStop(1, '#2a2f45');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,204,61,.05)';
+  for (let x = 0; x < W; x += 36) ctx.fillRect(x, 0, 18, H);
+  // counter
+  ctx.fillStyle = '#5b3a24'; ctx.fillRect(0, H - 30, W, 30);
+  ctx.fillStyle = '#7a5032'; ctx.fillRect(0, H - 30, W, 5);
+
+  if (items) for (const it of items){
+    const ix = it.x + (lessMotion ? 0 : Math.sin(it.phase) * 6);
+    ctx.save(); ctx.translate(ix, it.y); ctx.rotate(lessMotion ? 0 : it.rot * Math.sin(it.phase*0.5));
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, it.s*0.42, it.s*0.35, it.s*0.08, 0, 0, Math.PI*2); ctx.fill();
+    ING[it.key].draw(ctx, it.s);
+    ctx.restore();
+  }
+
+  drawTray();
+  if (state !== 'menu' && ticket) drawTicket();
+
+  if (serving){
+    const p = serving.t / 0.6;
+    const dy = lessMotion ? 0 : -p * 80;
+    drawStack(serving.stack, serving.x, trayY() + dy, 1 - p);
+  }
+
+  if (pops) for (const p of pops){
+    ctx.globalAlpha = 1 - p.t;
+    ctx.fillStyle = p.color; ctx.font = `800 ${Math.round(Math.max(16, W*0.04))}px system-ui,sans-serif`; ctx.textAlign = 'center';
+    ctx.fillText(p.text, clamp(p.x, 80, W - 80), p.y - (lessMotion ? 0 : p.t * 30));
+    ctx.globalAlpha = 1;
+  }
+  if (flash > 0){ ctx.fillStyle = `rgba(255,90,79,${flash*0.5})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+function drawTicket(){
+  const n = ticket.length;
+  const pad = 10, top = 10;
+  const cell = Math.min(46, (W - pad*2 - 16) / n);
+  const tw = cell * n + 16, th = cell + 54;
+  const tx = (W - tw) / 2;
+  ctx.fillStyle = '#fffaf0'; roundRect(ctx, tx, top, tw, th, 10); ctx.fill();
+  ctx.fillStyle = '#2b2b2b'; ctx.textAlign = 'center';
+  ctx.font = `700 ${Math.round(Math.max(12, Math.min(15, W*0.032)))}px system-ui,sans-serif`;
+  const need = ticket[step];
+  ctx.fillText('Next: ' + (need ? ING[need].name : '—'), W/2, top + 18);
+  ctx.fillStyle = '#8a7f6a'; ctx.font = `600 ${Math.round(Math.max(10, Math.min(12, W*0.026)))}px system-ui,sans-serif`;
+  ctx.fillText(ticketLabel(ticket), W/2, top + th - 8);
+  for (let i = 0; i < n; i++){
+    const cx = tx + 8 + cell*i + cell/2, cy = top + 26 + cell/2;
+    if (i === step){
+      ctx.fillStyle = '#ffcc3d'; roundRect(ctx, cx - cell/2 + 1, cy - cell/2, cell - 2, cell, 8); ctx.fill();
+    }
+    drawIng(ticket[i], cx, cy, cell * 0.82, i < step ? 0.3 : 1);
+    if (i < step){
+      ctx.strokeStyle = '#2f9e50'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx - cell*0.18, cy); ctx.lineTo(cx - cell*0.04, cy + cell*0.14); ctx.lineTo(cx + cell*0.2, cy - cell*0.14); ctx.stroke();
+    }
+  }
+}
+
+function drawTray(){
+  const y = trayY();
+  // foil tray
+  ctx.fillStyle = '#c9ced8';
+  roundRect(ctx, tray.x - tray.w/2, y, tray.w, 14, 5); ctx.fill();
+  ctx.fillStyle = '#eef1f6'; ctx.fillRect(tray.x - tray.w/2 + 6, y + 2, tray.w - 12, 3);
+  if (state === 'play' && stack) drawStack(stack, tray.x, y, 1);
+}
+
+function drawStack(st, x, y, alpha){
+  // build the donair on the tray: pita base, then layers piled on top
+  const s = Math.min(tray.w * 0.95, 120);
+  ctx.save(); ctx.globalAlpha = alpha;
+  let h = 0;
+  st.forEach((k, i) => {
+    if (k === 'pita'){
+      ctx.save(); ctx.translate(x, y - 6); ctx.scale(1, 0.32); drawPita(ctx, s); ctx.restore();
+      h = 10;
+    } else {
+      const sz = s * 0.55;
+      const off = ((i % 3) - 1) * s * 0.14;
+      ctx.save(); ctx.translate(x + off, y - h - sz*0.15); ctx.scale(1, 0.6); ING[k].draw(ctx, sz); ctx.restore();
+      h += sz * 0.17;
+    }
+  });
+  ctx.restore();
+}
+
+/* ---------- Input ---------- */
+window.addEventListener('keydown', e => {
+  if (['ArrowLeft','a','A'].includes(e.key)){ keys.left = true; e.preventDefault(); }
+  if (['ArrowRight','d','D'].includes(e.key)){ keys.right = true; e.preventDefault(); }
+  if ((e.key === 'Enter' || e.key === ' ') && state !== 'play'){ e.preventDefault(); start(); }
+});
+window.addEventListener('keyup', e => {
+  if (['ArrowLeft','a','A'].includes(e.key)) keys.left = false;
+  if (['ArrowRight','d','D'].includes(e.key)) keys.right = false;
+});
+function pointer(e){
+  if (state !== 'play') return;
+  const r = cv.getBoundingClientRect();
+  tray.target = clamp(e.clientX - r.left, tray.w/2, W - tray.w/2);
+}
+cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pointer(e); });
+cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) pointer(e); });
+$('go').addEventListener('click', start);
+$('again').addEventListener('click', start);
+$('lessMotion').addEventListener('change', e => { lessMotion = e.target.checked; store.set('donairDashLessMotion', lessMotion ? '1' : '0'); });
+window.addEventListener('resize', resize);
+
+resize();
+requestAnimationFrame(frame);
+setTimeout(() => $('go').focus(), 50);
+})();
+</script>
+</body>
+</html>

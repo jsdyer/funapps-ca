@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Some Good Kitchen Party 🦞</title>
+<meta name="description" content="Host the rowdiest kitchen party on the East Coast. Feed the crowd, keep the tunes rippin', don't let the party die. A 3D browser game for Maritimers, by the honour system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:ital,wght@0,400;0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wharf-red:#c8452c;
+    --buoy-orange:#e8722a;
+    --fog-blue:#7fa8b8;
+    --deep-sea:#16242c;
+    --spruce:#1e2d24;
+    --lamplight:#f6e7c8;
+    --buttercup:#f2b33d;
+    --plaid-green:#3e6b4f;
+    --wood-1:#8a5a33;
+    --wood-2:#6f4526;
+    --wood-3:#5c3820;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--deep-sea);
+    font-family:'Nunito','Segoe UI',Verdana,sans-serif;color:var(--lamplight);
+    touch-action:none; user-select:none; -webkit-user-select:none;}
+  #game-canvas{position:fixed;inset:0;}
+
+  /* ---------- shared wooden panel look ---------- */
+  .plank{
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 46px),
+      linear-gradient(180deg,var(--wood-1),var(--wood-2) 55%,var(--wood-3));
+    border:3px solid #3f2715;
+    border-radius:10px;
+    box-shadow:0 4px 0 #2a1a0e, 0 10px 24px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,235,200,.25);
+  }
+  .plaid-edge{position:relative;}
+  .plaid-edge::before{
+    content:"";position:absolute;left:10px;right:10px;top:-7px;height:8px;border-radius:4px;
+    background:
+      repeating-linear-gradient(90deg,#7a1f1f 0 14px,#a83232 14px 22px,#20402c 22px 36px,#a83232 36px 44px);
+    box-shadow:0 2px 3px rgba(0,0,0,.5);
+  }
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5;display:none;}
+  #hud.on{display:block;}
+  .hud-card{position:absolute;padding:10px 14px;pointer-events:none;}
+  #hud-left{top:12px;left:12px;min-width:230px;}
+  #hud-right{top:12px;right:12px;text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+
+  .hud-label{font-family:'Lilita One','Arial Rounded MT Bold',Verdana,sans-serif;
+    font-size:13px;letter-spacing:2px;color:var(--buttercup);text-shadow:0 2px 0 rgba(0,0,0,.6);}
+  #vibe-wrap{width:100%;height:22px;border-radius:11px;background:#2b1a10;
+    border:2px solid #1c1109;margin-top:4px;position:relative;overflow:visible;}
+  #vibe-fill{height:100%;border-radius:9px;width:70%;
+    background:linear-gradient(90deg,#c8452c,#e8722a 55%,#f2b33d);
+    transition:width .25s ease;box-shadow:inset 0 2px 0 rgba(255,255,255,.35);}
+  #vibe-buoy{position:absolute;top:-9px;font-size:24px;transform:translateX(-50%);left:70%;
+    transition:left .25s ease;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6));}
+  #vibe-warn{position:absolute;inset:0;border-radius:11px;box-shadow:0 0 0 0 rgba(200,60,40,0);}
+  #vibe-warn.danger{animation:pulseDanger 1s infinite;}
+  @keyframes pulseDanger{0%,100%{box-shadow:0 0 0 0 rgba(230,60,40,0)}50%{box-shadow:0 0 18px 4px rgba(230,60,40,.8)}}
+
+  #score-line{margin-top:8px;font-family:'Lilita One',Verdana,sans-serif;font-size:30px;line-height:1;
+    color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.55);}
+  #score-sub{font-size:12.5px;font-weight:800;color:#f0d9b0;opacity:.95;margin-top:3px;}
+  #combo-chip{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:20px;
+    background:var(--wharf-red);color:#ffe9b0;font-family:'Lilita One',Verdana;font-size:15px;
+    border:2px solid #7c2415;vertical-align:middle;transform:scale(0);transition:transform .18s;}
+  #combo-chip.on{transform:scale(1);}
+
+  #tunes-card{padding:8px 12px;}
+  #tunes-wrap{width:150px;height:12px;border-radius:6px;background:#2b1a10;border:2px solid #1c1109;margin-top:4px;}
+  #tunes-fill{height:100%;border-radius:4px;width:100%;background:linear-gradient(90deg,#5c88c5,#8fd0e8);
+    transition:width .25s ease;}
+  #level-chip{font-weight:800;font-size:12.5px;color:#ffe9b0;background:rgba(0,0,0,.35);
+    padding:4px 10px;border-radius:14px;border:1.5px solid rgba(255,230,170,.35);}
+  #btn-sound,#btn-pause{pointer-events:auto;cursor:pointer;font-size:20px;width:44px;height:44px;border-radius:50%;
+    border:3px solid #3f2715;background:linear-gradient(180deg,var(--wood-1),var(--wood-3));
+    box-shadow:0 3px 0 #2a1a0e;color:#fff;}
+  #btn-sound:active{transform:translateY(2px);box-shadow:0 1px 0 #2a1a0e;}
+
+  /* interact hint */
+  #hint{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) scale(.9);opacity:0;
+    transition:opacity .15s, transform .15s; pointer-events:none;z-index:6;
+    font-family:'Lilita One',Verdana;font-size:17px;letter-spacing:.5px;color:#fff;
+    padding:8px 18px;border-radius:24px;background:rgba(20,14,8,.85);border:2px solid var(--buttercup);
+    text-shadow:0 2px 0 rgba(0,0,0,.6); box-shadow:0 6px 16px rgba(0,0,0,.5);}
+  #hint.on{opacity:1;transform:translateX(-50%) scale(1);}
+  #hint .key{display:inline-block;background:var(--buttercup);color:#3a2410;border-radius:6px;
+    padding:0 8px;margin-right:8px;box-shadow:0 2px 0 #9c6d1c;}
+
+  /* toasts */
+  #toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:7;display:flex;
+    flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(560px,92vw);}
+  .toast{padding:9px 18px;border-radius:12px;font-weight:800;font-size:15px;text-align:center;
+    color:#fff7e6;background:linear-gradient(180deg,rgba(52,34,18,.96),rgba(30,19,10,.96));
+    border:2px solid rgba(242,179,61,.75);box-shadow:0 8px 20px rgba(0,0,0,.5);
+    animation:toastIn .3s ease, toastOut .4s ease 3.6s forwards;max-width:100%;}
+  .toast.big{font-family:'Lilita One',Verdana;font-size:19px;letter-spacing:.5px;
+    border-color:var(--wharf-red);color:#ffd88a;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(.92)}to{opacity:1;transform:none}}
+  @keyframes toastOut{to{opacity:0;transform:translateY(-10px) scale(.95)}}
+
+  /* ---------- overlays ---------- */
+  .overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%, rgba(30,45,55,.88), rgba(8,14,18,.96));
+    padding:18px;overflow-y:auto;touch-action:pan-y;}
+  .overlay.hidden{display:none;}
+  .board{max-width:640px;width:100%;padding:30px 30px 26px;text-align:center;position:relative;}
+
+  /* string lights across the top of the sign */
+  .lights{position:absolute;top:-16px;left:6%;right:6%;height:20px;display:flex;justify-content:space-between;}
+  .lights i{width:12px;height:12px;border-radius:50%;display:block;
+    animation:twinkle 1.6s infinite;}
+  .lights i:nth-child(4n+1){background:#ffd257;box-shadow:0 0 10px 3px rgba(255,210,87,.8);animation-delay:0s;}
+  .lights i:nth-child(4n+2){background:#ff6b57;box-shadow:0 0 10px 3px rgba(255,107,87,.8);animation-delay:.4s;}
+  .lights i:nth-child(4n+3){background:#6fd08c;box-shadow:0 0 10px 3px rgba(111,208,140,.8);animation-delay:.8s;}
+  .lights i:nth-child(4n+4){background:#6fb7ff;box-shadow:0 0 10px 3px rgba(111,183,255,.8);animation-delay:1.2s;}
+  @keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+  @media (prefers-reduced-motion: reduce){
+    .lights i,.toast,#vibe-warn.danger{animation:none !important;}
+  }
+
+  h1.title{font-family:'Lilita One','Arial Rounded MT Bold',Verdana,sans-serif;
+    font-size:clamp(34px,7vw,58px);line-height:.98;color:#ffdf9e;
+    text-shadow:0 3px 0 #7c2415, 0 6px 0 rgba(0,0,0,.45);letter-spacing:1px;margin-top:6px;}
+  h1.title .lob{display:inline-block;transform:rotate(-8deg);}
+  .subtitle{font-weight:800;font-style:italic;color:#f0d9b0;margin-top:6px;font-size:clamp(14px,2.6vw,17px);}
+
+  .howto{margin:20px auto 6px;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;text-align:left;
+    max-width:520px;font-size:14.5px;font-weight:700;color:#f6e7c8;}
+  .howto div{background:rgba(0,0,0,.28);border:1.5px solid rgba(246,231,200,.25);border-radius:10px;
+    padding:8px 11px;display:flex;gap:9px;align-items:center;line-height:1.25;}
+  .howto b{color:var(--buttercup);}
+  .howto .em{font-size:21px;flex:none;}
+  @media (max-width:560px){.howto{grid-template-columns:1fr;}}
+
+  .btn-big{pointer-events:auto;cursor:pointer;margin-top:20px;font-family:'Lilita One',Verdana;
+    font-size:clamp(20px,4vw,26px);letter-spacing:1px;color:#fff;padding:14px 34px;border-radius:14px;
+    border:3px solid #7c2415;background:linear-gradient(180deg,#e8722a,var(--wharf-red));
+    box-shadow:0 6px 0 #7c2415, 0 12px 22px rgba(0,0,0,.5);text-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .btn-big:active{transform:translateY(4px);box-shadow:0 2px 0 #7c2415;}
+  .fineprint{margin-top:16px;font-size:12px;color:#cdbb97;font-weight:700;opacity:.85;}
+
+  /* game over stats */
+  #rank{font-family:'Lilita One',Verdana;font-size:clamp(26px,5.4vw,40px);color:#ffd88a;
+    text-shadow:0 3px 0 #7c2415;margin:8px 0 2px;}
+  #rank-line{font-style:italic;font-weight:800;color:#f0d9b0;}
+  #final-score{font-family:'Lilita One',Verdana;font-size:clamp(40px,9vw,64px);color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.5);margin-top:10px;}
+  #best-line{font-weight:800;color:var(--buttercup);margin-top:2px;font-size:14px;}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+  .stat{background:rgba(0,0,0,.3);border:1.5px solid rgba(246,231,200,.3);border-radius:10px;
+    padding:7px 13px;font-weight:800;font-size:13.5px;}
+  .stat b{color:var(--buttercup);font-size:16px;display:block;text-align:center;}
+
+  /* ---------- mobile controls ---------- */
+  #mobile{position:fixed;inset:0;z-index:6;pointer-events:none;display:none;}
+  #mobile.on{display:block;}
+  #stick-zone{position:absolute;left:0;bottom:0;width:46%;height:46%;pointer-events:auto;}
+  #stick-base{position:absolute;width:118px;height:118px;border-radius:50%;
+    border:3px solid rgba(246,231,200,.5);background:rgba(20,14,8,.4);display:none;}
+  #stick-nub{position:absolute;width:56px;height:56px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ffb066,var(--wharf-red));
+    border:3px solid #7c2415;box-shadow:0 4px 10px rgba(0,0,0,.5);display:none;}
+  #btn-act{position:absolute;right:22px;bottom:34px;width:92px;height:92px;border-radius:50%;
+    pointer-events:auto;border:4px solid #7c2415;color:#fff;
+    background:radial-gradient(circle at 35% 28%,#ffb066,var(--wharf-red));
+    font-family:'Lilita One',Verdana;font-size:30px;box-shadow:0 6px 0 #7c2415,0 10px 20px rgba(0,0,0,.5);
+    text-shadow:0 2px 0 rgba(0,0,0,.4);}
+  #btn-act:active{transform:translateY(3px);box-shadow:0 3px 0 #7c2415;}
+  #btn-act small{display:block;font-size:11px;font-family:'Nunito';font-weight:800;letter-spacing:1px;}
+
+  #rotate-note{display:none;}
+
+  @media (max-width:680px){
+    #hud-left{transform:scale(.8);transform-origin:top left;min-width:200px;}
+    #hud-right{transform:scale(.8);transform-origin:top right;}
+    #toasts{top:110px;}
+    .toast{font-size:13px;padding:7px 13px;}
+    .toast.big{font-size:15.5px;}
+    #hint{bottom:150px;font-size:15px;}
+  }
+</style>
+<link rel="canonical" href="https://kitchen-party.funapps.ca/">
+<meta name="funapps-game-id" content="some-good-kitchen-party">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+
+<div id="game-canvas"></div>
+<div id="pause-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="board plank"><h2 id="pause-title">Kitchen paused</h2><p>The guests can wait. Resume whenever you’re ready.</p><button class="btn-big" id="btn-resume">Resume party</button></div></div>
+
+<!-- ============ HUD ============ -->
+<div id="hud">
+  <div class="hud-card plank plaid-edge" id="hud-left">
+    <div class="hud-label">🪩 PARTY VIBE</div>
+    <div id="vibe-wrap"><div id="vibe-fill"></div><div id="vibe-buoy">🦞</div><div id="vibe-warn"></div></div>
+    <div id="score-line">0<span id="combo-chip">x2</span></div>
+    <div id="score-sub">Guests fed: <span id="fed-n">0</span> &nbsp;·&nbsp; Sorries said: <span id="sorry-n">0</span></div>
+  </div>
+  <div id="hud-right">
+    <button id="btn-pause" title="Pause (P or Escape)" aria-label="Pause game">⏸</button>
+    <button id="btn-sound" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+    <div class="hud-card plank" id="tunes-card">
+      <div class="hud-label">🎻 TUNES</div>
+      <div id="tunes-wrap"><div id="tunes-fill"></div></div>
+    </div>
+    <div id="level-chip">Level 1 · just the regulars</div>
+  </div>
+</div>
+
+<div id="hint"><span class="key" id="hint-key">E</span><span id="hint-text"></span></div>
+<div id="toasts"></div>
+
+<!-- ============ MOBILE ============ -->
+<div id="mobile">
+  <div id="stick-zone"><div id="stick-base"></div><div id="stick-nub"></div></div>
+  <button id="btn-act">🤙<small>DO IT</small></button>
+</div>
+
+<!-- ============ START ============ -->
+<div class="overlay" id="start-overlay">
+  <div class="board plank plaid-edge">
+    <div class="lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <h1 class="title">SOME GOOD<br>KITCHEN PARTY <span class="lob">🦞</span></h1>
+    <div class="subtitle">Yer hostin'. The whole shore's comin'. Keep 'er goin'.</div>
+    <div class="howto">
+      <div><span class="em">🚶</span><span><b>WASD / arrows</b> to get around the kitchen (mind the table)</span></div>
+      <div><span class="em">🤙</span><span><b>E / Space</b> to grab grub, hand it over, or rip a jig</span></div>
+      <div><span class="em">🍩</span><span>Guests want <b>tea, lobster, garlic fingers, Timbits & storm chips</b> — check their bubble</span></div>
+      <div><span class="em">🎻</span><span>When the <b>tunes die, the vibe dies</b>. Grab the fiddle and save the night</span></div>
+      <div><span class="em">⚡</span><span>Expect <b>power outages, seagulls, Chase the Ace</b> & a singalong or three</span></div>
+      <div><span class="em">💀</span><span>If the <b>Party Vibe hits zero</b>, everyone does the two-hour goodbye. Don't let 'er die</span></div>
+    </div>
+    <button class="btn-big" id="btn-start">LET'S GO, B'Y →</button>
+    <div class="fineprint">Made with love, salt air, and a frankly irresponsible amount of donair sauce.<br>
+    Works best with sound on. Sorry in advance. (See? Already sayin' sorry.)</div>
+  </div>
+</div>
+
+<!-- ============ GAME OVER ============ -->
+<div class="overlay hidden" id="over-overlay">
+  <div class="board plank plaid-edge">
+    <div class="lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="subtitle" style="margin-top:2px">The vibe flatlined. Everyone's in the porch puttin' boots on…</div>
+    <div id="rank">Some Good Host</div>
+    <div id="rank-line"></div>
+    <div id="final-score">0</div>
+    <div id="best-line"></div>
+    <div class="stats">
+      <div class="stat"><b id="st-fed">0</b>guests fed</div>
+      <div class="stat"><b id="st-jigs">0</b>jigs ripped</div>
+      <div class="stat"><b id="st-sorry">0</b>sorries said</div>
+      <div class="stat"><b id="st-time">0:00</b>party lasted</div>
+      <div class="stat"><b id="st-level">1</b>level reached</div>
+    </div>
+    <button class="btn-big" id="btn-again">GO AGAIN (the party demands it)</button>
+    <div class="fineprint">Screenshot yer score and send it to the group chat. It's the law.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script id="game">
+'use strict';
+/* =====================================================================
+   SOME GOOD KITCHEN PARTY — a 3D East Coast hosting simulator
+   One file. No build step. Drag it onto Netlify and yer laughin'.
+   ===================================================================== */
+
+// ---------------------------------------------------------------- data
+const ITEMS = {
+  TEA:   { emoji:'☕', name:'a cuppa tea',                    grab:'Put the kettle on (tea)' },
+  LOB:   { emoji:'🦞', name:'a feed of lobster',              grab:'Grab a lobster from the cooler' },
+  GF:    { emoji:'🍕', name:'garlic fingers + donair sauce',  grab:'Pull garlic fingers from the oven' },
+  TIM:   { emoji:'🍩', name:'a box o\u2019 Timbits',          grab:'Snag some Timbits' },
+  CHIPS: { emoji:'🥔', name:'storm chips',                    grab:'Raid the storm chip stash' },
+};
+const ITEM_KEYS = Object.keys(ITEMS);
+
+const NAMES = ['Aunt Gert','Uncle Angus','Cousin Dougie','Buddy','Skipper','Marlene','Gordie','Cyril',
+  'Bernadette','Yvonne','Merv','Flossie','Junior','Darlene','Big Rick','Little Rick','Ti-Jean','Émile',
+  'Sheila','Wade','Kenzie','MacIsaac','Peggy','Vince','Coralee','Ferg'];
+
+const THANKS = ['Some good, b\u2019y!','Best kind!','Deadly — thanks buddy!','This is it right here!',
+  'G\u2019wan, ya didn\u2019t have to!','Lord tunderin\u2019, lovely!','Fill yer boots!','Right on!',
+  'Yes b\u2019y!!','Oh you\u2019re a saint, so y\u2019are','Mint!','What a host, wha?!'];
+
+const GRUMBLES = ['S\u2019pose I\u2019ll just starve then\u2026','Oh me nerves.','I\u2019m gettin\u2019 on home.',
+  'Tellin\u2019 Mom about this.','Even the mainland treats me better\u2026','The gulls eat better\u2019n this.'];
+
+const SORRIES = ['Sorry!','Oop — sorry b\u2019y','Pardon!','Sorry, sorry','Sorry, my love','Scuse me, sorry'];
+
+const AMBIENT = [
+  'Someone\u2019s tellin\u2019 the flat tire story again. Fourth time tonight.',
+  'The dip is gone. There was never enough dip.',
+  'Two fellas in the porch arguin\u2019 \u201Cchesterfield\u201D vs \u201Ccouch\u201D.',
+  'Aunt Cathy put her boots on to leave an hour ago. Still talkin\u2019 by the door.',
+  'A two-hour goodbye has officially begun.',
+  'Someone said \u201Canyway\u2026\u201D — nobody moved.',
+  'A Sobeys bag full of Sobeys bags was discovered under the sink.',
+  'Buddy swears the pothole on Route 6 ate his Civic.',
+  'They\u2019re playin\u2019 45s in the porch. It got competitive.',
+  'Someone\u2019s step-dancin\u2019 on the linoleum. The linoleum is losin\u2019.',
+  'Gunner the dog just walked in. He lives here now.',
+  'The kettle\u2019s on. The kettle is always on.',
+  'Somebody brought date squares. Peace in our time.',
+  'Lineup for the one bathroom. Morale is holdin\u2019.',
+  'Weather talk has entered hour two.',
+  'Someone\u2019s uncle is explainin\u2019 the tides. Nobody asked. Everyone\u2019s listenin\u2019.',
+  'A guitar appeared out of nowhere. It always does.',
+  'Somebody mentioned the ferry. Opinions are STRONG.',
+  'The fridge magnets now spell somethin\u2019 rude.',
+  'Someone whispered \u201Cstorm chips\u201D and three people checked the forecast.',
+  'A tray of hodge podge just materialized. Bless.',
+  'Someone\u2019s explainin\u2019 rappie pie to a mainlander. He looks frightened.',
+];
+
+const LEVEL_LINES = ['just the regulars','word\u2019s out on the Facebook group','someone called their cousins',
+  'the whole wharf heard','three counties deep now','buses comin\u2019 in from Moncton',
+  'CBC\u2019s here doin\u2019 a segment','the mainlanders found out','this party has its own postal code',
+  'legends will be sung','myth status achieved'];
+
+const RANKS = [
+  [600,  'Come From Away',        'Ya tried, and that\u2019s somethin\u2019. Next time put the kettle on sooner.'],
+  [1500, 'Fair to Middlin\u2019', 'Not too bad, not too good. Like a July with fog.'],
+  [3000, 'Some Good Host',        'They\u2019ll be talkin\u2019 about this one at Sobeys.'],
+  [5500, 'Right Some Good, B\u2019y','Three counties heard about this party.'],
+  [9000, 'Legend of the Wharf',   'They\u2019re namin\u2019 a boat after ya.'],
+  [Infinity,'Kitchen Party Royalty 👑','Rita MacNeil woulda been proud.'],
+];
+
+// -------------------------------------------------------------- state
+const S = {
+  paused:false,mode:'menu',        // menu | play | over
+  vibe:70, score:0, combo:0, comboT:0,
+  level:1, elapsed:0,
+  fed:0, jigs:0, sorries:0, best:0,
+  carrying:null,
+  music:{ on:true, meter:100 },
+  spawnT:3, eventT:34, ambientT:12,
+  patiencePause:0, outage:0, storm:0, singalong:0,
+  sorryCd:0,
+  gulls:[],
+};
+
+// ---------------------------------------------------------- three.js
+let scene, camera, renderer, player, playerCarrySprite, flashlight;
+let clockPrev = performance.now();
+const guests = [];
+const floats = [];   // rising text sprites
+const colliders = [];
+const stations = [];
+let fiddleGlow, tvScreen, stoveLight, lightsMain = [], beamCone, snowPts, moonMesh;
+
+const ROOM = { x:10, z:7 };
+const SPOTS = [[-6.2,2.6],[-3.4,4.5],[-0.6,4.8],[2.4,4.6],[5.3,3.0],
+               [-5.8,-1.8],[-2.8,-3.0],[2.8,-2.8],[5.6,-0.8],[7.3,1.2]];
+const spotUsed = new Array(SPOTS.length).fill(false);
+
+const V3 = (x,y,z)=>new THREE.Vector3(x,y,z);
+const rand = (a,b)=>a+Math.random()*(b-a);
+const pick = arr=>arr[Math.floor(Math.random()*arr.length)];
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
+// ------------------------------------------------------- tiny helpers
+function plaidTexture(base, stripe){
+  const c=document.createElement('canvas'); c.width=c.height=64;
+  const g=c.getContext('2d');
+  g.fillStyle=base; g.fillRect(0,0,64,64);
+  g.globalAlpha=.55; g.fillStyle=stripe;
+  for(let i=0;i<64;i+=16){ g.fillRect(i,0,6,64); g.fillRect(0,i,64,6); }
+  g.globalAlpha=.35; g.fillStyle='#000';
+  for(let i=8;i<64;i+=16){ g.fillRect(i,0,2,64); g.fillRect(0,i,64,2); }
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+}
+function woodTexture(){
+  const c=document.createElement('canvas'); c.width=256;c.height=256;
+  const g=c.getContext('2d');
+  g.fillStyle='#8a5a33'; g.fillRect(0,0,256,256);
+  for(let i=0;i<256;i+=32){
+    g.fillStyle= i%64? '#7d5029':'#93613a'; g.fillRect(0,i,256,30);
+    g.fillStyle='rgba(0,0,0,.25)'; g.fillRect(0,i+30,256,2);
+  }
+  g.strokeStyle='rgba(60,35,15,.5)';
+  for(let i=0;i<60;i++){ g.beginPath(); const y=Math.random()*256;
+    g.moveTo(Math.random()*256,y); g.lineTo(Math.random()*256+40,y+rand(-2,2)); g.stroke(); }
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(4,3); return t;
+}
+function textSprite(text, opts={}){
+  const size=opts.size||42, pad=18;
+  const c=document.createElement('canvas'); const g=c.getContext('2d');
+  g.font=`800 ${size}px Nunito, "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+  const w=Math.ceil(g.measureText(text).width)+pad*2;
+  c.width=w; c.height=size+pad*2;
+  const gg=c.getContext('2d');
+  gg.font=`800 ${size}px Nunito, "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+  gg.textBaseline='middle'; gg.textAlign='center';
+  gg.lineWidth=8; gg.strokeStyle=opts.stroke||'rgba(20,12,6,.9)';
+  gg.strokeText(text,w/2,c.height/2);
+  gg.fillStyle=opts.color||'#fff'; gg.fillText(text,w/2,c.height/2);
+  const t=new THREE.CanvasTexture(c);
+  const m=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false});
+  const s=new THREE.Sprite(m);
+  const sc=(opts.scale||1)*0.012;
+  s.scale.set(c.width*sc, c.height*sc, 1);
+  return s;
+}
+function addFloat(text, pos, opts={}){
+  const s=textSprite(text,opts);
+  s.position.copy(pos);
+  s.userData={life:opts.life||1.3, vy:opts.vy||1.1, t:0};
+  scene.add(s); floats.push(s);
+}
+
+// ------------------------------------------------------------- toasts
+const toastEl=document.getElementById('toasts');
+function toast(msg, big=false){
+  const d=document.createElement('div');
+  d.className='toast'+(big?' big':''); d.textContent=msg;
+  toastEl.appendChild(d);
+  while(toastEl.children.length>4) toastEl.removeChild(toastEl.firstChild);
+  setTimeout(()=>{ if(d.parentNode) d.parentNode.removeChild(d); }, 4100);
+}
+
+// -------------------------------------------------------------- audio
+const AU = {
+  ctx:null, master:null, muted:false,
+  eighth:0.165, nextT:0, step:0,
+  jig:[
+    294,370,440,587,440,370,  392,494,587,494,392,494,
+    440,554,659,554,440,554,  587,440,370,330,294,294 ],
+  ensure(){
+    if(this.ctx) return;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    this.ctx=new AC();
+    this.master=this.ctx.createGain();
+    this.master.gain.value=this.muted?0:0.5;
+    this.master.connect(this.ctx.destination);
+  },
+  tone(freq,dur,type,vol,when,slideTo){
+    if(!this.ctx) return;
+    const t=when??this.ctx.currentTime;
+    const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t);
+    if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t+dur+0.05);
+  },
+  noise(dur,vol,when){
+    if(!this.ctx) return;
+    const t=when??this.ctx.currentTime;
+    const len=this.ctx.sampleRate*dur|0;
+    const buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
+    const src=this.ctx.createBufferSource(); src.buffer=buf;
+    const g=this.ctx.createGain(); g.gain.value=vol;
+    src.connect(g); g.connect(this.master); src.start(t);
+  },
+  scheduleJig(){
+    if(!this.ctx || !S.music.on || S.mode!=='play') return;
+    while(this.nextT < this.ctx.currentTime+0.22){
+      const i=this.step % this.jig.length;
+      const f=this.jig[i];
+      // fiddle-ish lead
+      this.tone(f,0.16,'sawtooth',0.10,this.nextT);
+      this.tone(f*2,0.14,'triangle',0.04,this.nextT);
+      // boot stomp on the big beats
+      if(i%6===0) { this.tone(70,0.22,'sine',0.34,this.nextT); this.noise(0.05,0.10,this.nextT); }
+      if(i%6===3) this.tone(58,0.18,'sine',0.22,this.nextT);
+      // spoons tick
+      if(i%2===1) this.noise(0.02,0.05,this.nextT);
+      this.nextT+=this.eighth; this.step++;
+    }
+  },
+  resetJigClock(){ if(this.ctx){ this.nextT=this.ctx.currentTime+0.06; } },
+  sfx(name){
+    if(!this.ctx) return; const t=this.ctx.currentTime;
+    switch(name){
+      case 'ding':  [587,740,880].forEach((f,i)=>this.tone(f,0.14,'sine',0.22,t+i*0.055)); break;
+      case 'fail':  this.tone(220,0.35,'sawtooth',0.2,t,110); break;
+      case 'pick':  this.tone(660,0.08,'triangle',0.2,t); break;
+      case 'riff':  [294,370,440,587,740].forEach((f,i)=>this.tone(f,0.09,'sawtooth',0.16,t+i*0.05)); break;
+      case 'gull':  this.tone(1250,0.16,'square',0.10,t,700); this.tone(1250,0.16,'square',0.10,t+0.2,700); break;
+      case 'thud':  this.tone(55,0.5,'sine',0.4,t); this.noise(0.15,0.2,t); break;
+      case 'level': [587,784,988].forEach((f,i)=>this.tone(f,0.16,'triangle',0.2,t+i*0.07)); break;
+      case 'cheer': [523,659,784,1047].forEach((f,i)=>this.tone(f,0.5,'sine',0.09,t+i*0.02)); this.noise(0.4,0.12,t); break;
+      case 'sorry': this.tone(880,0.06,'sine',0.12,t); break;
+    }
+  },
+  setMuted(m){ this.muted=m; if(this.master) this.master.gain.value=m?0:0.5; }
+};
+
+// ------------------------------------------------------- scene set-up
+function initThree(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0d1a22);
+  scene.fog=new THREE.Fog(0x0d1a22, 30, 85);
+
+  camera=new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 120);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  document.getElementById('game-canvas').appendChild(renderer.domElement);
+
+  // -------- lights: warm kitchen glow
+  const amb=new THREE.AmbientLight(0xffe6c0, 0.55); scene.add(amb);
+  const key=new THREE.PointLight(0xffd9a0, 0.95, 40); key.position.set(0,9,2); scene.add(key);
+  const fill=new THREE.PointLight(0xffb36b, 0.5, 26); fill.position.set(-7,6,-3); scene.add(fill);
+  const fill2=new THREE.PointLight(0xffc98a, 0.45, 26); fill2.position.set(7,6,3); scene.add(fill2);
+  lightsMain=[amb,key,fill,fill2];
+  lightsMain.forEach(l=>l.userData.base=l.intensity);
+
+  stoveLight=new THREE.PointLight(0xff7a2a, 0.9, 8); stoveLight.position.set(-8.8,1.2,3.8); scene.add(stoveLight);
+
+  flashlight=new THREE.SpotLight(0xfff2cf, 0, 14, Math.PI/5, 0.5, 1.2);
+  flashlight.position.set(0,4,0); scene.add(flashlight); scene.add(flashlight.target);
+
+  buildRoom();
+  buildOutside();
+  buildFurniture();
+  player=makeCharacter({plaid:'#a83232', stripe:'#20402c', toque:'#c8452c', player:true});
+  player.position.set(0,0,3);
+  scene.add(player);
+
+  playerCarrySprite=textSprite('☕',{size:64,scale:1.15});
+  playerCarrySprite.visible=false;
+  scene.add(playerCarrySprite);
+
+  addEventListener('resize',()=>{
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+}
+
+function buildRoom(){
+  const wood=woodTexture();
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(ROOM.x*2+2, ROOM.z*2+2),
+    new THREE.MeshLambertMaterial({map:wood}));
+  floor.rotation.x=-Math.PI/2; scene.add(floor);
+
+  // braided rug — very grandma's kitchen
+  const rug=new THREE.Mesh(new THREE.CircleGeometry(2.6,40),
+    new THREE.MeshLambertMaterial({color:0x7a4b6e}));
+  rug.rotation.x=-Math.PI/2; rug.position.set(-3.5,0.012,1.5); scene.add(rug);
+  const rug2=new THREE.Mesh(new THREE.RingGeometry(1.1,1.8,40),
+    new THREE.MeshLambertMaterial({color:0x3e6b4f}));
+  rug2.rotation.x=-Math.PI/2; rug2.position.set(-3.5,0.013,1.5); scene.add(rug2);
+
+  const wallMat=new THREE.MeshLambertMaterial({color:0x9db3a8}); // sage-painted boards
+  const wainMat=new THREE.MeshLambertMaterial({color:0x6f4526});
+  const H=4.6;
+  // back wall with window hole (built from segments)
+  const mkWall=(w,h,x,y,z,ry=0)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,0.3),wallMat);
+    m.position.set(x,y,z); m.rotation.y=ry; scene.add(m); return m; };
+  // back wall in four pieces, leaving a real opening x:-1.6..1.6, y:1.5..3.3
+  mkWall(8.4, H, -5.8, H/2, -ROOM.z-0.15);          // left of window
+  mkWall(8.4, H,  5.8, H/2, -ROOM.z-0.15);          // right of window
+  mkWall(3.2, 1.5, 0, 0.75, -ROOM.z-0.15);          // below window
+  mkWall(3.2, H-3.3, 0, 3.3+(H-3.3)/2, -ROOM.z-0.15); // above window
+  const winGlass=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.8),
+    new THREE.MeshBasicMaterial({color:0x2a5568,transparent:true,opacity:0.18,depthWrite:false}));
+  winGlass.position.set(0,2.4,-ROOM.z-0.02); scene.add(winGlass);
+  // window frame
+  const frameMat=new THREE.MeshLambertMaterial({color:0xf6e7c8});
+  const fr=(w,h,x,y)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,0.18),frameMat);
+    m.position.set(x,y,-ROOM.z+0.1); scene.add(m); };
+  fr(3.5,0.16,0,3.32); fr(3.5,0.16,0,1.48); fr(0.16,2,-1.68,2.4); fr(0.16,2,1.68,2.4); fr(0.12,1.84,0,2.4);
+  // side walls (lower so camera sees in)
+  mkWall(ROOM.z*2+0.6, H, -ROOM.x-0.15, H/2, 0, Math.PI/2);
+  mkWall(ROOM.z*2+0.6, H,  ROOM.x+0.15, H/2, 0, Math.PI/2);
+  // wainscoting strips
+  const wains=(w,x,z,ry=0)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,1.1,0.36),wainMat);
+    m.position.set(x,0.55,z); m.rotation.y=ry; scene.add(m); };
+  wains(ROOM.x*2,0,-ROOM.z-0.12);
+  wains(ROOM.z*2+0.6,-ROOM.x-0.12,0,Math.PI/2);
+  wains(ROOM.z*2+0.6, ROOM.x+0.12,0,Math.PI/2);
+
+  // string lights along the back wall
+  const cols=[0xffd257,0xff6b57,0x6fd08c,0x6fb7ff];
+  for(let i=0;i<15;i++){
+    const b=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,8),
+      new THREE.MeshBasicMaterial({color:cols[i%4]}));
+    const x=-8.4+i*1.2;
+    b.position.set(x, 3.9+Math.sin(i*1.1)*0.12, -ROOM.z+0.25);
+    scene.add(b);
+  }
+  // "EAST COAST OR NO COAST" sign — a lobster trap buoy wall
+  const buoy=(x,c)=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(0.22,10,10),
+    new THREE.MeshLambertMaterial({color:c}));
+    m.position.set(x,3.0,-ROOM.z+0.22); m.scale.y=1.5; scene.add(m); };
+  buoy(-6.5,0xe8722a); buoy(-5.9,0x2e6fb0); buoy(-5.3,0xf2b33d);
+  buoy(5.4,0xc8452c); buoy(6.0,0x3e6b4f); buoy(6.6,0xe8e2d0);
+}
+
+function buildOutside(){
+  // night sky + moon + lighthouse + sea, seen through the window
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(60,30),
+    new THREE.MeshBasicMaterial({color:0x0e2733}));
+  sea.rotation.x=-Math.PI/2; sea.position.set(0,-0.1,-24); scene.add(sea);
+
+  moonMesh=new THREE.Mesh(new THREE.SphereGeometry(0.9,16,16),
+    new THREE.MeshBasicMaterial({color:0xfff3d6}));
+  moonMesh.position.set(-5,7.5,-26); scene.add(moonMesh);
+
+  // stars
+  const starGeo=new THREE.BufferGeometry();
+  const sp=[];
+  for(let i=0;i<120;i++) sp.push(rand(-25,25), rand(3,14), rand(-30,-20));
+  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(sp,3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xcfe4ee,size:0.09})));
+
+  // lighthouse
+  const lh=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.75,3.4,10),
+    new THREE.MeshLambertMaterial({color:0xe8e2d0}));
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(0.66,0.72,0.6,10),
+    new THREE.MeshLambertMaterial({color:0xc8452c}));
+  band.position.y=-0.6;
+  const top=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.6,10),
+    new THREE.MeshBasicMaterial({color:0xfff0b8}));
+  top.position.y=2.0;
+  const cap=new THREE.Mesh(new THREE.ConeGeometry(0.55,0.5,10),
+    new THREE.MeshLambertMaterial({color:0xc8452c}));
+  cap.position.y=2.55;
+  lh.add(body,band,top,cap);
+  lh.position.set(6,1.7,-25); scene.add(lh);
+
+  const beam=new THREE.Mesh(new THREE.ConeGeometry(1.6,10,16,1,true),
+    new THREE.MeshBasicMaterial({color:0xfff2c0,transparent:true,opacity:0.16,
+      side:THREE.DoubleSide,depthWrite:false}));
+  beam.rotation.z=Math.PI/2;   // apex sits at the group origin
+  beam.position.x=5;           // beam extends outward from the lamp
+  beamCone=new THREE.Group();  // rotate this and the light sweeps
+  beamCone.add(beam);
+  beamCone.position.set(6,3.7,-25);
+  scene.add(beamCone);
+
+  // snow (hidden until a storm blows in)
+  const snowGeo=new THREE.BufferGeometry();
+  const pts=[];
+  for(let i=0;i<500;i++) pts.push(rand(-20,20), rand(0,12), rand(-30,-8));
+  snowGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  snowPts=new THREE.Points(snowGeo, new THREE.PointsMaterial({color:0xffffff,size:0.12,transparent:true,opacity:0.9}));
+  snowPts.visible=false; scene.add(snowPts);
+}
+
+function addCollider(minX,maxX,minZ,maxZ){ colliders.push({minX,maxX,minZ,maxZ}); }
+
+function buildFurniture(){
+  const counterMat=new THREE.MeshLambertMaterial({color:0xdcd3bd});
+  const cabMat=new THREE.MeshLambertMaterial({color:0x4e7a8a}); // painted cabinets, coastal blue
+  const darkMat=new THREE.MeshLambertMaterial({color:0x2f2a26});
+  const steelMat=new THREE.MeshLambertMaterial({color:0xb9c0c4});
+
+  // ---- back counter run
+  const counter=new THREE.Group();
+  const cab=new THREE.Mesh(new THREE.BoxGeometry(13,1.1,1.5),cabMat); cab.position.y=0.55;
+  const topC=new THREE.Mesh(new THREE.BoxGeometry(13.2,0.14,1.6),counterMat); topC.position.y=1.17;
+  counter.add(cab,topC); counter.position.set(-0.5,0,-6.2); scene.add(counter);
+  addCollider(-7.2,6.2,-7.2,-5.4);
+
+  // stove + kettle (TEA)
+  const stove=new THREE.Group();
+  const sbody=new THREE.Mesh(new THREE.BoxGeometry(1.7,1.25,1.55),steelMat); sbody.position.y=0.62;
+  stove.add(sbody);
+  for(let i=0;i<4;i++){
+    const b=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.03,12),darkMat);
+    b.position.set(-0.4+(i%2)*0.8,1.26,-0.35+Math.floor(i/2)*0.7);
+    stove.add(b);
+  }
+  const kettle=new THREE.Group();
+  const kb=new THREE.Mesh(new THREE.SphereGeometry(0.3,12,12),new THREE.MeshLambertMaterial({color:0xc8452c}));
+  kb.scale.y=0.85;
+  const spout=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.09,0.35,8),new THREE.MeshLambertMaterial({color:0xc8452c}));
+  spout.rotation.z=Math.PI/3; spout.position.set(0.3,0.1,0);
+  kettle.add(kb,spout); kettle.position.set(-0.4,1.5,-0.35);
+  stove.add(kettle);
+  stove.position.set(-4.6,0,-6.2); scene.add(stove);
+
+  // oven end of counter (GARLIC FINGERS) — a pizza box stack
+  for(let i=0;i<3;i++){
+    const box=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.12,1.1),
+      new THREE.MeshLambertMaterial({color:i===2?0xe8d8ad:0xd9c48f}));
+    box.position.set(3.4,1.28+i*0.13,-6.1); box.rotation.y=i*0.2-0.2; scene.add(box);
+  }
+
+  // fridge/cooler corner (LOBSTER)
+  const cooler=new THREE.Group();
+  const cbody=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.1,2.0),
+    new THREE.MeshLambertMaterial({color:0xe8e2d0}));
+  cbody.position.y=0.55;
+  const clid=new THREE.Mesh(new THREE.BoxGeometry(1.56,0.18,2.06),
+    new THREE.MeshLambertMaterial({color:0x2e6fb0}));
+  clid.position.y=1.16; clid.rotation.x=-0.12;
+  const lob=textSprite('🦞',{size:56,scale:0.9}); lob.position.set(0,1.7,0);
+  cooler.add(cbody,clid,lob);
+  cooler.position.set(-9.3,0,-2.0); scene.add(cooler);
+  addCollider(-10.2,-8.5,-3.1,-0.9);
+
+  // pantry shelf (STORM CHIPS)
+  const shelf=new THREE.Group();
+  const sh=new THREE.Mesh(new THREE.BoxGeometry(1.3,2.4,2.0),
+    new THREE.MeshLambertMaterial({color:0x6f4526}));
+  sh.position.y=1.2;
+  shelf.add(sh);
+  for(let i=0;i<3;i++){
+    const bag=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.5,0.14),
+      new THREE.MeshLambertMaterial({color:[0xf2b33d,0xc8452c,0x3e6b4f][i]}));
+    bag.position.set(-0.72,0.9+i*0.55,-0.5+i*0.5); bag.rotation.y=0.3;
+    shelf.add(bag);
+  }
+  shelf.position.set(9.5,0,-2.0); scene.add(shelf);
+  addCollider(8.7,10.2,-3.2,-0.8);
+
+  // kitchen table (TIMBITS on it)
+  const table=new THREE.Group();
+  const tTop=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.14,2.0),
+    new THREE.MeshLambertMaterial({color:0x8a5a33}));
+  tTop.position.y=1.0;
+  table.add(tTop);
+  [[-1.5,-0.8],[1.5,-0.8],[-1.5,0.8],[1.5,0.8]].forEach(([x,z])=>{
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(0.14,1.0,0.14),
+      new THREE.MeshLambertMaterial({color:0x5c3820}));
+    leg.position.set(x,0.5,z); table.add(leg);
+  });
+  const timBox=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.3,0.5),
+    new THREE.MeshLambertMaterial({color:0xc8452c}));
+  timBox.position.set(-0.6,1.22,0);
+  const timLid=new THREE.Mesh(new THREE.BoxGeometry(0.82,0.06,0.52),
+    new THREE.MeshLambertMaterial({color:0xf6e7c8}));
+  timLid.position.set(-0.6,1.4,0);
+  const teapot=new THREE.Mesh(new THREE.SphereGeometry(0.22,10,10),
+    new THREE.MeshLambertMaterial({color:0x4e7a8a}));
+  teapot.position.set(0.7,1.2,0.3);
+  const squares=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.08,0.5),
+    new THREE.MeshLambertMaterial({color:0x7a4b2a}));
+  squares.position.set(0.5,1.11,-0.5);
+  table.add(timBox,timLid,teapot,squares);
+  table.position.set(0,0,0.8); scene.add(table);
+  addCollider(-1.9,1.9,-0.4,2.0);
+
+  // woodstove (cozy corner)
+  const ws=new THREE.Group();
+  const wsBody=new THREE.Mesh(new THREE.BoxGeometry(1.3,1.3,1.3),darkMat); wsBody.position.y=0.75;
+  const wsDoor=new THREE.Mesh(new THREE.PlaneGeometry(0.6,0.5),
+    new THREE.MeshBasicMaterial({color:0xff8c3a}));
+  wsDoor.position.set(0.66,0.7,0); wsDoor.rotation.y=Math.PI/2;
+  const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,2.4,10),darkMat);
+  pipe.position.y=2.4;
+  ws.add(wsBody,wsDoor,pipe);
+  ws.position.set(-8.9,0,3.8); scene.add(ws);
+  addCollider(-9.8,-8.1,3.0,4.7);
+
+  // fiddle corner — chair + fiddle + amp of pure vibes
+  const chair=new THREE.Group();
+  const seat=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.12,0.9),
+    new THREE.MeshLambertMaterial({color:0x6f4526}));
+  seat.position.y=0.6;
+  const back=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.9,0.12),
+    new THREE.MeshLambertMaterial({color:0x6f4526}));
+  back.position.set(0,1.1,-0.4);
+  chair.add(seat,back);
+  [[-0.38,-0.38],[0.38,-0.38],[-0.38,0.38],[0.38,0.38]].forEach(([x,z])=>{
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.1),
+      new THREE.MeshLambertMaterial({color:0x5c3820}));
+    leg.position.set(x,0.3,z); chair.add(leg);
+  });
+  const fBody=new THREE.Mesh(new THREE.SphereGeometry(0.26,10,10),
+    new THREE.MeshLambertMaterial({color:0x9c5a24}));
+  fBody.scale.set(1,0.35,1.5);
+  fBody.position.set(0,0.75,0.1);
+  const fNeck=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.06,0.7),
+    new THREE.MeshLambertMaterial({color:0x3a2410}));
+  fNeck.position.set(0,0.78,-0.4);
+  chair.add(fBody,fNeck);
+  chair.position.set(8.0,0,4.6); chair.rotation.y=-0.6; scene.add(chair);
+  addCollider(7.3,8.7,3.9,5.3);
+  fiddleGlow=new THREE.Mesh(new THREE.RingGeometry(0.8,1.05,24),
+    new THREE.MeshBasicMaterial({color:0x8fd0e8,transparent:true,opacity:0.5,side:THREE.DoubleSide}));
+  fiddleGlow.rotation.x=-Math.PI/2; fiddleGlow.position.set(8.0,0.03,4.6); scene.add(fiddleGlow);
+
+  // TV on the right wall (for when the game's on)
+  const tv=new THREE.Mesh(new THREE.BoxGeometry(0.2,1.1,1.9),darkMat);
+  tv.position.set(9.8,2.6,2.2); scene.add(tv);
+  tvScreen=new THREE.Mesh(new THREE.PlaneGeometry(1.7,0.9),
+    new THREE.MeshBasicMaterial({color:0x16242c}));
+  tvScreen.position.set(9.68,2.6,2.2); tvScreen.rotation.y=-Math.PI/2; scene.add(tvScreen);
+
+  // door mat by the entrance (front-right) + boots pile. Sacred.
+  const mat=new THREE.Mesh(new THREE.PlaneGeometry(2.2,1.4),
+    new THREE.MeshLambertMaterial({color:0x3e6b4f}));
+  mat.rotation.x=-Math.PI/2; mat.position.set(7.4,0.014,6.1); scene.add(mat);
+  for(let i=0;i<5;i++){
+    const boot=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.3,0.42),
+      new THREE.MeshLambertMaterial({color:[0xc8452c,0x2f2a26,0xf2b33d,0x2e6fb0,0x2f2a26][i]}));
+    boot.position.set(5.6+rand(-0.3,0.3),0.15,6.3+((i%2)*0.45)-0.2);
+    boot.rotation.y=rand(-0.7,0.7); scene.add(boot);
+  }
+
+  // ---------------- stations (interact points)
+  stations.push(
+    {id:'TEA',   x:-4.6, z:-4.9, r:1.6, label:ITEMS.TEA.grab},
+    {id:'GF',    x: 3.4, z:-4.9, r:1.6, label:ITEMS.GF.grab},
+    {id:'LOB',   x:-8.2, z:-2.0, r:1.6, label:ITEMS.LOB.grab},
+    {id:'CHIPS', x: 8.3, z:-2.0, r:1.6, label:ITEMS.CHIPS.grab},
+    {id:'TIM',   x: 0.0, z: 2.7, r:1.5, label:ITEMS.TIM.grab},
+    {id:'FIDDLE',x: 7.6, z: 3.4, r:1.7, label:'Rip a set of jigs on the fiddle'},
+  );
+  // glow rings under stations
+  stations.forEach(st=>{
+    const ring=new THREE.Mesh(new THREE.RingGeometry(0.45,0.62,22),
+      new THREE.MeshBasicMaterial({color:0xf2b33d,transparent:true,opacity:0.35,side:THREE.DoubleSide}));
+    ring.rotation.x=-Math.PI/2; ring.position.set(st.x,0.02,st.z);
+    scene.add(ring); st.ring=ring;
+  });
+}
+
+// -------------------------------------------------------- characters
+function makeCharacter(opts={}){
+  const g=new THREE.Group();
+  const plaid=plaidTexture(opts.plaid||pick(['#a83232','#2e5a8a','#3e6b4f','#8a5a33','#7a4b6e']),
+                           opts.stripe||pick(['#20402c','#e0d6b8','#1c2a3a']));
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.8,0.46),
+    new THREE.MeshLambertMaterial({map:plaid}));
+  torso.position.y=1.0;
+  const legs=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.4),
+    new THREE.MeshLambertMaterial({color:0x2b3a4a}));
+  legs.position.y=0.3;
+  const skin=pick([0xf0c8a0,0xd9a06b,0x9c6b42,0xf6d7bd]);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.46,0.46),
+    new THREE.MeshLambertMaterial({color:skin}));
+  head.position.y=1.68;
+  const toqueC=opts.toque||pick(['#c8452c','#2e6fb0','#f2b33d','#3e6b4f','#7a4b6e']);
+  const toque=new THREE.Mesh(new THREE.BoxGeometry(0.54,0.24,0.5),
+    new THREE.MeshLambertMaterial({color:new THREE.Color(toqueC)}));
+  toque.position.y=1.98;
+  const pom=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8),
+    new THREE.MeshLambertMaterial({color:0xf6e7c8}));
+  pom.position.y=2.16;
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.66,0.18),
+    new THREE.MeshLambertMaterial({map:plaid}));
+  armL.position.set(-0.5,1.0,0);
+  const armR=armL.clone(); armR.position.x=0.5;
+  // wee face
+  const eye=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.07,0.02),
+    new THREE.MeshBasicMaterial({color:0x1a1a1a}));
+  eye.position.set(-0.12,1.72,0.24);
+  const eye2=eye.clone(); eye2.position.x=0.12;
+  const blob=new THREE.Mesh(new THREE.CircleGeometry(0.45,18),
+    new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.28}));
+  blob.rotation.x=-Math.PI/2; blob.position.y=0.02;
+  g.add(torso,legs,head,toque,pom,armL,armR,eye,eye2,blob);
+  g.userData.arms=[armL,armR];
+  g.userData.walk=0;
+  if(opts.player){
+    // host gets the oven mitt of destiny
+    const mitt=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.24,0.24),
+      new THREE.MeshLambertMaterial({color:0xf2b33d}));
+    mitt.position.set(0.5,0.62,0.06); g.add(mitt);
+  }
+  return g;
+}
+
+// ------------------------------------------------------------ guests
+function makeBubble(guest){
+  const c=document.createElement('canvas'); c.width=256; c.height=180;
+  guest.bubbleCanvas=c;
+  const t=new THREE.CanvasTexture(c);
+  guest.bubbleTex=t;
+  const m=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false});
+  const s=new THREE.Sprite(m);
+  s.scale.set(1.9,1.34,1);
+  guest.bubble=s;
+  drawBubble(guest);
+  return s;
+}
+function drawBubble(g){
+  const c=g.bubbleCanvas, ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  // bubble
+  ctx.fillStyle='rgba(255,250,238,0.97)';
+  ctx.strokeStyle=g.chaseAce?'#f2b33d':'#3a2410';
+  ctx.lineWidth=g.chaseAce?10:6;
+  roundRect(ctx,8,8,240,132,22); ctx.fill(); ctx.stroke();
+  // tail
+  ctx.beginPath(); ctx.moveTo(112,138); ctx.lineTo(128,166); ctx.lineTo(146,138); ctx.closePath();
+  ctx.fillStyle='rgba(255,250,238,0.97)'; ctx.fill();
+  // name
+  ctx.fillStyle='#7c2415'; ctx.font='800 22px Nunito, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText((g.chaseAce?'♠ ':'')+g.name+(g.chaseAce?' ♠':''),128,36);
+  // item
+  ctx.font='58px "Segoe UI Emoji","Apple Color Emoji",serif';
+  ctx.fillText(ITEMS[g.item].emoji,128,96);
+  // patience bar
+  const p=clamp(g.patience/g.patienceMax,0,1);
+  ctx.fillStyle='#d8cbb0'; roundRect(ctx,28,116,200,14,7); ctx.fill();
+  ctx.fillStyle= p>0.5?'#3e9b58': p>0.25?'#f2b33d':'#c8452c';
+  roundRect(ctx,28,116,200*p,14,7); ctx.fill();
+  g.bubbleTex.needsUpdate=true;
+  g.lastDrawn=p;
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// route around the big table: back-row spots go down the right-side corridor,
+// far-left spots swing around the front. Nobody walks over the squares.
+function routeIn(x,z){
+  if(z<=-0.5) return [V3(4.6,0,3.2), V3(4.6,0,-1.6), V3(x,0,z)];
+  if(x<=-2.6) return [V3(0.5,0,3.8), V3(x,0,z)];
+  return [V3(x,0,z)];
+}
+function routeOut(x,z){
+  const door=V3(7.4,0,9.5);
+  if(z<=-0.5) return [V3(4.6,0,-1.6), V3(4.6,0,3.2), door];
+  if(x<=-2.6) return [V3(0.5,0,3.8), door];
+  return [door];
+}
+
+function spawnGuest(){
+  const free=[];
+  spotUsed.forEach((u,i)=>{ if(!u) free.push(i); });
+  if(!free.length) return;
+  const si=pick(free); spotUsed[si]=true;
+  const g={
+    mesh: makeCharacter({}),
+    name: pick(NAMES),
+    item: pick(ITEM_KEYS),
+    spot: si,
+    state:'entering',
+    patienceMax: Math.max(11, 23 - S.level*1.05),
+    patience: 0,
+    chaseAce:false, aceT:0,
+    lastDrawn:1,
+  };
+  g.patience=g.patienceMax;
+  g.mesh.position.set(7.4,0,8.6);
+  g.path=routeIn(SPOTS[si][0],SPOTS[si][1]);
+  scene.add(g.mesh);
+  const b=makeBubble(g);
+  b.visible=false;
+  scene.add(b);
+  guests.push(g);
+}
+
+function removeGuest(g){
+  if(g.spot>=0 && g.spot<SPOTS.length) spotUsed[g.spot]=false;
+  scene.remove(g.mesh); scene.remove(g.bubble);
+  const i=guests.indexOf(g); if(i>=0) guests.splice(i,1);
+}
+
+// walk along a waypoint path; returns true when the whole path is done
+function followPath(g,dt,speed){
+  const m=g.mesh;
+  if(!g.path || !g.path.length) return true;
+  const wp=g.path[0];
+  const d=V3().subVectors(wp,m.position); d.y=0;
+  if(d.length()<0.18){
+    g.path.shift();
+    return g.path.length===0;
+  }
+  d.normalize().multiplyScalar(speed*dt);
+  m.position.add(d);
+  m.rotation.y=Math.atan2(d.x,d.z);
+  animWalk(m,dt,true);
+  return false;
+}
+
+function updateGuests(dt){
+  for(let i=guests.length-1;i>=0;i--){
+    const g=guests[i];
+    const m=g.mesh;
+    if(g.state==='entering'){
+      if(followPath(g,dt,2.7)){ g.state='waiting'; g.bubble.visible=true; }
+    }else if(g.state==='waiting'){
+      animWalk(m,dt,false);
+      // face the player if close, else face the room
+      const toP=V3().subVectors(player.position,m.position);
+      if(toP.length()<4) m.rotation.y+= (Math.atan2(toP.x,toP.z)-m.rotation.y)*0.1;
+      if(S.patiencePause<=0){
+        const mult=(S.outage>0?1.4:1)*(S.storm>0?1.15:1);
+        g.patience-=dt*mult;
+      }
+      if(g.chaseAce){ g.aceT-=dt; if(g.aceT<=0){ g.chaseAce=false; drawBubble(g);} }
+      const p=clamp(g.patience/g.patienceMax,0,1);
+      if(Math.abs(p-g.lastDrawn)>0.03) drawBubble(g);
+      if(g.patience<=0){
+        g.state='leaving'; g.bubble.visible=false;
+        g.path=routeOut(m.position.x,m.position.z);
+        S.vibe=clamp(S.vibe-13,0,100);
+        S.combo=0; updateComboChip();
+        addFloat(pick(GRUMBLES), m.position.clone().add(V3(0,2.5,0)), {color:'#ffb0a0',size:34,scale:1});
+        AU.sfx('fail');
+      }
+      g.bubble.position.set(m.position.x, 3.15, m.position.z);
+    }else if(g.state==='leaving' || g.state==='served'){
+      if(followPath(g,dt,3.1)){ removeGuest(g); continue; }
+    }
+  }
+}
+function animWalk(m,dt,moving){
+  m.userData.walk+= dt*(moving?11:3.2);
+  const a=Math.sin(m.userData.walk)* (moving?0.55:0.12);
+  m.userData.arms[0].rotation.x=a;
+  m.userData.arms[1].rotation.x=-a;
+  m.position.y=moving? Math.abs(Math.sin(m.userData.walk))*0.06 : 0;
+}
+
+// -------------------------------------------------------------- input
+const keys={};
+addEventListener('keydown',e=>{
+  if(e.code==='KeyP'||e.code==='Escape'){if(!e.repeat){e.preventDefault();setPaused(!S.paused)}return;}
+  if(S.mode==='play'&&!S.paused){
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
+    keys[e.code]=true;
+    if(!e.repeat&&(e.code==='KeyE'||e.code==='Space'))interact();
+  }
+  if(e.code==='Enter'&&!e.repeat&&!e.target.closest?.('button')){
+    if(S.mode==='menu'||S.mode==='over'){e.preventDefault();startGame();}
+  }
+});
+addEventListener('keyup',e=>{ keys[e.code]=false; });
+
+// mobile joystick
+const stick={active:false,id:null,cx:0,cy:0,dx:0,dy:0};
+const stickZone=document.getElementById('stick-zone');
+const stickBase=document.getElementById('stick-base');
+const stickNub=document.getElementById('stick-nub');
+function stickSet(x,y){
+  let dx=x-stick.cx, dy=y-stick.cy;
+  const len=Math.hypot(dx,dy), max=46;
+  if(len>max){ dx*=max/len; dy*=max/len; }
+  stick.dx=dx/max; stick.dy=dy/max;
+  stickNub.style.left=(stick.cx+dx-28)+'px';
+  stickNub.style.top =(stick.cy+dy-28)+'px';
+}
+stickZone.addEventListener('touchstart',e=>{
+  if(S.paused||S.mode!=='play'||stick.active)return;
+  const t=e.changedTouches[0];
+  stick.active=true; stick.id=t.identifier;
+  stick.cx=t.clientX; stick.cy=t.clientY;
+  stickBase.style.display=stickNub.style.display='block';
+  stickBase.style.left=(stick.cx-59)+'px'; stickBase.style.top=(stick.cy-59)+'px';
+  stickSet(t.clientX,t.clientY);
+  e.preventDefault();
+},{passive:false});
+stickZone.addEventListener('touchmove',e=>{
+  for(const t of e.changedTouches) if(t.identifier===stick.id) stickSet(t.clientX,t.clientY);
+  e.preventDefault();
+},{passive:false});
+const stickEnd=e=>{
+  for(const t of e.changedTouches) if(t.identifier===stick.id){
+    stick.active=false; stick.dx=stick.dy=0;
+    stickBase.style.display=stickNub.style.display='none';
+  }
+};
+stickZone.addEventListener('touchend',stickEnd);
+stickZone.addEventListener('touchcancel',stickEnd);
+document.getElementById('btn-act').addEventListener('touchstart',e=>{
+  e.preventDefault(); if(S.mode==='play') interact();
+},{passive:false});
+document.getElementById('btn-act').addEventListener('click',e=>{
+  if(S.mode==='play') interact();
+});
+
+// ---------------------------------------------------------- interact
+let currentTarget=null; // {type:'guest'|'station', ref}
+function findTarget(){
+  const p=player.position;
+  // matching guest first (highest priority when carrying)
+  let best=null, bestD=1.7;
+  if(S.carrying){
+    for(const g of guests){
+      if(g.state!=='waiting'||g.item!==S.carrying) continue;
+      const d=Math.hypot(g.mesh.position.x-p.x, g.mesh.position.z-p.z);
+      if(d<bestD){ best={type:'guest',ref:g}; bestD=d; }
+    }
+    if(best) return best;
+  }
+  for(const st of stations){
+    const d=Math.hypot(st.x-p.x, st.z-p.z);
+    if(d<st.r){ return {type:'station',ref:st}; }
+  }
+  // near a waiting guest but wrong/no item → show what they want
+  for(const g of guests){
+    if(g.state!=='waiting') continue;
+    const d=Math.hypot(g.mesh.position.x-p.x, g.mesh.position.z-p.z);
+    if(d<1.5) return {type:'wantinfo',ref:g};
+  }
+  return null;
+}
+function interact(){
+  if(S.mode!=='play'||S.paused)return;
+  AU.ensure();
+  const t=findTarget();
+  currentTarget=t;
+  if(!t) return;
+  if(t.type==='guest'){
+    deliver(t.ref);
+  }else if(t.type==='station'){
+    const st=t.ref;
+    if(st.id==='FIDDLE'){
+      S.music.meter=100;
+      if(!S.music.on){ S.music.on=true; AU.resetJigClock(); }
+      S.jigs++;
+      S.vibe=clamp(S.vibe+3,0,100);
+      AU.sfx('riff');
+      addFloat('🎻 RIPPIN\u2019 A JIG!', V3(7.6,2.6,3.4), {color:'#8fd0e8',size:36,scale:1.1});
+      for(let i=0;i<5;i++)
+        setTimeout(()=>addFloat(pick(['♪','♫','♩']), V3(7.6+rand(-0.8,0.8),2.2,3.4+rand(-0.6,0.6)),
+          {color:'#bfe6f5',size:40,scale:0.8,vy:1.6}),i*150);
+    }else{
+      S.carrying=st.id;
+      AU.sfx('pick');
+      setCarry(st.id);
+      addFloat(ITEMS[st.id].emoji, player.position.clone().add(V3(0,2.4,0)), {size:44,scale:0.9});
+    }
+  }
+}
+function setCarry(id){
+  if(!id){ playerCarrySprite.visible=false; return; }
+  // rebuild sprite with the right emoji
+  scene.remove(playerCarrySprite);
+  playerCarrySprite=textSprite(ITEMS[id].emoji,{size:64,scale:1.15});
+  scene.add(playerCarrySprite);
+}
+function deliver(g){
+  if(g.state!=='waiting'||!S.carrying||g.item!==S.carrying)return;
+  g.state='served'; g.bubble.visible=false;
+  g.path=routeOut(g.mesh.position.x,g.mesh.position.z);
+  if(g.spot>=0 && g.spot<SPOTS.length) spotUsed[g.spot]=false;
+  g.spot=-1; // freed early so the next guest can take the spot
+  S.fed++;
+  S.combo++; S.comboT=8;
+  const pat=clamp(g.patience/g.patienceMax,0,1);
+  let pts=Math.round((100 + pat*80) * (1+(S.level-1)*0.15) * (1+ (S.combo-1)*0.12));
+  let bonus='';
+  if(g.chaseAce){ const ace=400+S.level*100; pts+=ace; bonus=`  ♠ CHASE THE ACE +${ace}!`; 
+    toast('♠ CHASE THE ACE! Ya won the pot!! ♠', true); AU.sfx('cheer'); }
+  S.score+=pts;
+  S.vibe=clamp(S.vibe+8,0,100);
+  S.carrying=null; setCarry(null);
+  updateComboChip();
+  AU.sfx('ding');
+  addFloat(pick(THANKS), g.mesh.position.clone().add(V3(0,2.6,0)), {color:'#ffe9a0',size:34,scale:1});
+  addFloat('+'+pts+bonus, g.mesh.position.clone().add(V3(0,2.0,0)), {color:'#a0ffb8',size:30,scale:0.9});
+  document.getElementById('fed-n').textContent=S.fed;
+}
+function updateComboChip(){
+  const c=document.getElementById('combo-chip');
+  if(S.combo>=2){ c.textContent='x'+S.combo; c.classList.add('on'); }
+  else c.classList.remove('on');
+}
+
+// -------------------------------------------------------------- events
+function fireEvent(){
+  const pool=['outage','gull','keiths','storm','hockey','singalong'];
+  if(guests.some(g=>g.state==='waiting')) pool.push('ace','ace');
+  const ev=pick(pool);
+  switch(ev){
+    case 'outage':
+      S.outage=12;
+      lightsMain.forEach(l=>l.intensity=l.userData.base*0.12);
+      flashlight.intensity=1.6;
+      AU.sfx('thud');
+      toast('⚡ POWER\u2019S OUT! Thanks a LOT, NS Power. Flashlight\u2019s on — keep hostin\u2019!', true);
+      break;
+    case 'gull': {
+      S.gulls.push(makeGull());
+      AU.sfx('gull');
+      toast('🕊️ A SEAGULL got in! Guard yer grub!', true);
+      break;
+    }
+    case 'keiths':
+      S.vibe=clamp(S.vibe+18,0,100);
+      AU.sfx('cheer');
+      toast('🍺 Buddy just showed up with a two-four of Keith\u2019s! Vibe +18!', true);
+      break;
+    case 'storm':
+      S.storm=18;
+      snowPts.visible=true;
+      toast('🌨️ She\u2019s blowin\u2019 a GALE — everyone in the county\u2019s comin\u2019 in!', true);
+      break;
+    case 'hockey':
+      S.patiencePause=6;
+      tvScreen.material.color.set(0x9fd8ff);
+      AU.sfx('cheer');
+      toast('🏒 HE SHOOTS, HE SCOOOORES! Everyone\u2019s glued to the TV — patience paused!', true);
+      setTimeout(()=>tvScreen.material.color.set(0x16242c),6000);
+      break;
+    case 'singalong':
+      S.singalong=8; S.patiencePause=Math.max(S.patiencePause,4);
+      S.vibe=clamp(S.vibe+10,0,100);
+      guests.forEach(g=>{ if(g.state==='waiting'){ g.patience=Math.min(g.patienceMax,g.patience+g.patienceMax*0.3); drawBubble(g);} });
+      AU.sfx('cheer');
+      toast('🎶 SOMEONE STARTED BARRETT\u2019S PRIVATEERS — full singalong! Everyone\u2019s thrilled!', true);
+      break;
+    case 'ace': {
+      const w=guests.filter(g=>g.state==='waiting'&&!g.chaseAce);
+      if(!w.length){ // nobody eligible? Keith's it is
+        S.vibe=clamp(S.vibe+18,0,100); AU.sfx('cheer');
+        toast('🍺 Buddy just showed up with a two-four of Keith\u2019s! Vibe +18!', true);
+        return;
+      }
+      const g=pick(w);
+      g.chaseAce=true; g.aceT=12; drawBubble(g);
+      toast(`♠ CHASE THE ACE! Serve ${g.name} quick for the jackpot!`, true);
+      break;
+    }
+  }
+}
+function makeGull(){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,10),
+    new THREE.MeshLambertMaterial({color:0xf2f2ee}));
+  body.scale.set(1,0.8,1.4);
+  const wingGeo=new THREE.BoxGeometry(0.9,0.05,0.3);
+  const wingMat=new THREE.MeshLambertMaterial({color:0xe0e0da});
+  const wl=new THREE.Mesh(wingGeo,wingMat); wl.position.x=-0.55;
+  const wr=new THREE.Mesh(wingGeo,wingMat); wr.position.x=0.55;
+  const beak=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.25,8),
+    new THREE.MeshLambertMaterial({color:0xf2b33d}));
+  beak.rotation.x=Math.PI/2; beak.position.set(0,0.05,0.45);
+  g.add(body,wl,wr,beak);
+  g.userData={t:0, wl, wr, stole:false};
+  g.position.set(rand(-9,9),5.5,9);
+  scene.add(g);
+  return g;
+}
+function updateGulls(dt){
+  for(let i=S.gulls.length-1;i>=0;i--){
+    const g=S.gulls[i]; g.userData.t+=dt;
+    const t=g.userData.t;
+    g.userData.wl.rotation.z= Math.sin(t*18)*0.7;
+    g.userData.wr.rotation.z=-Math.sin(t*18)*0.7;
+    if(!g.userData.stole){
+      // dive at the player
+      const target=player.position.clone().add(V3(0,1.6,0));
+      const d=V3().subVectors(target,g.position);
+      const dist=d.length();
+      d.normalize().multiplyScalar(6.5*dt);
+      g.position.add(d);
+      g.rotation.y=Math.atan2(d.x,d.z);
+      if(dist<0.9){
+        g.userData.stole=true;
+        if(S.carrying){
+          addFloat('🕊️ '+ITEMS[S.carrying].emoji+' GONE!', player.position.clone().add(V3(0,2.6,0)),
+            {color:'#ffb0a0',size:36,scale:1});
+          toast(`That gull just made off with ${ITEMS[S.carrying].name}. Absolute menace.`);
+          S.carrying=null; setCarry(null);
+        }else{
+          addFloat('🕊️ MISSED, B\u2019Y!', player.position.clone().add(V3(0,2.6,0)),
+            {color:'#a0ffb8',size:36,scale:1});
+        }
+        AU.sfx('gull');
+      }
+    }else{
+      g.position.y+=4*dt; g.position.z+=5*dt;
+      if(g.position.y>10){ scene.remove(g); S.gulls.splice(i,1); }
+    }
+  }
+}
+
+// ----------------------------------------------------------- HUD refs
+const vibeFill=document.getElementById('vibe-fill');
+const vibeBuoy=document.getElementById('vibe-buoy');
+const vibeWarn=document.getElementById('vibe-warn');
+const tunesFill=document.getElementById('tunes-fill');
+const scoreLine=document.getElementById('score-line');
+const levelChip=document.getElementById('level-chip');
+const hintEl=document.getElementById('hint');
+const hintText=document.getElementById('hint-text');
+const hintKey=document.getElementById('hint-key');
+if('ontouchstart' in window) hintKey.textContent='🤙';
+
+function refreshHUD(){
+  vibeFill.style.width=S.vibe+'%';
+  vibeBuoy.style.left=S.vibe+'%';
+  vibeWarn.classList.toggle('danger', S.vibe<25);
+  tunesFill.style.width=S.music.meter+'%';
+  tunesFill.style.background= S.music.on
+    ? 'linear-gradient(90deg,#5c88c5,#8fd0e8)' : '#5a4436';
+  scoreLine.firstChild.textContent=S.score.toLocaleString();
+  document.getElementById('sorry-n').textContent=S.sorries;
+}
+
+// ----------------------------------------------------------- game flow
+function startGame(){
+  clearInput();S.paused=false;document.getElementById('pause-overlay').classList.add('hidden');
+  AU.ensure();
+  if(AU.ctx && AU.ctx.state==='suspended') AU.ctx.resume();
+  // reset
+  guests.slice().forEach(removeGuest);
+  spotUsed.fill(false);
+  floats.slice().forEach(f=>{ scene.remove(f); });
+  floats.length=0;
+  S.gulls.forEach(g=>scene.remove(g)); S.gulls.length=0;
+  Object.assign(S,{mode:'play',vibe:70,score:0,combo:0,comboT:0,level:1,elapsed:0,
+    fed:0,jigs:0,sorries:0,carrying:null,
+    spawnT:2.5,eventT:34,ambientT:14,patiencePause:0,outage:0,storm:0,singalong:0,sorryCd:0});
+  S.music.on=true; S.music.meter=100;
+  setCarry(null);
+  lightsMain.forEach(l=>l.intensity=l.userData.base);
+  flashlight.intensity=0;
+  snowPts.visible=false;
+  player.position.set(0,0,3);
+  document.getElementById('fed-n').textContent='0';
+  updateComboChip();
+  levelChip.textContent='Level 1 · '+LEVEL_LINES[0];
+  document.getElementById('start-overlay').classList.add('hidden');
+  document.getElementById('over-overlay').classList.add('hidden');
+  document.getElementById('hud').classList.add('on');
+  if('ontouchstart' in window) document.getElementById('mobile').classList.add('on');
+  AU.resetJigClock();
+  toast('Doors open! First guests comin\u2019 up the lane…', true);
+}
+
+function gameOver(){
+  S.mode='over';
+  document.getElementById('hud').classList.remove('on');
+  document.getElementById('mobile').classList.remove('on');
+  hintEl.classList.remove('on');
+  AU.sfx('fail');
+  const r=RANKS.find(r=>S.score<r[0]);
+  document.getElementById('rank').textContent=r[1];
+  document.getElementById('rank-line').textContent='\u201C'+r[2]+'\u201D';
+  document.getElementById('final-score').textContent=S.score.toLocaleString();
+  const newBest=S.score>S.best;
+  if(newBest) S.best=S.score;
+  document.getElementById('best-line').textContent= newBest
+    ? '🏆 NEW BEST TONIGHT!' : 'Best tonight: '+S.best.toLocaleString();
+  document.getElementById('st-fed').textContent=S.fed;
+  document.getElementById('st-jigs').textContent=S.jigs;
+  document.getElementById('st-sorry').textContent=S.sorries;
+  document.getElementById('st-level').textContent=S.level;
+  const m=Math.floor(S.elapsed/60), s=Math.floor(S.elapsed%60);
+  document.getElementById('st-time').textContent=m+':'+String(s).padStart(2,'0');
+  document.getElementById('over-overlay').classList.remove('hidden');
+}
+
+document.getElementById('btn-start').addEventListener('click',startGame);
+document.getElementById('btn-again').addEventListener('click',startGame);
+document.getElementById('btn-sound').addEventListener('click',e=>{
+  AU.ensure();
+  AU.setMuted(!AU.muted);
+  e.target.textContent=AU.muted?'🔇':'🔊';
+});
+
+// ------------------------------------------------------------- update
+function movePlayer(dt){
+  let dx=0,dz=0;
+  if(keys['KeyW']||keys['ArrowUp']) dz-=1;
+  if(keys['KeyS']||keys['ArrowDown']) dz+=1;
+  if(keys['KeyA']||keys['ArrowLeft']) dx-=1;
+  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
+  dx+=stick.dx; dz+=stick.dy;
+  const len=Math.hypot(dx,dz);
+  if(len>0.01){
+    dx/=Math.max(1,len); dz/=Math.max(1,len);
+    const sp=5.4;
+    player.position.x+=dx*sp*dt;
+    player.position.z+=dz*sp*dt;
+    player.rotation.y=Math.atan2(dx,dz);
+    animWalk(player,dt,true);
+  }else animWalk(player,dt,false);
+  // room clamp
+  player.position.x=clamp(player.position.x,-9.4,9.4);
+  player.position.z=clamp(player.position.z,-6.5,6.6);
+  // furniture collision (circle vs AABB push-out)
+  const r=0.45;
+  for(const c of colliders){
+    const nx=clamp(player.position.x,c.minX,c.maxX);
+    const nz=clamp(player.position.z,c.minZ,c.maxZ);
+    const ddx=player.position.x-nx, ddz=player.position.z-nz;
+    const d2=ddx*ddx+ddz*ddz;
+    if(d2<r*r){
+      if(d2>1e-6){
+        const d=Math.sqrt(d2);
+        player.position.x=nx+ddx/d*r;
+        player.position.z=nz+ddz/d*r;
+      }else{
+        player.position.z=c.maxZ+r; // degenerate: shove forward
+      }
+    }
+  }
+  // Canadian collision protocol
+  if(S.sorryCd>0) S.sorryCd-=dt;
+  else for(const g of guests){
+    if(g.state!=='waiting') continue;
+    const d=Math.hypot(g.mesh.position.x-player.position.x, g.mesh.position.z-player.position.z);
+    if(d<0.85){
+      S.sorries++; S.score+=2; S.sorryCd=1.6;
+      AU.sfx('sorry');
+      addFloat(pick(SORRIES), player.position.clone().add(V3(rand(-0.3,0.3),2.3,0)),
+        {color:'#cfe4ee',size:28,scale:0.85});
+      break;
+    }
+  }
+}
+
+function update(dt){
+  S.elapsed+=dt;
+
+  // levels
+  const lvl=1+Math.floor(S.elapsed/25);
+  if(lvl!==S.level){
+    S.level=lvl;
+    AU.sfx('level');
+    const line=LEVEL_LINES[Math.min(lvl-1,LEVEL_LINES.length-1)];
+    levelChip.textContent='Level '+lvl+' · '+line;
+    toast('📈 LEVEL '+lvl+' — '+line+'!', true);
+  }
+
+  movePlayer(dt);
+
+  // carry sprite hovers over the host
+  if(S.carrying){
+    playerCarrySprite.visible=true;
+    playerCarrySprite.position.set(player.position.x, 2.85+Math.sin(S.elapsed*4)*0.08, player.position.z);
+  }else playerCarrySprite.visible=false;
+
+  // flashlight tracks the host during outages
+  if(S.outage>0){
+    S.outage-=dt;
+    flashlight.position.set(player.position.x,3.6,player.position.z+0.5);
+    flashlight.target.position.set(
+      player.position.x+Math.sin(player.rotation.y)*2.5, 0.4,
+      player.position.z+Math.cos(player.rotation.y)*2.5);
+    if(S.outage<=0){
+      lightsMain.forEach(l=>l.intensity=l.userData.base);
+      flashlight.intensity=0;
+      AU.sfx('cheer');
+      toast('💡 Power\u2019s back! Cheers erupt like a Crosby goal.');
+    }
+  }
+  if(S.storm>0){ S.storm-=dt; if(S.storm<=0) snowPts.visible=false; }
+  if(S.patiencePause>0) S.patiencePause-=dt;
+  if(S.singalong>0) S.singalong-=dt;
+  if(S.comboT>0){ S.comboT-=dt; if(S.comboT<=0){ S.combo=0; updateComboChip(); } }
+
+  // music meter
+  if(S.music.on){
+    S.music.meter-=dt*(2.0+S.level*0.25);
+    if(S.music.meter<=0){
+      S.music.meter=0; S.music.on=false;
+      toast('🎻 The fiddler\u2019s takin\u2019 a break — GRAB THE FIDDLE or the vibe dies!', true);
+    }
+  }
+  fiddleGlow.material.opacity= S.music.on?0.25:(0.45+Math.sin(S.elapsed*6)*0.25);
+  fiddleGlow.scale.setScalar(S.music.on?1:(1.1+Math.sin(S.elapsed*6)*0.1));
+
+  // vibe drain
+  let drain=1.05+S.level*0.07;
+  if(!S.music.on) drain+=1.6;
+  if(S.singalong>0) drain=0;
+  S.vibe-=drain*dt;
+  S.vibe=clamp(S.vibe,0,100);
+  if(S.vibe<=0){ gameOver(); return; }
+
+  // spawns
+  S.spawnT-=dt*(S.storm>0?2:1);
+  if(S.spawnT<=0){
+    spawnGuest();
+    S.spawnT=Math.max(2.1, 6.2-S.level*0.45)*rand(0.8,1.2);
+  }
+  updateGuests(dt);
+  updateGulls(dt);
+
+  // events + ambient colour
+  S.eventT-=dt;
+  if(S.eventT<=0){ fireEvent(); S.eventT=rand(24,40); }
+  S.ambientT-=dt;
+  if(S.ambientT<=0){ toast(pick(AMBIENT)); S.ambientT=rand(16,26); }
+
+  // interact target + hint
+  currentTarget=findTarget();
+  if(currentTarget){
+    hintEl.classList.add('on');
+    if(currentTarget.type==='guest'){
+      hintKey.style.display='';
+      hintText.textContent='Hand '+currentTarget.ref.name+' '+ITEMS[currentTarget.ref.item].name;
+    }else if(currentTarget.type==='station'){
+      const st=currentTarget.ref;
+      hintKey.style.display='';
+      if(st.id!=='FIDDLE' && S.carrying===st.id) hintText.textContent='(Already holdin\u2019 that, b\u2019y)';
+      else hintText.textContent=st.label;
+    }else{ // wantinfo — just tell 'em what buddy's after
+      const g=currentTarget.ref;
+      hintKey.style.display='none';
+      hintText.textContent=g.name+' is waitin\u2019 on '+ITEMS[g.item].name+'\u2026';
+    }
+  }else hintEl.classList.remove('on');
+  stations.forEach(st=>{
+    const active=currentTarget&&currentTarget.type==='station'&&currentTarget.ref===st;
+    st.ring.material.opacity=active?0.85:0.3;
+  });
+
+  // floats
+  for(let i=floats.length-1;i>=0;i--){
+    const f=floats[i]; f.userData.t+=dt;
+    f.position.y+=f.userData.vy*dt;
+    if(f.userData.t>f.userData.life*0.5)
+      f.material.opacity=1-((f.userData.t-f.userData.life*0.5)/(f.userData.life*0.5));
+    if(f.userData.t>=f.userData.life){ scene.remove(f); floats.splice(i,1); }
+  }
+
+  // ambience anim
+  beamCone.rotation.y+=dt*0.8;
+  stoveLight.intensity=0.75+Math.sin(S.elapsed*9)*0.15+Math.random()*0.1;
+  if(snowPts.visible){
+    const pos=snowPts.geometry.attributes.position;
+    for(let i=0;i<pos.count;i++){
+      let y=pos.getY(i)-dt*2.2;
+      if(y<0) y=12;
+      pos.setY(i,y);
+      pos.setX(i,pos.getX(i)+Math.sin(S.elapsed*2+i)*dt*0.6);
+    }
+    pos.needsUpdate=true;
+  }
+
+  AU.scheduleJig();
+  refreshHUD();
+}
+
+// --------------------------------------------------------------- loop
+function animate(){
+  requestAnimationFrame(animate);
+  const now=performance.now();
+  let dt=(now-clockPrev)/1000; clockPrev=now;
+  dt=Math.min(dt,0.05);
+  if(S.mode==='play'&&!S.paused&&!document.hidden) update(dt);
+  else{
+    // idle camera sway on menus
+    beamCone.rotation.y+=dt*0.8;
+    stoveLight.intensity=0.75+Math.sin(now*0.009)*0.15;
+  }
+  // camera follows the host
+  const look= S.mode==='play'? player.position : V3(0,0,0.5);
+  const tx=clamp(look.x*0.45,-3.5,3.5);
+  const tz=look.z*0.25;
+  camera.position.lerp(V3(tx, 12.5, 12.5+tz), 0.06);
+  camera.lookAt(tx*0.6, 0.6, tz*0.5);
+  renderer.render(scene,camera);
+}
+
+function clearInput(){
+  Object.keys(keys).forEach(k=>delete keys[k]);
+  stick.active=false;stick.id=null;stick.dx=stick.dy=0;
+  stickBase.style.display=stickNub.style.display='none';
+}
+function setPaused(paused){
+  if(S.mode!=='play')return;
+  S.paused=paused;clearInput();clockPrev=performance.now();
+  document.getElementById('pause-overlay').classList.toggle('hidden',!paused);
+  if(paused)document.getElementById('btn-resume').focus();
+  if(AU.ctx){if(paused)AU.ctx.suspend().catch(()=>{});else{AU.ctx.resume().catch(()=>{});AU.resetJigClock();}}
+}
+document.getElementById('btn-pause').addEventListener('click',()=>setPaused(true));
+document.getElementById('btn-resume').addEventListener('click',()=>setPaused(false));
+addEventListener('blur',()=>{clearInput();setPaused(true)});
+document.addEventListener('visibilitychange',()=>{clockPrev=performance.now();if(document.hidden)setPaused(true)});
+
+// --------------------------------------------------------------- boot
+try{
+  initThree();
+  animate();
+}catch(err){
+  S.mode='unavailable';
+  document.body.innerHTML='<div style="display:flex;height:100vh;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:sans-serif;color:#f6e7c8"><div><h2>Well, that\u2019s some foolishness.</h2><p>This game needs WebGL, which is unavailable in this browser session. Try a browser with graphics acceleration enabled, or choose a 2D game from the arcade.</p><p><a href="https://funapps.ca/" style="color:#ffdf9e">Back to FunApps</a></p></div></div>';
+  console.error(err);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maritime Merchant: The Cabot Trail</title>
+    <style>
+        :root {
+            --bg-color: #0b192c;
+            --panel-bg: #1a365d;
+            --text-main: #e2e8f0;
+            --accent: #4fd1c5;
+            --danger: #fc8181;
+            --success: #68d391;
+            --gold: #ecc94b;
+        }
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #a0aec0;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .panel {
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a4365;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .panel h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            font-size: 1.2rem;
+            color: var(--gold);
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .market-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .trade-controls button {
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .trade-controls button:hover { background: #3182ce; }
+        .trade-controls button:disabled { background: #4a5568; cursor: not-allowed; }
+        
+        .travel-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.2s;
+        }
+        .travel-btn:hover { background: #319795; }
+        .travel-btn.active { background: #234e52; border: 2px solid var(--gold); }
+        
+        .event-log {
+            height: 200px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+        .log-entry { margin-bottom: 5px; }
+        .log-good { color: var(--success); }
+        .log-bad { color: var(--danger); }
+        
+        .upgrade-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .upgrade-btn:disabled { background: #718096; cursor: not-allowed; }
+
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+        * { box-sizing: border-box; }
+        button { min-height: 44px; touch-action: manipulation; }
+        button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+        .panel { min-width: 0; }
+        .trade-controls { display: flex; gap: 5px; }
+        .subtitle { text-align: center; }
+        @media (max-width: 420px) { body { padding: 12px; } .panel { padding: 12px; } }
+        .save-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 12px 0; }
+        .save-controls button { min-height: 44px; padding: 10px 16px; border: 1px solid #b8e1dc; border-radius: 5px; background: #214e57; color: white; cursor: pointer; }
+        .save-help { max-width: 38rem; text-align: center; font-size: 14px; }
+        #save-dialog { width: min(550px, calc(100vw - 24px)); max-height: 85vh; overflow: auto; color: #eef8f9; background: #143640; border: 2px solid #b8e1dc; border-radius: 10px; }
+        #save-dialog::backdrop { background: #000a; }
+        #save-code { width: 100%; box-sizing: border-box; padding: 12px; font: 14px monospace; background: #fff; color: #102c33; }
+    </style>
+<meta name="description" content="Trade between ports and put your earnings into a better vessel. Make your way through a Maritime merchant’s life.">
+<link rel="canonical" href="https://merchant.funapps.ca/">
+<meta name="funapps-game-id" content="maritime-merchant">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+
+    <h1>Maritime Merchant</h1>
+    <div class="subtitle">Buy low, sail to another port, sell high. Build up to the Bluenose replica.</div>
+
+    <div class="dashboard">
+        <!-- PLAYER STATS & INVENTORY -->
+        <div class="panel">
+            <h2>Captain's Log</h2>
+            <div class="stat-row">
+                <span>Toonies (Cash):</span>
+                <span id="cash" style="color: var(--success); font-weight: bold;">$100</span>
+            </div>
+            <div class="stat-row">
+                <span>Vessel:</span>
+                <span id="vessel-name" style="color: var(--accent);">Patchwork Canoe</span>
+            </div>
+            <div class="stat-row">
+                <span>Cargo Space:</span>
+                <span id="cargo-space">0 / 10</span>
+            </div>
+            
+            <h2 style="margin-top: 20px;">Inventory</h2>
+            <div id="inventory-list">
+                <!-- Inventory populated by JS -->
+            </div>
+
+            <button onclick="restartGame()" class="travel-btn">Start a New Voyage</button>
+            <button id="upgrade-btn" class="upgrade-btn" onclick="upgradeVessel()">Upgrade Vessel ($500)</button>
+        </div>
+
+        <!-- THE MARKET -->
+        <div class="panel">
+            <h2>Market: <span id="current-location-name" style="color: white;">Halifax</span></h2>
+            <p style="font-size: 0.8rem; color: #a0aec0; margin-top: -10px;">Prices fluctuate every time you travel.</p>
+            <div id="market-list">
+                <!-- Market items populated by JS -->
+            </div>
+        </div>
+
+        <!-- NAVIGATION & EVENTS -->
+        <div class="panel">
+            <h2>Navigation</h2>
+            <div id="locations-list">
+                <!-- Locations populated by JS -->
+            </div>
+            
+            <h2 style="margin-top: 20px;">Scanner & Radio</h2>
+            <div class="event-log" id="event-log" role="log" aria-live="polite">
+                <div class="log-entry">Welcome to the Maritimes. Try not to sink.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-controls"><button onclick="openSave('export')">Export save</button><button onclick="openSave('import')">Import save</button></div>
+    <p class="save-help">Move to a new device or address: export here, then import there.</p>
+    <dialog id="save-dialog" aria-labelledby="save-title">
+      <h2 id="save-title">Save code</h2>
+      <p id="save-instructions"></p>
+      <textarea id="save-code" aria-label="Save code" rows="7" spellcheck="false"></textarea>
+      <p id="save-feedback" role="status"></p>
+      <div class="save-controls"><button id="save-action" onclick="saveAction()">Copy save</button><button onclick="document.getElementById('save-dialog').close()">Close</button></div>
+    </dialog>
+
+    <script>
+        // --- GAME DATA ---
+        const VESSELS = [
+            { name: "Patchwork Canoe", capacity: 10 },
+            { name: "Expedition Touring Kayak", capacity: 35, cost: 600 },
+            { name: "Cape Islander Fishing Boat", capacity: 150, cost: 3500 },
+            { name: "Bluenose Replica", capacity: 500, cost: 15000 }
+        ];
+
+        const LOCATIONS = ["Halifax Harbour", "Dartmouth Cove", "Peggy's Cove", "Sydney (Cape Breton)"];
+        
+        const ITEMS = [
+            { id: "lobster", name: "Live Lobster", basePrice: 20, volatility: 0.5 },
+            { id: "donair", name: "Halifax Donair", basePrice: 8, volatility: 0.3 },
+            { id: "chips", name: "Storm Chips", basePrice: 4, volatility: 0.8 },
+            { id: "rum", name: "Overproof Rum", basePrice: 35, volatility: 0.4 }
+        ];
+
+        // --- GAME STATE ---
+        let state = {
+            cash: 100,
+            vesselLevel: 0,
+            locationIndex: 0,
+            inventory: { lobster: 0, donair: 0, chips: 0, rum: 0 },
+            marketPrices: {}
+        };
+
+        // --- CORE LOGIC ---
+        function validSave(data) {
+            if (!data || !Number.isFinite(data.cash) || data.cash < 0 ||
+                !Number.isInteger(data.vesselLevel) || !VESSELS[data.vesselLevel] ||
+                !Number.isInteger(data.locationIndex) || !LOCATIONS[data.locationIndex] ||
+                !data.inventory || !ITEMS.every(item => Number.isInteger(data.inventory[item.id]) && data.inventory[item.id] >= 0)) return false;
+            return ITEMS.reduce((sum, item) => sum + data.inventory[item.id], 0) <= VESSELS[data.vesselLevel].capacity;
+        }
+        function initGame() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('maritimeMerchantSave'));
+                if (validSave(saved)) {
+                    state.cash = saved.cash; state.vesselLevel = saved.vesselLevel;
+                    state.locationIndex = saved.locationIndex;
+                    ITEMS.forEach(item => state.inventory[item.id] = saved.inventory[item.id]);
+                    if (saved.marketPrices && ITEMS.every(item => Number.isInteger(saved.marketPrices[item.id]) && saved.marketPrices[item.id] > 0))
+                        state.marketPrices = saved.marketPrices;
+                }
+            } catch (_) {}
+            // Keep the market you left. Refreshing is not a free voyage.
+            if (!ITEMS.every(item => state.marketPrices[item.id] > 0)) generateMarketPrices();
+            updateUI(); saveGame();
+        }
+
+        function saveGame() {
+            try { localStorage.setItem('maritimeMerchantSave', JSON.stringify(state)); } catch (_) {}
+        }
+        function restartGame() {
+            if (!confirm('Start a new voyage? This clears your cash, cargo and vessel progress.')) return;
+            state = {cash:100, vesselLevel:0, locationIndex:0, inventory:{lobster:0,donair:0,chips:0,rum:0}, marketPrices:{}};
+            generateMarketPrices(); updateUI(); saveGame();
+            logEvent('A new voyage begins in Halifax Harbour.', 'good');
+        }
+
+        function logEvent(msg, type = 'normal') {
+            const log = document.getElementById('event-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type === 'good' ? 'log-good' : type === 'bad' ? 'log-bad' : ''}`;
+            entry.innerText = `> ${msg}`;
+            log.prepend(entry);
+            while (log.children.length > 100) log.lastElementChild.remove();
+        }
+
+        function getCargoCount() {
+            return Object.values(state.inventory).reduce((a, b) => a + b, 0);
+        }
+
+        function getCapacity() {
+            return VESSELS[state.vesselLevel].capacity;
+        }
+
+        function generateMarketPrices() {
+            ITEMS.forEach(item => {
+                // Randomize price based on volatility
+                const variance = 1 + ((Math.random() * item.volatility * 2) - item.volatility);
+                let price = Math.round(item.basePrice * variance);
+                
+                // Regional modifiers
+                if (state.locationIndex === 0 && item.id === "donair") price = Math.round(price * 0.7); // Cheaper in Hali
+                if (state.locationIndex === 3 && item.id === "lobster") price = Math.round(price * 0.6); // Cheaper in Cape Breton
+                if (state.locationIndex === 2 && item.id === "rum") price = Math.round(price * 1.5); // Tourist trap pricing
+
+                state.marketPrices[item.id] = Math.max(1, price);
+            });
+        }
+
+        function buyItem(id) {
+            if (!ITEMS.some(item => item.id === id)) return;
+            const price = state.marketPrices[id];
+            if (state.cash >= price && getCargoCount() < getCapacity()) {
+                state.cash -= price;
+                state.inventory[id]++;
+                updateUI(); saveGame();
+            }
+        }
+
+        function sellItem(id) {
+            if (state.inventory[id] > 0) {
+                const price = state.marketPrices[id];
+                state.cash += price;
+                state.inventory[id]--;
+                updateUI(); saveGame();
+            }
+        }
+
+        function travel(newLocationIndex) {
+            if (!Number.isInteger(newLocationIndex) || !LOCATIONS[newLocationIndex] || newLocationIndex === state.locationIndex) return;
+
+            const oldLoc = LOCATIONS[state.locationIndex];
+            state.locationIndex = newLocationIndex;
+            const newLoc = LOCATIONS[newLocationIndex];
+
+            // Random Events during travel
+            const eventRoll = Math.random();
+            if (eventRoll < 0.15) {
+                logEvent(`Thick fog rolled in on the Northwest Arm. Lost some time.`, 'bad');
+            } else if (eventRoll < 0.3) {
+                const lostCash = Math.floor(Math.random() * 20) + 10;
+                if (state.cash >= lostCash) {
+                    state.cash -= lostCash;
+                    logEvent(`Hit a massive pothole in Bedford. Cost $${lostCash} in repairs.`, 'bad');
+                }
+            } else if (eventRoll > 0.85) {
+                const foundCash = Math.floor(Math.random() * 50) + 20;
+                state.cash += foundCash;
+                logEvent(`Found an uncashed EI cheque floating in the water! +$${foundCash}`, 'good');
+            } else {
+                logEvent(`Navigated safely from ${oldLoc} to ${newLoc}.`);
+            }
+
+            generateMarketPrices();
+            updateUI();
+            saveGame();
+        }
+
+        function upgradeVessel() {
+            const nextVessel = VESSELS[state.vesselLevel + 1];
+            if (nextVessel && state.cash >= nextVessel.cost) {
+                state.cash -= nextVessel.cost;
+                state.vesselLevel++;
+                logEvent(`Upgraded to ${nextVessel.name}! Cargo space increased.`, 'good');
+                updateUI();
+                saveGame();
+            }
+        }
+
+        // --- UI UPDATES ---
+        function updateUI() {
+            const focusedId = document.activeElement?.id;
+            // Stats
+            document.getElementById('cash').innerText = `$${state.cash}`;
+            document.getElementById('vessel-name').innerText = VESSELS[state.vesselLevel].name;
+            document.getElementById('cargo-space').innerText = `${getCargoCount()} / ${getCapacity()}`;
+            document.getElementById('current-location-name').innerText = LOCATIONS[state.locationIndex];
+
+            // Upgrade Button
+            const upBtn = document.getElementById('upgrade-btn');
+            const nextVessel = VESSELS[state.vesselLevel + 1];
+            if (nextVessel) {
+                upBtn.innerText = `Upgrade to ${nextVessel.name} ($${nextVessel.cost})`;
+                upBtn.disabled = state.cash < nextVessel.cost;
+            } else {
+                upBtn.innerText = "Max Vessel Reached";
+                upBtn.disabled = true;
+            }
+
+            // Inventory & Market
+            const invContainer = document.getElementById('inventory-list');
+            const marketContainer = document.getElementById('market-list');
+            invContainer.innerHTML = '';
+            marketContainer.innerHTML = '';
+
+            ITEMS.forEach(item => {
+                // Inventory Render
+                const invRow = document.createElement('div');
+                invRow.className = 'stat-row';
+                invRow.innerHTML = `<span>${item.name}</span> <span>${state.inventory[item.id]}</span>`;
+                invContainer.appendChild(invRow);
+
+                // Market Render
+                const price = state.marketPrices[item.id];
+                const canBuy = state.cash >= price && getCargoCount() < getCapacity();
+                const canSell = state.inventory[item.id] > 0;
+
+                const mktRow = document.createElement('div');
+                mktRow.className = 'market-item';
+                mktRow.innerHTML = `
+                    <div style="flex:1;">
+                        <strong>${item.name}</strong><br>
+                        <span style="color: var(--gold);">$${price}</span>
+                    </div>
+                    <div class="trade-controls">
+                        <button id="sell-${item.id}" aria-label="Sell one ${item.name}" onclick="sellItem('${item.id}')" ${!canSell ? 'disabled' : ''}>SELL</button>
+                        <button id="buy-${item.id}" aria-label="Buy one ${item.name}" onclick="buyItem('${item.id}')" ${!canBuy ? 'disabled' : ''}>BUY</button>
+                    </div>
+                `;
+                marketContainer.appendChild(mktRow);
+            });
+
+            // Locations
+            const locContainer = document.getElementById('locations-list');
+            locContainer.innerHTML = '';
+            LOCATIONS.forEach((loc, index) => {
+                const btn = document.createElement('button');
+                btn.className = `travel-btn ${index === state.locationIndex ? 'active' : ''}`;
+                btn.innerText = index === state.locationIndex ? `Docked: ${loc}` : `Sail to ${loc}`;
+                btn.id = `travel-${index}`;
+                btn.disabled = index === state.locationIndex;
+                btn.onclick = () => travel(index);
+                locContainer.appendChild(btn);
+            });
+            if (focusedId) {
+                let control = document.getElementById(focusedId);
+                if (control?.disabled && /^(buy|sell)-/.test(focusedId)) {
+                    const alternate = focusedId.startsWith('buy-') ? focusedId.replace('buy-', 'sell-') : focusedId.replace('sell-', 'buy-');
+                    control = document.getElementById(alternate);
+                }
+                if (control && !control.disabled) control.focus();
+            }
+        }
+
+        let saveMode = 'export';
+        function openSave(mode) {
+            saveMode = mode;
+            const box = document.getElementById('save-code');
+            box.value = mode === 'export' ? JSON.stringify(portableSave()) : '';
+            box.readOnly = mode === 'export';
+            document.getElementById('save-title').textContent = mode === 'export' ? 'Export your save' : 'Import your save';
+            document.getElementById('save-instructions').textContent = mode === 'export' ? 'Copy this code into a note. On your other device or address, choose Import save and paste it.' : 'Paste a save code from this game. A valid import replaces your current progress.';
+            document.getElementById('save-feedback').textContent = '';
+            document.getElementById('save-action').textContent = mode === 'export' ? 'Copy save' : 'Load save';
+            document.getElementById('save-dialog').showModal(); box.focus(); box.select();
+        }
+        async function saveAction() {
+            const feedback = document.getElementById('save-feedback');
+            if (saveMode === 'export') {
+                const box = document.getElementById('save-code'); box.focus(); box.select();
+                try {
+                    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(box.value);
+                    else if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+                    feedback.textContent = 'Save copied. Keep it somewhere safe.';
+                } catch (_) { feedback.textContent = 'Use Copy or Ctrl/Cmd+C to copy the selected code.'; }
+                return;
+            }
+            try {
+                importSave(document.getElementById('save-code').value);
+                feedback.textContent = 'Save loaded successfully.';
+            } catch (_) { feedback.textContent = 'That is not a valid save for this game. Your current progress is unchanged.'; }
+        }
+
+        function portableSave() { return { game: 'maritime-merchant', version: 1, ...state }; }
+        function importSave(raw) {
+            const data = JSON.parse(raw);
+            if (!data || data.game !== 'maritime-merchant' || data.version !== 1 || !validSave(data) ||
+                !data.marketPrices || !ITEMS.every(item => Number.isInteger(data.marketPrices[item.id]) && data.marketPrices[item.id] > 0 && data.marketPrices[item.id] < 1e6)) throw new Error('Invalid save');
+            const next = { cash: data.cash, vesselLevel: data.vesselLevel, locationIndex: data.locationIndex, inventory: {}, marketPrices: {} };
+            ITEMS.forEach(item => { next.inventory[item.id] = data.inventory[item.id]; next.marketPrices[item.id] = data.marketPrices[item.id]; });
+            state = next; updateUI(); saveGame(); logEvent('Voyage restored from your save code.', 'good');
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

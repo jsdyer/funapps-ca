@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://merchant.funapps.ca/sitemap.xml

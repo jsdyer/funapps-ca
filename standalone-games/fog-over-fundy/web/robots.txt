@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fundy.funapps.ca/sitemap.xml

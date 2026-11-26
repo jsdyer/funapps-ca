@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Double Empire — A Thoroughly Canadian Clicker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:ital,wght@0,400;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --snow:#F4EFE4;
+  --paper:#FFFDF6;
+  --spruce:#1F3D2B;
+  --spruce-deep:#12271B;
+  --maple:#C8102E;
+  --maple-dark:#8F0A20;
+  --brew:#5F4128;
+  --cream:#EBDCC3;
+  --gold:#D9A441;
+  --ice:#DCE9EE;
+  --ink:#241F19;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:var(--snow);
+  color:var(--ink);
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(255,255,255,.7) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 22%, rgba(255,255,255,.6) 0 2px, transparent 3px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,.5) 0 2px, transparent 3px);
+}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3,.slab{font-family:'Alfa Slab One',serif;font-weight:400;letter-spacing:.5px}
+
+/* ---------- Plaid header ---------- */
+header{
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 6px, transparent 6px 34px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 6px, transparent 6px 34px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.10) 14px 20px, transparent 20px 34px),
+    var(--maple);
+  color:#fff;
+  padding:18px 16px 14px;
+  text-align:center;
+  border-bottom:6px solid var(--spruce-deep);
+  position:relative;
+}
+header h1{font-size:clamp(1.5rem,4.5vw,2.6rem);text-shadow:3px 3px 0 var(--maple-dark)}
+header .tagline{font-style:italic;opacity:.95;margin-top:4px;font-size:.95rem;text-shadow:1px 1px 0 rgba(0,0,0,.35)}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:18px 14px 90px;display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:18px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--paper);border:2px solid var(--spruce);border-radius:var(--radius);box-shadow:4px 4px 0 rgba(31,61,43,.25);padding:16px}
+.card h2{font-size:1.05rem;color:var(--spruce);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h2 .rule{flex:1;height:3px;background:repeating-linear-gradient(90deg,var(--maple) 0 10px,transparent 10px 16px);border-radius:2px}
+
+/* ---------- Stats ---------- */
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin-bottom:12px}
+.stat{text-align:center}
+.stat .num{font-family:'Alfa Slab One',serif;font-size:1.55rem;color:var(--maple);line-height:1.1}
+.stat .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--brew)}
+
+/* ---------- The Cup ---------- */
+.cup-zone{position:relative;display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;user-select:none}
+#cup{
+  width:min(230px,60vw);height:auto;background:none;border:none;
+  filter:drop-shadow(0 10px 6px rgba(0,0,0,.22));
+  transition:transform .07s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#cup:active{transform:scale(.93) rotate(-2deg)}
+#cup svg{display:block;width:100%;height:auto}
+.steam{position:absolute;top:-4px;font-size:1.4rem;opacity:0;animation:steam 2.6s ease-in-out infinite}
+.steam:nth-child(2){animation-delay:.9s;left:46%}
+.steam:nth-child(3){animation-delay:1.7s;left:56%}
+@keyframes steam{0%{transform:translateY(8px);opacity:0}30%{opacity:.7}100%{transform:translateY(-26px) translateX(6px);opacity:0}}
+.click-hint{font-size:.8rem;color:var(--brew);font-weight:700;margin-top:6px;font-style:italic}
+
+.float-txt{position:absolute;font-family:'Alfa Slab One',serif;pointer-events:none;animation:floatUp 1s ease-out forwards;color:var(--spruce);font-size:1.05rem;z-index:5;text-shadow:1px 1px 0 #fff}
+.float-txt.red{color:var(--maple)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-58px)}}
+
+/* ---------- Politeness ---------- */
+.polite-wrap{margin-top:14px}
+.polite-bar{height:20px;background:var(--ice);border:2px solid var(--spruce);border-radius:12px;overflow:hidden;position:relative}
+.polite-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--maple));transition:width .15s}
+.polite-lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--spruce);margin-bottom:4px;display:flex;justify-content:space-between}
+#sorryBtn{
+  display:none;width:100%;margin-top:8px;padding:12px;border-radius:12px;border:3px solid var(--maple-dark);
+  background:var(--maple);color:#fff;font-family:'Alfa Slab One',serif;font-size:1.15rem;
+  animation:pulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.035)}}
+.spree-on{outline:4px dashed var(--gold);outline-offset:3px}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{flex:1;min-width:90px;padding:9px 6px;border-radius:10px;border:2px solid var(--spruce);background:var(--cream);font-weight:800;font-size:.85rem;color:var(--spruce)}
+.tab.active{background:var(--spruce);color:#fff}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ---------- Shop ---------- */
+.shop-item,.upg-item{display:flex;align-items:center;gap:12px;padding:10px;border:2px solid var(--spruce);border-radius:12px;margin-bottom:8px;background:#fff;transition:transform .1s}
+.shop-item .icon,.upg-item .icon{font-size:1.9rem;width:44px;text-align:center;flex-shrink:0}
+.shop-item .info,.upg-item .info{flex:1;min-width:0}
+.shop-item .name,.upg-item .name{font-weight:800;font-size:.95rem}
+.shop-item .flavor,.upg-item .flavor{font-size:.76rem;font-style:italic;color:#6b6157;line-height:1.25}
+.shop-item .meta{font-size:.74rem;color:var(--spruce);font-weight:700}
+.buy{padding:8px 12px;border-radius:10px;border:2px solid var(--spruce-deep);background:var(--spruce);color:#fff;font-weight:800;min-width:86px;flex-shrink:0;font-size:.85rem}
+.buy:disabled{background:#b9b3a7;border-color:#948e83;cursor:not-allowed}
+.count-badge{font-family:'Alfa Slab One',serif;color:var(--maple);font-size:1.2rem;min-width:34px;text-align:right}
+.buy:not(:disabled):hover{transform:translateY(-1px)}
+.upg-item.owned{opacity:.55;background:var(--ice)}
+.upg-item.owned .buy{display:none}
+
+/* ---------- Achievements ---------- */
+.ach{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;margin-bottom:6px;border:2px dashed #c9c2b4;background:#fff;font-size:.85rem}
+.ach.unlocked{border:2px solid var(--gold);background:#FFF8E8}
+.ach .icon{font-size:1.3rem}
+.ach .name{font-weight:800}
+.ach .desc{font-size:.76rem;color:#6b6157;font-style:italic}
+.ach.locked{filter:grayscale(1);opacity:.6}
+
+/* ---------- Events ---------- */
+#goose{position:fixed;bottom:12vh;left:-140px;font-size:4.2rem;z-index:60;cursor:pointer;user-select:none;transition:transform .1s;filter:drop-shadow(2px 4px 3px rgba(0,0,0,.3))}
+#goose:active{transform:scale(.85) rotate(-14deg)}
+#goose .hp{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:.8rem;font-family:'Alfa Slab One',serif;color:var(--maple);background:#fff;padding:1px 8px;border-radius:8px;border:2px solid var(--maple);white-space:nowrap}
+
+.modal-bg{position:fixed;inset:0;background:rgba(18,39,27,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--paper);border:3px solid var(--spruce);border-radius:16px;max-width:420px;width:100%;padding:22px;text-align:center;box-shadow:6px 6px 0 rgba(18,39,27,.4)}
+.modal h3{color:var(--maple);font-size:1.3rem;margin-bottom:8px}
+.modal p{font-size:.92rem;margin-bottom:14px;line-height:1.45}
+.modal .big-btn{padding:12px 22px;border-radius:12px;border:3px solid var(--maple-dark);background:var(--maple);color:#fff;font-family:'Alfa Slab One',serif;font-size:1.05rem}
+.modal .quiet-btn{margin-top:10px;background:none;border:none;text-decoration:underline;color:var(--spruce);font-weight:700;font-size:.85rem;display:inline-block}
+.modal textarea{width:100%;height:90px;border:2px solid var(--spruce);border-radius:10px;padding:8px;font-family:monospace;font-size:.75rem;margin-bottom:10px}
+#rimCup{font-size:5rem;background:none;border:none;transition:transform .1s}
+#rimCup:active{transform:scale(.9) rotate(8deg)}
+
+/* ---------- Snow squall ---------- */
+#squall{position:fixed;inset:0;pointer-events:none;z-index:50;display:none}
+#squall.on{display:block;background:rgba(220,233,238,.35)}
+.flake{position:absolute;top:-30px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,.15);animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(340deg)}}
+#shovelBar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:70;display:none;text-align:center}
+#shovelBar.on{display:block}
+#shovelBtn{font-size:1rem;padding:12px 18px;border-radius:14px;border:3px solid var(--spruce-deep);background:#fff;font-family:'Alfa Slab One',serif;color:var(--spruce);box-shadow:4px 4px 0 rgba(0,0,0,.3)}
+
+/* ---------- Toast + ticker ---------- */
+#toasts{position:fixed;top:14px;right:14px;z-index:200;display:flex;flex-direction:column;gap:8px;max-width:300px}
+.toast{background:var(--spruce);color:#fff;border:2px solid var(--gold);border-radius:12px;padding:10px 14px;font-size:.85rem;animation:toastIn .3s ease,toastOut .4s ease 4.6s forwards;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+.toast b{color:var(--gold)}
+@keyframes toastIn{from{transform:translateX(120%)}to{transform:translateX(0)}}
+@keyframes toastOut{to{transform:translateX(130%);opacity:0}}
+
+#ticker{position:fixed;bottom:0;left:0;right:0;background:var(--spruce-deep);color:var(--cream);font-size:.82rem;padding:9px 0;z-index:80;overflow:hidden;border-top:3px solid var(--maple);white-space:nowrap}
+#tickerTxt{display:inline-block;padding-left:100vw;animation:tick 28s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+#ticker b{color:var(--gold)}
+
+.save-row{display:flex;gap:8px;margin-top:12px}
+.save-row button{flex:1;padding:8px;border-radius:10px;border:2px solid var(--spruce);background:var(--cream);font-weight:800;font-size:.8rem;color:var(--spruce)}
+footer{text-align:center;font-size:.75rem;color:#7d7466;padding:10px 0 60px;font-style:italic}
+
+@media (prefers-reduced-motion:reduce){
+  .steam,.flake,#tickerTxt,#sorryBtn{animation:none!important}
+}
+button, [role="button"] { touch-action: manipulation; }
+.modal { max-height: 85vh; overflow-y: auto; }
+.save-row { flex-wrap: wrap; }
+.wrap > *, .shop { min-width: 0; }
+@media (max-width: 400px) { .tab { min-width: 0; } .shop-item, .upg-item { gap: 6px; } .buy { min-width: 70px; padding: 8px; } .shop-item .icon, .upg-item .icon { width: 30px; font-size: 1.5rem; } }
+button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #d03d2b; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+</style>
+<meta name="description" content="Start with coffee and think bigger. Build income, buy upgrades, and collect achievements as your double-double business grows.">
+<link rel="canonical" href="https://double-double.funapps.ca/">
+<meta name="funapps-game-id" content="double-double-empire">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64">
+<link rel="icon" href="favicon.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+</head>
+<body>
+
+<header>
+  <h1>🍁 DOUBLE-DOUBLE EMPIRE 🍁</h1>
+  <div class="tagline">A thoroughly Canadian clicker. Sorry in advance. And after.</div>
+</header>
+
+<div class="wrap">
+
+  <!-- LEFT: clicker -->
+  <div>
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><div class="num" id="stLoonies">0</div><div class="lbl">Loonies</div></div>
+        <div class="stat"><div class="num" id="stLps">0</div><div class="lbl">per second</div></div>
+        <div class="stat"><div class="num" id="stLpc">1</div><div class="lbl">per sip</div></div>
+      </div>
+
+      <div class="cup-zone">
+        <span class="steam" style="left:40%">〰️</span>
+        <span class="steam">〰️</span>
+        <span class="steam">〰️</span>
+        <button id="cup" aria-label="Take a sip of the double-double to earn loonies">
+          <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M30 60 L170 60 L156 220 Q155 232 140 232 L60 232 Q45 232 44 220 Z" fill="#C8102E" stroke="#8F0A20" stroke-width="5"/>
+            <rect x="20" y="38" width="160" height="26" rx="10" fill="#FFFDF6" stroke="#8F0A20" stroke-width="5"/>
+            <path d="M38 120 L162 120 L156 176 L44 176 Z" fill="#FFFDF6" stroke="#8F0A20" stroke-width="4"/>
+            <path d="M100 130 c-9 -12 -28 -6 -28 8 c0 12 16 20 28 30 c12 -10 28 -18 28 -30 c0 -14 -19 -20 -28 -8 z" fill="#C8102E"/>
+            <text x="100" y="205" text-anchor="middle" font-family="Alfa Slab One,serif" font-size="17" fill="#FFFDF6">DBL-DBL</text>
+          </svg>
+        </button>
+        <div class="click-hint" id="hint">Tap the cup. Two creams, two sugars, infinite ambition.</div>
+      </div>
+
+      <div class="polite-wrap">
+        <div class="polite-lbl"><span>Politeness Meter</span><span id="politePct">0%</span></div>
+        <div class="polite-bar"><div class="polite-fill" id="politeFill"></div></div>
+        <button id="sorryBtn">SAY SORRY (×7 everything, 20s)</button>
+      </div>
+
+      <div class="save-row">
+        <button id="exportBtn">💾 Export save</button>
+        <button id="importBtn">📥 Import save</button>
+        <button id="resetBtn">Start over</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>🧾 Lifetime Ledger <span class="rule"></span></h2>
+      <div style="font-size:.85rem;line-height:1.9" id="ledger"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: tabs -->
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-panel="shop">🏒 The Rink Shop</button>
+      <button class="tab" data-panel="upg">🔧 Upgrades</button>
+      <button class="tab" data-panel="ach">🏅 Achievements</button>
+    </div>
+    <div class="panel active" id="panel-shop"></div>
+    <div class="panel" id="panel-upg"></div>
+    <div class="panel" id="panel-ach"></div>
+  </div>
+</div>
+
+<footer><span id="save-status">Progress saves on this browser.</span> Export a save code to move devices or domains.<br>Made with maple. No geese were reasoned with during development.</footer>
+
+<!-- Goose event -->
+<div id="goose" style="display:none" tabindex="0" role="button" aria-label="Shoo the goose">🪿<span class="hp" id="gooseHp">5 pecks left</span></div>
+
+<!-- Snow squall -->
+<div id="squall"></div>
+<div id="shovelBar">
+  <button id="shovelBtn">🧹 SHOVEL THE DRIVEWAY (<span id="shovelCt">12</span>)</button>
+  <div style="color:#fff;font-size:.75rem;margin-top:4px;text-shadow:1px 1px 2px #000">Snow squall! Income halved until you dig out. Classic.</div>
+</div>
+
+<!-- Roll up the rim modal -->
+<div class="modal-bg" id="rimModal" role="dialog" aria-modal="true" aria-label="Roll up the rim">
+  <div class="modal">
+    <h3>☕ ROLL UP THE RIM</h3>
+    <p>A mysterious cup appears. You know the drill. You've trained for this your whole life.</p>
+    <button id="rimCup">🥤</button>
+    <p id="rimResult" style="font-weight:800;min-height:24px"></p>
+    <button class="quiet-btn" id="rimClose" style="display:none">Recycle the cup responsibly</button>
+  </div>
+</div>
+
+<!-- Intro modal -->
+<div class="modal-bg show" id="introModal" role="dialog" aria-modal="true" aria-label="Welcome to Double-Double Empire">
+  <div class="modal">
+    <h3>Welcome, friend. 🍁</h3>
+    <p>Your mission: build a coast-to-coast empire of toques, poutine, and questionable rink decisions — one double-double at a time.<br><br>
+    Watch for <b>geese</b>. Shovel when it <b>squalls</b>. And when the meter fills… <b>say sorry</b>. It's the most powerful force in the country.</p>
+    <button class="big-btn" id="startBtn">LET'S GIVE'R</button>
+  </div>
+</div>
+
+<!-- Save modal -->
+<div class="modal-bg" id="saveModal" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
+  <div class="modal">
+    <h3 id="saveTitle">Save code</h3>
+    <p id="saveDesc" style="font-size:.8rem"></p>
+    <textarea id="saveText" aria-label="Save code"></textarea>
+    <div>
+      <button class="big-btn" id="saveAction">Copy</button>
+      <button class="quiet-btn" id="saveClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="ticker"><span id="tickerTxt"><b>MOOSE NEWS NETWORK:</b> Loading extremely important national updates…</span></div>
+
+<script>
+"use strict";
+/* =========================================================
+   DOUBLE-DOUBLE EMPIRE — single file, no dependencies.
+   ========================================================= */
+
+const BUILDINGS = [
+ {id:"toque",   icon:"🧢", name:"Toque Stand",            base:15,      lps:0.1,   flavor:"One size fits all heads and most hearts."},
+ {id:"runner",  icon:"☕", name:"Double-Double Runner",   base:100,     lps:1,     flavor:"Two creams. Two sugars. Zero questions."},
+ {id:"poutine", icon:"🍟", name:"Poutine Truck",          base:1100,    lps:8,     flavor:"The cheese must squeak. This is law."},
+ {id:"beaver",  icon:"🦫", name:"Beaver Lodge",           base:12000,   lps:47,    flavor:"Industrious. Unionized. Slightly damp."},
+ {id:"rink",    icon:"🏒", name:"Backyard Rink",          base:130000,  lps:260,   flavor:"Dad floods it at 11pm. It's his whole personality now."},
+ {id:"zamboni", icon:"🚜", name:"Zamboni",                base:1.4e6,   lps:1400,  flavor:"Everyone's actual dream job. Be honest."},
+ {id:"curling", icon:"🥌", name:"Curling Club",           base:2e7,     lps:7800,  flavor:"HURRY! HARD! (This is encouragement.)"},
+ {id:"plow",    icon:"🛻", name:"Snowplow Fleet",         base:3.3e8,   lps:44000, flavor:"Buries the end of your driveway with love."},
+ {id:"syrup",   icon:"🥞", name:"Strategic Syrup Reserve",base:5.1e9,   lps:260000,flavor:"Yes, it's real. No, you can't see it."},
+ {id:"tower",   icon:"🗼", name:"Peace Tower Timeshare",  base:7.5e10,  lps:1.6e6, flavor:"Question Period, but it's your living room."},
+];
+
+const UPGRADES = [
+ {id:"mittens", icon:"🧤", name:"Mittens With The String",     cost:100,    type:"clickAdd", val:1,   flavor:"You will never lose them again. Your mom was right."},
+ {id:"robertson",icon:"🪛",name:"Robertson Screwdriver",       cost:1000,   type:"clickMult",val:2,   flavor:"The superior screw. We said what we said."},
+ {id:"milkbag", icon:"🥛", name:"Milk In A Bag",               cost:10000,  type:"clickMult",val:2,   flavor:"It's fine. It's FINE. Stop asking."},
+ {id:"ketchup", icon:"🥔", name:"Ketchup Chip Dust",           cost:100000, type:"allMult",  val:1.10,flavor:"Applied directly to the economy."},
+ {id:"dressed", icon:"✨", name:"All-Dressed Everything",      cost:1e6,    type:"allMult",  val:1.15,flavor:"Why choose one flavour when you can choose all governance."},
+ {id:"rip",     icon:"🛷", name:"Out For A Rip",               cost:1e7,    type:"clickMult",val:3,   flavor:"Bud. Buddy. Bud."},
+ {id:"tires",   icon:"🛞", name:"The Good Winter Tires",       cost:1e8,    type:"allMult",  val:1.20,flavor:"Not all-seasons. THE GOOD ONES."},
+ {id:"blockheater",icon:"🔌",name:"Block Heater Plugged In",   cost:1e9,    type:"allMult",  val:1.25,flavor:"An extension cord across the yard: the national flower."},
+ {id:"twofour", icon:"📦", name:"Two-Four Of Motivation",      cost:1e10,   type:"clickMult",val:4,   flavor:"Picked up on the May long, obviously."},
+ {id:"chesterfield",icon:"🛋️",name:"Chesterfield Command Centre",cost:1e11, type:"allMult",  val:1.30,flavor:"You apologized to it once. It remembers."},
+];
+
+const ACHIEVEMENTS = [
+ {id:"first",   icon:"🪙", name:"First Loonie",              desc:"Earn your very first loonie. Frame it mentally.",            test:s=>s.totalEarned>=1},
+ {id:"keener",  icon:"📚", name:"Keener",                    desc:"Click 100 times. Front row of the economy.",                 test:s=>s.clicks>=100},
+ {id:"giver",   icon:"💪", name:"Give'r",                    desc:"Click 1,000 times. Absolutely giving it.",                   test:s=>s.clicks>=1000},
+ {id:"unit",    icon:"🏔️", name:"Absolute Unit of Industry", desc:"Click 10,000 times. See a doctor (wait time: 14 months).",   test:s=>s.clicks>=10000},
+ {id:"gst",     icon:"💸", name:"GST Rebate Day",            desc:"Earn 1,000 loonies total. Treat yourself to one (1) snack.", test:s=>s.totalEarned>=1000},
+ {id:"ctm",     icon:"🛒", name:"Canadian Tire Millionaire", desc:"Earn 1,000,000 loonies. Roughly $4.30 in Canadian Tire money.",test:s=>s.totalEarned>=1e6},
+ {id:"housing", icon:"🏠", name:"Down Payment (One Shed)",   desc:"Earn 1,000,000,000 loonies. The shed has potential.",        test:s=>s.totalEarned>=1e9},
+ {id:"goose1",  icon:"🪿", name:"Goose Whisperer",           desc:"Shoo 1 goose. Politely but firmly.",                         test:s=>s.geese>=1},
+ {id:"goose10", icon:"😤", name:"Cobra Chicken Tamer",       desc:"Shoo 10 geese. Legends speak of you at the park.",           test:s=>s.geese>=10},
+ {id:"goose25", icon:"⚠️", name:"Do Not Approach The Waterfowl",desc:"Shoo 25 geese. The geese have a photo of you now.",       test:s=>s.geese>=25},
+ {id:"sorry1",  icon:"🙏", name:"Sorry, Eh?",                desc:"Trigger 1 Sorry Spree. It wasn't even your fault.",          test:s=>s.sprees>=1},
+ {id:"sorry10", icon:"🇨🇦", name:"Chronically Apologetic",    desc:"Trigger 10 Sorry Sprees. You've apologized to a door.",      test:s=>s.sprees>=10},
+ {id:"rimwin",  icon:"🎉", name:"IT'S ACTUALLY A WINNER",    desc:"Win Roll Up The Rim. Tell everyone. Forever.",               test:s=>s.rimWins>=1},
+ {id:"shovel",  icon:"🧹", name:"Driveway Defender",         desc:"Survive 3 snow squalls. The plow will return. It always returns.",test:s=>s.squalls>=3},
+ {id:"toque10", icon:"🧢", name:"Toque Season Is All Seasons",desc:"Own 10 Toque Stands. July? Toque. Wedding? Toque.",         test:s=>s.counts.toque>=10},
+ {id:"zam",     icon:"🚜", name:"Living The Dream",          desc:"Own a Zamboni. Childhood: complete.",                        test:s=>s.counts.zamboni>=1},
+ {id:"eh",      icon:"🗣️", name:"Fluent in Eh",              desc:"Type 'eh' on your keyboard 10 times. A full conversation.",  test:s=>s.ehCount>=10},
+ {id:"empire",  icon:"👑", name:"Coast To Coast To Coast",   desc:"Own at least one of everything. From sea to sea to sea.",    test:s=>BUILDINGS.every(b=>s.counts[b.id]>=1)},
+];
+
+const TICKER_LINES = [
+ "Local man says sorry to chesterfield after bumping into it; chesterfield accepts.",
+ "Nation agrees: 'it's not the cold, it's the wind.'",
+ "Area goose declares sidewalk sovereign territory; residents comply.",
+ "Poll: 98% say 'washroom.' Remaining 2% were tourists.",
+ "First snowfall triggers annual collective amnesia about how driving works.",
+ "Neighbour waves. You wave. This will continue until one of you moves away.",
+ "Weather forecast for tomorrow: 'honestly? we'll see.'",
+ "Milk bag lobby confirms: it's fine, actually.",
+ "Nation's dads emerge in shorts at 4°C, right on schedule.",
+ "'Cabin,' 'cottage,' or 'camp' debate enters its 157th year with no ceasefire in sight.",
+ "'Eh' officially recognized as a complete sentence, question, and legal argument.",
+ "Hockey highlights delayed by 40-minute goodbye in a hallway.",
+ "Ski-doo season declared open by a guy named Gord.",
+ "KD with ketchup: cuisine, nation confirms.",
+ "Plow buries freshly shovelled driveway; community calls it 'character building.'",
+ "Loonie and toonie reportedly in committed long-term relationship.",
+ "Man holds door for stranger 40 metres away; both now legally bound to jog awkwardly.",
+ "Caesar declared a breakfast, a lunch, and a personality.",
+ "Springtime pothole named regional landmark; given own postal code.",
+ "Study: 100% of pencil crayons are, in fact, pencil crayons.",
+ "Tim's line now visible from space. Orderly, though.",
+ "Local rink schedules 3am ice time; grown adults thrilled.",
+ "'Could be worse' remains nation's official response to everything.",
+ "Two strangers say sorry simultaneously; ceremony held.",
+];
+
+/* ---------- State ---------- */
+const state = {
+  loonies:0, totalEarned:0, clicks:0,
+  counts:Object.fromEntries(BUILDINGS.map(b=>[b.id,0])),
+  upgrades:{},
+  polite:0, spreeUntil:0, sprees:0,
+  geese:0, rimWins:0, squalls:0, ehCount:0,
+  unlocked:{},
+  startedAt:Date.now(),
+};
+
+const DEFAULT_STATE = JSON.parse(JSON.stringify(state));
+const SAVE_KEY = 'doubleDoubleEmpireSave_v1';
+function sanitizeState(data) {
+  if (!data || typeof data !== 'object' || !data.counts || !Number.isFinite(data.loonies) || data.loonies < 0) throw new Error('Invalid save');
+  const clean = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  for (const key of ['loonies','totalEarned','clicks','polite','sprees','geese','rimWins','squalls','ehCount','startedAt']) {
+    if (data[key] === undefined) continue;
+    if (!Number.isFinite(data[key]) || data[key] < 0 || data[key] > 1e100) throw new Error('Invalid ' + key);
+    clean[key] = data[key];
+  }
+  clean.polite = Math.min(100, clean.polite);
+  clean.spreeUntil = 0; // Temporary events never carry across a load.
+  for (const b of BUILDINGS) {
+    const n = data.counts[b.id] ?? 0;
+    if (!Number.isInteger(n) || n < 0 || n > 1000) throw new Error('Invalid building count');
+    clean.counts[b.id] = n;
+  }
+  for (const u of UPGRADES) if (data.upgrades?.[u.id] === true) clean.upgrades[u.id] = true;
+  for (const a of ACHIEVEMENTS) if (data.unlocked?.[a.id] === true) clean.unlocked[a.id] = true;
+  return clean;
+}
+function saveProgress() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); return true; } catch (_) { return false; } }
+function applySavedState(clean) {
+  Object.assign(state, clean);
+  clearInterval(gooseTimer); clearInterval(flakeTimer);
+  squallOn = false; eventBusy = false;
+  $('goose').style.display = 'none';
+  $('squall').classList.remove('on'); $('squall').innerHTML = '';
+  $('shovelBar').classList.remove('on'); $('rimModal').classList.remove('show');
+  document.body.classList.remove('spree-on');
+  $('sorryBtn').style.display = 'none';
+  UPGRADES.forEach(u => $('upg-'+u.id).classList.toggle('owned', !!state.upgrades[u.id]));
+  ACHIEVEMENTS.forEach(a => {
+    $('ach-'+a.id).classList.toggle('locked', !state.unlocked[a.id]);
+    $('ach-'+a.id).classList.toggle('unlocked', !!state.unlocked[a.id]);
+  });
+  scheduleNext(); updateHUD(); refreshShop(); refreshUpgrades();
+}
+
+/* ---------- Helpers ---------- */
+const $=id=>document.getElementById(id);
+function fmt(n){
+  if(n<1000) return (Math.floor(n*10)/10).toString().replace(/\.0$/,"");
+  const units=["K","M","B","T","Qa","Qi"];
+  let u=-1;
+  while(n>=1000 && u<units.length-1){n/=1000;u++;}
+  return n.toFixed(n<10?2:n<100?1:0)+units[u];
+}
+function clickMult(){let m=1;UPGRADES.forEach(u=>{if(state.upgrades[u.id]&&u.type==="clickMult")m*=u.val;});return m;}
+function clickAdd(){let a=0;UPGRADES.forEach(u=>{if(state.upgrades[u.id]&&u.type==="clickAdd")a+=u.val;});return a;}
+function allMult(){let m=1;UPGRADES.forEach(u=>{if(state.upgrades[u.id]&&u.type==="allMult")m*=u.val;});return m;}
+function spreeMult(){return Date.now()<state.spreeUntil?7:1;}
+function squallMult(){return squallOn?0.5:1;}
+function lpc(){return (1+clickAdd())*clickMult()*allMult()*spreeMult();}
+function lps(){
+  let t=0;BUILDINGS.forEach(b=>t+=b.lps*state.counts[b.id]);
+  return t*allMult()*spreeMult()*squallMult();
+}
+function cost(b){return Math.ceil(b.base*Math.pow(1.15,state.counts[b.id]));}
+function earn(n){state.loonies+=n;state.totalEarned+=n;}
+
+function toast(html){
+  const t=document.createElement("div");t.className="toast";t.innerHTML=html;
+  $("toasts").appendChild(t);setTimeout(()=>t.remove(),5200);
+}
+function floatText(x,y,txt,red){
+  const f=document.createElement("div");
+  f.className="float-txt"+(red?" red":"");f.textContent=txt;
+  f.style.left=x+"px";f.style.top=y+"px";f.style.position="fixed";
+  document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
+}
+
+/* ---------- Cup clicking ---------- */
+const SIP_LINES=["+","+","+","+","eh!","sorry!","beauty!","give'r!"];
+$("cup").addEventListener("click",e=>{
+  const gain=lpc();
+  earn(gain);state.clicks++;
+  state.polite=Math.min(100,state.polite+0.6);
+  const x=(e.clientX||window.innerWidth/2)+(Math.random()*40-20);
+  const y=(e.clientY||300)-20;
+  const roll=SIP_LINES[Math.floor(Math.random()*SIP_LINES.length)];
+  floatText(x,y, roll==="+"?("+"+fmt(gain)):roll, roll!=="+");
+  updateHUD();
+});
+
+/* ---------- Politeness / Sorry Spree ---------- */
+$("sorryBtn").addEventListener("click",()=>{
+  if (state.polite < 100 || Date.now() < state.spreeUntil) return;
+  state.polite=0;state.sprees++;
+  state.spreeUntil=Date.now()+20000;
+  $("sorryBtn").style.display="none";
+  document.body.classList.add("spree-on");
+  toast("🙏 <b>SORRY SPREE!</b> Everything ×7 for 20 seconds. You didn't even do anything wrong.");
+  setTimeout(()=>{document.body.classList.remove("spree-on");},20000);
+});
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");$("panel-"+t.dataset.panel).classList.add("active");
+}));
+
+/* ---------- Shop render ---------- */
+function buildShop(){
+  const p=$("panel-shop");p.innerHTML="";
+  BUILDINGS.forEach(b=>{
+    const d=document.createElement("div");d.className="shop-item";d.id="shop-"+b.id;
+    d.innerHTML=`<div class="icon">${b.icon}</div>
+      <div class="info">
+        <div class="name">${b.name}</div>
+        <div class="flavor">${b.flavor}</div>
+        <div class="meta">+${fmt(b.lps)} loonies/sec each</div>
+      </div>
+      <div class="count-badge" id="ct-${b.id}">0</div>
+      <button class="buy" id="buy-${b.id}"></button>`;
+    p.appendChild(d);
+    d.querySelector(".buy").addEventListener("click",()=>{
+      const c=cost(b);
+      if(state.loonies>=c){state.loonies-=c;state.counts[b.id]++;updateHUD();refreshShop();}
+    });
+  });
+}
+function refreshShop(){
+  BUILDINGS.forEach(b=>{
+    const c=cost(b);
+    const btn=$("buy-"+b.id);
+    btn.textContent="🪙 "+fmt(c);
+    btn.disabled=state.loonies<c;
+    $("ct-"+b.id).textContent=state.counts[b.id];
+  });
+}
+
+/* ---------- Upgrades render ---------- */
+function buildUpgrades(){
+  const p=$("panel-upg");p.innerHTML="";
+  UPGRADES.forEach(u=>{
+    const d=document.createElement("div");d.className="upg-item";d.id="upg-"+u.id;
+    const eff=u.type==="clickAdd"?`+${u.val} per sip`:u.type==="clickMult"?`sips ×${u.val}`:`everything ×${u.val}`;
+    d.innerHTML=`<div class="icon">${u.icon}</div>
+      <div class="info">
+        <div class="name">${u.name}</div>
+        <div class="flavor">${u.flavor}</div>
+        <div class="meta" style="font-size:.74rem;color:var(--spruce);font-weight:700">${eff}</div>
+      </div>
+      <button class="buy" id="buyu-${u.id}"></button>`;
+    p.appendChild(d);
+    d.querySelector(".buy").addEventListener("click",()=>{
+      if(state.upgrades[u.id])return;
+      if(state.loonies>=u.cost){
+        state.loonies-=u.cost;state.upgrades[u.id]=true;
+        d.classList.add("owned");
+        toast(`${u.icon} <b>${u.name}</b> acquired. ${eff}.`);
+        updateHUD();refreshUpgrades();
+      }
+    });
+  });
+}
+function refreshUpgrades(){
+  UPGRADES.forEach(u=>{
+    const d=$("upg-"+u.id),btn=$("buyu-"+u.id);
+    if(state.upgrades[u.id]){d.classList.add("owned");return;}
+    btn.textContent="🪙 "+fmt(u.cost);
+    btn.disabled=state.loonies<u.cost;
+  });
+}
+
+/* ---------- Achievements ---------- */
+function buildAch(){
+  const p=$("panel-ach");p.innerHTML="";
+  ACHIEVEMENTS.forEach(a=>{
+    const d=document.createElement("div");d.className="ach locked";d.id="ach-"+a.id;
+    d.innerHTML=`<div class="icon">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+    p.appendChild(d);
+  });
+}
+function checkAch(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(!state.unlocked[a.id] && a.test(state)){
+      state.unlocked[a.id]=true;
+      const d=$("ach-"+a.id);d.classList.remove("locked");d.classList.add("unlocked");
+      toast(`🏅 <b>Achievement:</b> ${a.icon} ${a.name}`);
+    }
+  });
+}
+
+/* ---------- HUD ---------- */
+function updateHUD(){
+  $("stLoonies").textContent=fmt(state.loonies);
+  $("stLps").textContent=fmt(lps());
+  $("stLpc").textContent=fmt(lpc());
+  $("politeFill").style.width=state.polite+"%";
+  $("politePct").textContent=Math.floor(state.polite)+"%";
+  if(state.polite>=100 && Date.now()>=state.spreeUntil) $("sorryBtn").style.display="block";
+  $("ledger").innerHTML=
+    `Total earned: <b>🪙 ${fmt(state.totalEarned)}</b><br>`+
+    `Sips taken: <b>${state.clicks.toLocaleString()}</b><br>`+
+    `Geese shooed: <b>${state.geese}</b> &nbsp; Squalls survived: <b>${state.squalls}</b><br>`+
+    `Sorry sprees: <b>${state.sprees}</b> &nbsp; Rim wins: <b>${state.rimWins}</b><br>`+
+    `Ehs uttered: <b>${state.ehCount}</b>`;
+}
+
+/* ---------- Main loop ---------- */
+setInterval(()=>{
+  earn(lps()/10);
+},100);
+setInterval(()=>{
+  updateHUD();refreshShop();refreshUpgrades();checkAch();
+},250);
+
+/* ---------- Random events ---------- */
+let nextEvent=Date.now()+20000;
+let eventBusy=false;
+setInterval(()=>{
+  if(eventBusy||Date.now()<nextEvent||document.hidden||$('introModal').classList.contains('show')||$('saveModal').classList.contains('show'))return;
+  const started=state.totalEarned>10;
+  if(!started){nextEvent=Date.now()+10000;return;}
+  const r=Math.random();
+  if(r<0.45)startGoose();
+  else if(r<0.75)startRim();
+  else startSquall();
+},1000);
+function scheduleNext(){nextEvent=Date.now()+35000+Math.random()*40000;eventBusy=false;}
+
+/* ---- Goose ---- */
+let goosePecks=0,gooseTimer=null;
+function startGoose(){
+  eventBusy=true;goosePecks=5;
+  const g=$("goose");g.style.display="block";g.style.left="-140px";
+  $("gooseHp").textContent="5 pecks left";
+  toast("🪿 <b>A GOOSE APPROACHES.</b> It knows what you did. Click it 5 times!");
+  let x=-140;const speed=(window.innerWidth+300)/18000*50;
+  gooseTimer=setInterval(()=>{
+    x+=speed;g.style.left=x+"px";
+    if(x>window.innerWidth+40){ // escaped
+      clearInterval(gooseTimer);g.style.display="none";
+      const stolen=state.loonies*0.03;
+      state.loonies-=stolen;
+      toast(`🪿 The goose has taken <b>🪙 ${fmt(stolen)}</b>. It was owed. Do not pursue.`);
+      updateHUD();scheduleNext();
+    }
+  },50);
+}
+$("goose").addEventListener("click",()=>{
+  goosePecks--;
+  $("gooseHp").textContent=goosePecks+" pecks left";
+  if(goosePecks<=0){
+    clearInterval(gooseTimer);
+    $("goose").style.display="none";
+    state.geese++;
+    const reward=Math.max(25,lps()*30);
+    earn(reward);
+    toast(`🪿 <b>Goose shooed!</b> (You said sorry to it.) Reward: <b>🪙 ${fmt(reward)}</b>`);
+    updateHUD();scheduleNext();
+  }
+});
+
+/* ---- Roll up the rim ---- */
+let rimDone=false;
+function startRim(){
+  eventBusy=true;rimDone=false;
+  $("rimResult").textContent="";
+  $("rimClose").style.display="none";
+  $("rimCup").style.display="inline-block";
+  $("rimModal").classList.add("show");
+  $("rimCup").focus();
+}
+$("rimCup").addEventListener("click",()=>{
+  if(rimDone)return;rimDone=true;
+  const r=Math.random();let msg;
+  if(r<0.05){
+    const w=Math.max(500,lps()*120);earn(w);state.rimWins++;
+    msg=`🎉 WINNER!! 🪙 ${fmt(w)}!! Call your mother. Call everyone.`;
+  }else if(r<0.30){
+    const w=Math.max(60,lps()*25);earn(w);state.rimWins++;
+    msg=`☕ You won 🪙 ${fmt(w)}! A free coffee, basically. Elite feeling.`;
+  }else{
+    msg=`"PLEASE PLAY AGAIN" — respectfully, of course.`;
+  }
+  $("rimResult").textContent=msg;
+  $("rimCup").style.display="none";
+  $("rimClose").style.display="inline-block";
+  $("rimClose").focus();
+  updateHUD();
+});
+$("rimClose").addEventListener("click",()=>{
+  $("rimModal").classList.remove("show");scheduleNext();
+});
+
+/* ---- Snow squall ---- */
+let squallOn=false,shovels=0,flakeTimer=null;
+function startSquall(){
+  eventBusy=true;squallOn=true;shovels=12;
+  $("shovelCt").textContent=shovels;
+  $("squall").classList.add("on");$("shovelBar").classList.add("on");
+  toast("🌨️ <b>SNOW SQUALL!</b> Income halved. Grab the shovel. You know the one.");
+  flakeTimer=setInterval(()=>{
+    for(let i=0;i<3;i++){
+      const f=document.createElement("div");f.className="flake";f.textContent="❄";
+      f.style.left=Math.random()*100+"vw";
+      f.style.fontSize=(10+Math.random()*16)+"px";
+      f.style.animationDuration=(2.5+Math.random()*3)+"s";
+      $("squall").appendChild(f);
+      setTimeout(()=>f.remove(),6000);
+    }
+  },160);
+}
+$("shovelBtn").addEventListener("click",()=>{
+  shovels--; $("shovelCt").textContent=shovels;
+  if(shovels<=0){
+    squallOn=false;state.squalls++;
+    clearInterval(flakeTimer);
+    $("squall").classList.remove("on");$("squall").innerHTML="";
+    $("shovelBar").classList.remove("on");
+    const reward=Math.max(40,lps()*15);earn(reward);
+    toast(`🧹 <b>Driveway cleared!</b> +🪙 ${fmt(reward)}. The plow will undo this within the hour.`);
+    updateHUD();scheduleNext();
+  }
+});
+
+/* ---------- Ticker ---------- */
+let tickIdx=Math.floor(Math.random()*TICKER_LINES.length);
+function nextTick(){
+  const parts=[];
+  for(let i=0;i<3;i++){parts.push(TICKER_LINES[(tickIdx+i)%TICKER_LINES.length]);}
+  tickIdx=(tickIdx+3)%TICKER_LINES.length;
+  $("tickerTxt").innerHTML="<b>MOOSE NEWS NETWORK:</b> "+parts.join(" &nbsp;🍁&nbsp; ");
+}
+nextTick();
+$("tickerTxt").addEventListener("animationiteration",nextTick);
+
+/* ---------- 'eh' easter egg ---------- */
+let lastKey="";
+document.addEventListener("keydown",e=>{
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.target?.matches?.('input,textarea,[contenteditable]')) return;
+  const k=(e.key||"").toLowerCase();
+  if(lastKey==="e"&&k==="h"){
+    state.ehCount++;
+    floatText(window.innerWidth/2+(Math.random()*120-60), window.innerHeight/2, "eh? 🍁", true);
+    const bonus=Math.max(2,lps()*2);earn(bonus);
+    updateHUD();
+  }
+  lastKey=k;
+});
+
+/* ---------- Save / load (portable save codes) ---------- */
+function openSaveModal(title,desc,text,actionLabel,onAction){
+  $("saveTitle").textContent=title;
+  $("saveDesc").textContent=desc;
+  $("saveText").value=text;
+  $("saveAction").textContent=actionLabel;
+  $("saveModal").classList.add("show");
+  $("saveAction").onclick=onAction;
+  $("saveText").focus();
+}
+$("saveClose").addEventListener("click",()=>$("saveModal").classList.remove("show"));
+$("exportBtn").addEventListener("click",()=>{
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  openSaveModal("Export save","Copy this code somewhere safe (a note, an email to yourself, carved into a canoe paddle).",code,"Copy",async()=>{
+    $("saveText").select();
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText($("saveText").value);
+      else if (!document.execCommand('copy')) throw new Error('Copy unavailable');
+      toast("💾 Save code copied. Guard it like the syrup reserve.");
+    } catch (_) { toast('Copy was unavailable. The code is selected: use Copy or Ctrl/Cmd+C.'); }
+  });
+});
+$("importBtn").addEventListener("click",()=>{
+  openSaveModal("Import save","Paste your save code below, then hit Load.","","Load",()=>{
+    try{
+      const obj=JSON.parse(decodeURIComponent(escape(atob($("saveText").value.trim()))));
+      const clean = sanitizeState(obj);
+      applySavedState(clean); saveProgress();
+      $("saveModal").classList.remove("show");
+      updateHUD();refreshShop();refreshUpgrades();
+      toast("📥 <b>Save loaded!</b> Welcome back. The geese noticed you were gone.");
+    }catch(err){
+      toast("❌ That code didn't work, bud. Double-check it, eh?");
+    }
+  });
+});
+
+$('goose').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!e.repeat) $('goose').click(); }
+});
+$('resetBtn').addEventListener('click', () => {
+  if (!confirm('Start over? This clears all Double-Double Empire progress in this browser.')) return;
+  applySavedState(JSON.parse(JSON.stringify(DEFAULT_STATE))); saveProgress();
+});
+window.addEventListener('pagehide', saveProgress);
+setInterval(saveProgress, 5000);
+
+document.addEventListener('keydown', e => {
+  const modal = ['saveModal','introModal','rimModal'].map($).find(el => el.classList.contains('show'));
+  if (!modal) return;
+  if (e.key === 'Escape' && modal.id === 'saveModal') { e.preventDefault(); modal.classList.remove('show'); $('importBtn').focus(); }
+  if (e.key !== 'Tab') return;
+  const focusable = [...modal.querySelectorAll('button, textarea')].filter(el => !el.disabled && el.style.display !== 'none');
+  if (!focusable.length) return;
+  const first=focusable[0], last=focusable.at(-1);
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---------- Intro ---------- */
+$("startBtn").addEventListener("click",()=>{
+  $("introModal").classList.remove("show");
+  nextEvent=Date.now()+25000;
+  $("cup").focus();
+});
+
+/* ---------- Init ---------- */
+buildShop();buildUpgrades();buildAch();
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) applySavedState(sanitizeState(JSON.parse(raw))); } catch (_) {}
+updateHUD();refreshShop();refreshUpgrades();
+if (!saveProgress()) $('save-status').textContent='Auto-save is unavailable here; use Export save to keep your progress.';
+$('startBtn').focus();
+</script>
+</body>
+</html>
