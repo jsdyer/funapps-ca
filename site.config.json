@@ -23,6 +23,25 @@
       "audited_at": "2026-11-26"
     },
     {
+      "slug": "boardwalk-bandit",
+      "name": "Boardwalk Bandit",
+      "url": "https://funapps.ca/play/boardwalk-bandit/",
+      "description": "Be a Halifax Waterfront seagull. Swoop through tourists' fries, fish & chips and donairs, dodge the rolled-up newspapers, and feast when the Noon Gun makes everyone drop their snacks.",
+      "category": "Food & frenzy",
+      "icon": "🐦",
+      "color": "#bfe2f6",
+      "technology": "Canvas 2D + Web Audio",
+      "controls": [
+        "Move the mouse or a finger and the gull follows; arrow keys or WASD also fly.",
+        "Fly through a snack to grab it. Quick grabs build a combo.",
+        "A \"!\" over a tourist means a newspaper swat is coming. P pauses."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "audited_at": "2026-11-26"
+    },
+    {
       "slug": "rockies-explorer",
       "name": "Westward: Mountain Run",
       "url": "https://funapps.ca/play/rockies-explorer/",
