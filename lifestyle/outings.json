@@ -1,18 +1,165 @@
 {
   "two-hour-escape": [
-    {"id":"point-pleasant","region":"Halifax","name":"Point Pleasant shore walk","mood":"Waterfront","minutes":60,"location":"South End, Halifax","description":"Pick a shore-side path in Point Pleasant Park. Give the first half of your time to the outward walk and turn back while the harbour is still in view.","challenge":"Listen for three distinct sounds between the trees and the shore.","link":"https://novascotia.com/listing/point-pleasant-park/","source":"Tourism Nova Scotia"},
-    {"id":"halifax-boardwalk","region":"Halifax","name":"A boardwalk photo hunt","mood":"Waterfront","minutes":30,"location":"Halifax waterfront","description":"Start at the central waterfront. Follow the boardwalk in one direction for 15 minutes, then look for a completely different photograph on your way back.","challenge":"Frame a working boat, a reflection and one bit of old harbour hardware.","link":"https://buildns.ca/visit/halifax/","source":"Build Nova Scotia"},
-    {"id":"shubie","region":"Halifax","name":"Follow the canal at Shubie Park","mood":"Trees & trails","minutes":90,"location":"Dartmouth","description":"Start near the Fairbanks Centre, follow the canal-side paths, then use the rest of your time to retrace your favourite stretch.","challenge":"Find a trace of the old waterway and imagine how a boat would get past it.","link":"https://www.shubenacadiecanal.ca/shubie-park/","source":"Shubenacadie Canal Commission"},
-    {"id":"derby-reach","region":"Langley","name":"Watch the Fraser at Derby Reach","mood":"Waterfront","minutes":60,"location":"Edgewater Bar, Langley Township","description":"Make a riverside out-and-back from Edgewater Bar. Leave ten minutes at the end to sit and watch the working river.","challenge":"Look for something travelling upstream and something travelling down.","link":"https://metrovancouver.org/services/regional-parks/park/derby-reach-regional-park","source":"Metro Vancouver"},
-    {"id":"campbell-valley","region":"Langley","name":"A slow wander in Campbell Valley","mood":"Trees & trails","minutes":90,"location":"Campbell Valley Regional Park","description":"Use the official park map to choose a section near the Little River Loop. Pause at a wetland viewpoint before retracing your route.","challenge":"Spot three changes in the landscape without leaving the trail.","link":"https://metrovancouver.org/services/regional-parks/park/campbell-valley-regional-park","source":"Metro Vancouver"},
-    {"id":"sendall","region":"Langley","name":"A pocket garden and a creek","mood":"Trees & trails","minutes":30,"location":"Sendall Gardens, Langley City","description":"Take a short loop among the plantings at Sendall Gardens, then slow down beside Muckle Creek.","challenge":"Find one interesting leaf shape and one reflection.","link":"https://www.langleycity.ca/parks-recreation/parks-trails/sendall-gardens","source":"Langley City"}
+    {
+      "id": "point-pleasant",
+      "region": "Halifax",
+      "name": "Point Pleasant shore walk",
+      "mood": "Waterfront",
+      "minutes": 60,
+      "location": "South End, Halifax",
+      "description": "Pick a shore-side path in Point Pleasant Park. Give the first half of your time to the outward walk and turn back while the harbour is still in view.",
+      "challenge": "Listen for three distinct sounds between the trees and the shore.",
+      "link": "https://novascotia.com/listing/point-pleasant-park/",
+      "source": "Tourism Nova Scotia"
+    },
+    {
+      "id": "halifax-boardwalk",
+      "region": "Halifax",
+      "name": "A boardwalk photo hunt",
+      "mood": "Waterfront",
+      "minutes": 30,
+      "location": "Halifax waterfront",
+      "description": "Start at the central waterfront. Follow the boardwalk in one direction for 15 minutes, then look for a completely different photograph on your way back.",
+      "challenge": "Frame a working boat, a reflection and one bit of old harbour hardware.",
+      "link": "https://buildns.ca/visit/halifax/",
+      "source": "Build Nova Scotia",
+      "snack": {
+        "name": "COWS at Cable Wharf",
+        "url": "https://cows.ca/pages/locations",
+        "tip": "Check seasonal hours for a waterfront ice cream."
+      }
+    },
+    {
+      "id": "shubie",
+      "region": "Halifax",
+      "name": "Follow the canal at Shubie Park",
+      "mood": "Trees & trails",
+      "minutes": 90,
+      "location": "Dartmouth",
+      "description": "Start near the Fairbanks Centre, follow the canal-side paths, then use the rest of your time to retrace your favourite stretch.",
+      "challenge": "Find a trace of the old waterway and imagine how a boat would get past it.",
+      "link": "https://www.shubenacadiecanal.ca/shubie-park/",
+      "source": "Shubenacadie Canal Commission",
+      "snack": {
+        "name": "Two If By Sea Café",
+        "url": "https://www.twoifbysea.cafe/menu",
+        "tip": "Add time for a separate pastry stop in downtown Dartmouth."
+      }
+    },
+    {
+      "id": "derby-reach",
+      "region": "Langley",
+      "name": "Watch the Fraser at Derby Reach",
+      "mood": "Waterfront",
+      "minutes": 60,
+      "location": "Edgewater Bar, Langley Township",
+      "description": "Make a riverside out-and-back from Edgewater Bar. Leave ten minutes at the end to sit and watch the working river.",
+      "challenge": "Look for something travelling upstream and something travelling down.",
+      "link": "https://metrovancouver.org/services/regional-parks/park/derby-reach-regional-park",
+      "source": "Metro Vancouver",
+      "snack": {
+        "name": "Blacksmith Bakery",
+        "url": "https://blacksmithbakery.ca/",
+        "tip": "Add time for a pastry stop in Fort Langley village."
+      }
+    },
+    {
+      "id": "campbell-valley",
+      "region": "Langley",
+      "name": "A slow wander in Campbell Valley",
+      "mood": "Trees & trails",
+      "minutes": 90,
+      "location": "Campbell Valley Regional Park",
+      "description": "Use the official park map to choose a section near the Little River Loop. Pause at a wetland viewpoint before retracing your route.",
+      "challenge": "Spot three changes in the landscape without leaving the trail.",
+      "link": "https://metrovancouver.org/services/regional-parks/park/campbell-valley-regional-park",
+      "source": "Metro Vancouver"
+    },
+    {
+      "id": "sendall",
+      "region": "Langley",
+      "name": "A pocket garden and a creek",
+      "mood": "Trees & trails",
+      "minutes": 30,
+      "location": "Sendall Gardens, Langley City",
+      "description": "Take a short loop among the plantings at Sendall Gardens, then slow down beside Muckle Creek.",
+      "challenge": "Find one interesting leaf shape and one reflection.",
+      "link": "https://www.langleycity.ca/parks-recreation/parks-trails/sendall-gardens",
+      "source": "Langley City"
+    }
   ],
   "rainy-saturday": [
-    {"id":"central-library","region":"Halifax","name":"A five-floor book hunt","admission":"Free entry","location":"Halifax Central Library","description":"Pick a subject neither of you knows, find the most surprising book on it, and trade one fact before you leave.","challenge":"Finish with a look out over Spring Garden Road.","link":"https://www.halifaxpubliclibraries.ca/locations/halifax-central-public-library/","source":"Halifax Public Libraries"},
-    {"id":"maritime-museum","region":"Halifax","name":"A day among ship models","admission":"Check admission","location":"Maritime Museum of the Atlantic","description":"Choose one vessel in the museum. Look for a detail that tells you how people lived or worked aboard.","challenge":"Pick the object you would put on a Halifax postcard.","link":"https://maritimemuseum.novascotia.ca/visit","source":"Maritime Museum of the Atlantic","backup":"central-library"},
-    {"id":"art-gallery","region":"Halifax","name":"A gallery colour hunt","admission":"Check admission","location":"Art Gallery of Nova Scotia","description":"Choose one colour at the door and follow it through the galleries. Compare the two most different ways artists used it.","challenge":"Give your favourite work a second title of your own.","link":"https://agns.ca/visit/plan-your-visit/","source":"Art Gallery of Nova Scotia","backup":"central-library"},
-    {"id":"fort-library","region":"Langley","name":"A village library detour","admission":"Free entry","location":"Fort Langley Library","description":"Pick a Canadian author from the shelves. Read the first page of two books, then choose which story you want to take home.","challenge":"Find a cover that could pass for a postcard from BC.","link":"https://www.fvrl.bc.ca/locations/fort-langley-library","source":"Fraser Valley Regional Library"},
-    {"id":"flight-museum","region":"Langley","name":"A hangar sketchbook visit","admission":"Check admission","location":"Canadian Museum of Flight","description":"Spend the indoor part of your visit comparing aircraft shapes. Sketch two wing outlines and see if your companion can identify them.","challenge":"Choose a cockpit you would like to see from the pilot’s seat.","link":"https://canadianmuseumofflight.ca/about/admission-and-hours/","source":"Canadian Museum of Flight","backup":"fort-library"},
-    {"id":"langley-library","region":"Langley","name":"Plan a miniature local expedition","admission":"Free entry","location":"Langley City Library","description":"Find a travel book about a place you could reach in a day. Each person picks one stop and explains what makes it worth the journey.","challenge":"Sketch the route on a scrap of paper before you check a map.","link":"https://www.langleycity.ca/community-culture/community-services/public-library","source":"Langley City"}
+    {
+      "id": "central-library",
+      "region": "Halifax",
+      "name": "A five-floor book hunt",
+      "admission": "Free entry",
+      "location": "Halifax Central Library",
+      "description": "Pick a subject neither of you knows, find the most surprising book on it, and trade one fact before you leave.",
+      "challenge": "Finish with a look out over Spring Garden Road.",
+      "link": "https://www.halifaxpubliclibraries.ca/locations/halifax-central-public-library/",
+      "source": "Halifax Public Libraries",
+      "calendar": "https://halifax.bibliocommons.com/v2/events"
+    },
+    {
+      "id": "maritime-museum",
+      "region": "Halifax",
+      "name": "A day among ship models",
+      "admission": "Check admission",
+      "location": "Maritime Museum of the Atlantic",
+      "description": "Choose one vessel in the museum. Look for a detail that tells you how people lived or worked aboard.",
+      "challenge": "Pick the object you would put on a Halifax postcard.",
+      "link": "https://maritimemuseum.novascotia.ca/visit",
+      "source": "Maritime Museum of the Atlantic",
+      "backup": "central-library"
+    },
+    {
+      "id": "art-gallery",
+      "region": "Halifax",
+      "name": "A gallery colour hunt",
+      "admission": "Check admission",
+      "location": "Art Gallery of Nova Scotia",
+      "description": "Choose one colour at the door and follow it through the galleries. Compare the two most different ways artists used it.",
+      "challenge": "Give your favourite work a second title of your own.",
+      "link": "https://agns.ca/visit/plan-your-visit/",
+      "source": "Art Gallery of Nova Scotia",
+      "backup": "central-library"
+    },
+    {
+      "id": "fort-library",
+      "region": "Langley",
+      "name": "A village library detour",
+      "admission": "Free entry",
+      "location": "Fort Langley Library",
+      "description": "Pick a Canadian author from the shelves. Read the first page of two books, then choose which story you want to take home.",
+      "challenge": "Find a cover that could pass for a postcard from BC.",
+      "link": "https://www.fvrl.bc.ca/locations/fort-langley-library",
+      "source": "Fraser Valley Regional Library",
+      "calendar": "https://www.fvrl.bc.ca/events"
+    },
+    {
+      "id": "flight-museum",
+      "region": "Langley",
+      "name": "A hangar sketchbook visit",
+      "admission": "Check admission",
+      "location": "Canadian Museum of Flight",
+      "description": "Spend the indoor part of your visit comparing aircraft shapes. Sketch two wing outlines and see if your companion can identify them.",
+      "challenge": "Choose a cockpit you would like to see from the pilot’s seat.",
+      "link": "https://canadianmuseumofflight.ca/about/admission-and-hours/",
+      "source": "Canadian Museum of Flight",
+      "backup": "fort-library"
+    },
+    {
+      "id": "langley-library",
+      "region": "Langley",
+      "name": "Plan a miniature local expedition",
+      "admission": "Free entry",
+      "location": "Langley City Library",
+      "description": "Find a travel book about a place you could reach in a day. Each person picks one stop and explains what makes it worth the journey.",
+      "challenge": "Sketch the route on a scrap of paper before you check a map.",
+      "link": "https://www.langleycity.ca/community-culture/community-services/public-library",
+      "source": "Langley City",
+      "calendar": "https://www.fvrl.bc.ca/events"
+    }
   ]
 }

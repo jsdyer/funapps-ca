@@ -63,6 +63,11 @@ def result_card(app, row, rows, snapshot):
         meta = row["location"] + " · " + (str(row["minutes"]) + " min on site" if "minutes" in row else row["admission"])
         extra = '<p class="challenge">'+escape(row["challenge"])+'</p>'
         link, label = row["link"], row["source"] + " visitor information"
+        if row.get("snack"):
+            stop = row["snack"]
+            end = f'<p>Snack detour: <a href="{escape(stop["url"])}">{escape(stop["name"])}</a>. {escape(stop["tip"])}</p>'
+        if row.get("calendar"):
+            end = f'<p><a href="{escape(row["calendar"])}">Check the library event calendar</a> for a programme to pair with your visit.</p>'
         if row.get("backup"):
             backup = next(other for other in rows if other["id"] == row["backup"])
             end = f'<p>Free backup: <a href="{escape(backup["link"])}">{escape(backup["location"])}</a></p>'
