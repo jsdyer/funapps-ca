@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Citadel Hill Climb · funapps.ca</title>
+<meta name="description" content="Push a stroller or wheelchair up Halifax's Citadel Hill before the noon gun goes off. A funapps.ca game.">
+<style>
+  html,body{margin:0;height:100%;background:#1b2a38;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
+  canvas{display:block;width:100vw;height:100vh}
+  #ui{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .card{pointer-events:auto;background:rgba(250,246,236,.96);color:#1f2a33;border-radius:18px;padding:22px 24px;max-width:420px;width:calc(100% - 48px);text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+  .card h1{margin:0 0 4px;font-size:28px;letter-spacing:.5px}
+  .card p{margin:6px 0 14px;line-height:1.4;font-size:15px}
+  .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;background:#b3261e;color:#fff;min-width:150px}
+  button.alt{background:#2f5d7c}
+  .small{font-size:13px;opacity:.75}
+  a{color:#2f5d7c}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <div class="card" id="title">
+    <h1>Citadel Hill Climb</h1>
+    <p>Get up to the fort before the <b>noon gun</b> goes off. Some steep, wha?</p>
+    <div class="row">
+      <button id="bStroller">👶 Stroller</button>
+      <button id="bChair" class="alt">♿ Wheelchair</button>
+    </div>
+    <p class="small" style="margin-top:14px"><b>Hold</b> anywhere (or Space) to push · let go to catch your breath<br>Stairs? <b>Tap tap tap</b>. Mind the bumps — and the geese.</p>
+  </div>
+  <div class="card hidden" id="end">
+    <h1 id="endTitle">BOOM!</h1>
+    <p id="endText"></p>
+    <div class="row">
+      <button id="bAgain">Go again</button>
+      <button id="bSwap" class="alt">Switch</button>
+    </div>
+    <p class="small" style="margin-top:12px"><a href="https://funapps.ca">More funapps.ca games</a></p>
+  </div>
+</div>
+<script>
+(() => {
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let W, H, DPR;
+function resize(){ DPR = Math.min(2, window.devicePixelRatio||1); W = innerWidth; H = innerHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener('resize', resize); resize();
+
+// ---------- Course ----------
+// Segments: grade = rise/run. type: path | bumps | stairs | goose | fog | top
+const SEGS = [
+  {len:260, g:0.00, type:'start'},
+  {len:520, g:0.14, type:'path'},
+  {len:520, g:0.20, type:'bumps'},
+  {len:150, g:0.55, type:'stairs', steps:8},
+  {len:560, g:0.24, type:'goose'},
+  {len:480, g:0.30, type:'bumps'},
+  {len:160, g:0.60, type:'stairs', steps:10},
+  {len:520, g:0.34, type:'fog'},
+  {len:420, g:0.04, type:'top'}
+];
+let segStart = [], total = 0;
+SEGS.forEach(s => { segStart.push(total); total += s.len; });
+const FINISH = total - 220;
+const heights = []; // sampled every 4 px
+(function build(){
+  let h = 0;
+  for (let x=0; x<=total+800; x+=4){
+    heights.push(h);
+    const s = segAt(x);
+    let g = s ? s.g : 0;
+    h += g*4;
+  }
+})();
+function segIndex(x){ for (let i=SEGS.length-1;i>=0;i--) if (x>=segStart[i]) return i; return 0; }
+function segAt(x){ return x>total ? null : SEGS[segIndex(x)]; }
+function baseH(x){ x = Math.max(0, x); const i = x/4|0, f = (x%4)/4; const a = heights[Math.min(i,heights.length-1)], b = heights[Math.min(i+1,heights.length-1)]; return a+(b-a)*f; }
+// bumps decor height (visual + gameplay jolts)
+const bumps = [];
+SEGS.forEach((s,i) => { if (s.type==='bumps'){ for (let x=segStart[i]+60; x<segStart[i]+s.len-40; x+=70+Math.random()*80) bumps.push({x, h:7+Math.random()*7, w:26+Math.random()*16, hit:false}); } });
+function bumpH(x){ let y=0; for (const b of bumps){ const d = Math.abs(x-b.x); if (d<b.w/2) y = Math.max(y, b.h*Math.cos(d/(b.w/2)*Math.PI/2)); } return y; }
+function stairH(x){ // stepped profile for stairs
+  const i = segIndex(x), s = SEGS[i];
+  if (s.type!=='stairs') return baseH(x);
+  const x0 = segStart[i], h0 = baseH(x0), rise = s.g*s.len, n = s.steps;
+  const k = Math.min(n, Math.floor((x-x0)/(s.len/n))+1);
+  return h0 + rise*(k/n);
+}
+function groundH(x){ return stairH(x) + bumpH(x); }
+
+// ---------- State ----------
+let mode = 'stroller'; // or 'chair'
+let st;
+function reset(){
+  st = {
+    x: 40, v: 0, stamina: 1, patience: 1, clock: 0, // clock: game seconds since 11:57:00
+    pushing: false, phase: 'play', stair: null, quip: '', quipT: 0, shake: 0,
+    geese: [], gooseSpawned: false, wind: 0, windT: 3, parts: [], t: 0, roll: 0, detourUsed: {}, honks: 0, jolts: 0
+  };
+  const gi = SEGS.findIndex(s=>s.type==='goose');
+  for (let k=0;k<3;k++) st.geese.push({x: segStart[gi]+120+k*150, y:0, dir: Math.random()<.5?-1:1, t: Math.random()*6, state:'graze', away:0});
+  say(mode==='stroller' ? "Right then. Up we go, wee one." : "Let's see how 'accessible' this hill is.");
+}
+const CLOCK_LIMIT = 130; // 11:57:50 -> 12:00
+const CLOCK_RATE = 1.8;  // game seconds per real second (~100s real)
+
+function say(t, d=2.4){ st.quip = t; st.quipT = d; }
+const Q = {
+  steep: ["Some steep, wha?", "Jeezly hill!", "Who built this, a mountain goat?", "Legs are some sore now.", "Halfway up and I'm wore out."],
+  bump: ["Oof! Big root there.", "That jostled the young one.", "Who's fixing these ruts, b'y?", "Bumpy as the Bedford Highway."],
+  stairs: ["Stairs. Course there's stairs.", "Who puts stairs on a path?", "Not a ramp in sight, wha?"],
+  goose: ["HONK. Geese have the right of way, buddy.", "Get off the path, ye feathered menace!", "Even the geese are judging me."],
+  fog: ["Fog's rollin' in off the harbour.", "Can't see me own feet now.", "Wind's some wicked off the water."],
+  rest: ["Just... a sec...", "Catchin' me breath.", "Rollin' back! Rollin' back!"]
+};
+const pick = a => a[Math.random()*a.length|0];
+
+// ---------- Input ----------
+let held = false;
+function down(e){ if (st && st.phase==='play'){ held = true; if (st.stair) tapStair(); } }
+function up(){ held = false; }
+cv.addEventListener('pointerdown', e=>{ e.preventDefault(); down(e); });
+addEventListener('pointerup', up); addEventListener('pointercancel', up);
+addEventListener('keydown', e=>{ if (e.code==='Space'||e.code==='ArrowUp'||e.code==='ArrowRight'){ e.preventDefault(); if (!e.repeat) down(); else held = true; } if (e.code==='Enter' && st.phase!=='play') start(mode); });
+addEventListener('keyup', e=>{ if (e.code==='Space'||e.code==='ArrowUp'||e.code==='ArrowRight') up(); });
+
+function tapStair(){
+  const s = st.stair; if (!s) return;
+  if (st.stamina < 0.04){ say("Too wore out... rest a sec."); return; }
+  s.taps++; st.stamina -= 0.035; st.shake = 4;
+  if (s.taps >= s.need){
+    const i = s.seg; st.x = segStart[i]+SEGS[i].len+4; st.v = 30; st.stair = null;
+    say(mode==='stroller' ? "Made it. Arms are noodles." : "Up. Took two strangers and a prayer.");
+  }
+}
+
+// ---------- Loop ----------
+let last = performance.now();
+const TS = +(new URLSearchParams(location.search).get('ts')||1); window.__g = () => st;
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000)*TS; last = now;
+  if (st.phase==='play') update(dt); else ambient(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+function ambient(dt){ st.t += dt; }
+
+function update(dt){
+  st.t += dt;
+  st.clock += dt*CLOCK_RATE;
+  st.quipT -= dt; st.shake = Math.max(0, st.shake - dt*20);
+  const i = segIndex(st.x), seg = SEGS[i];
+
+  // Stairs
+  if (!st.stair && seg.type==='stairs' && !st.detourUsed[i]){
+    if (mode==='chair'){
+      // forced detour: the long way round
+      st.detourUsed[i] = true; st.clock += 16; st.x = segStart[i]+seg.len+4; st.v = 20;
+      say("Stairs. No ramp. Long way round... (+16s)", 3.2); st.shake = 3;
+      addPart(st.x, '+16s', '#ffd166');
+    } else {
+      st.stair = {seg:i, taps:0, need: seg.steps*2}; st.detourUsed[i] = true; st.v = 0;
+      st.x = segStart[i]+2; say(pick(Q.stairs)+" TAP to haul it up!", 3);
+    }
+  }
+  if (st.stair){
+    st.stamina = Math.min(1, st.stamina + dt*0.12);
+    const s = st.stair, sg = SEGS[s.seg];
+    st.x = segStart[s.seg] + 2 + (sg.len-6)*(s.taps/s.need);
+    endCheck(); return;
+  }
+
+  // slope at position
+  const dx = 6, slope = (baseH(st.x+dx)-baseH(st.x-dx))/(2*dx);
+  const ang = Math.atan(slope);
+  const pushing = held && st.stamina > 0.02;
+  st.pushing = pushing;
+  const pushF = mode==='chair' ? 350 : 330;
+  let a = -400*Math.sin(ang) - 1.1*st.v;
+  if (pushing) a += pushF * (0.35 + 0.65*Math.min(1, st.stamina*2.2));
+  // wind in fog zone
+  if (seg.type==='fog'){
+    st.windT -= dt;
+    if (st.windT<0){ st.wind = st.wind ? 0 : 1; st.windT = st.wind ? 1.4 : 2.5+Math.random()*2; if (st.wind) say(pick(Q.fog)); }
+    if (st.wind) a -= 90;
+  } else st.wind = 0;
+  // geese
+  for (const g of st.geese){
+    g.t += dt;
+    if (g.state==='graze'){
+      if (Math.abs(g.x - st.x) < 260 && g.t > 1.5 && Math.random()<dt*0.9){ g.state='cross'; g.t=0; }
+    } else if (g.state==='cross'){ g.y = Math.min(1, g.y + dt*0.55*g.dir*g.dir); if (g.t>3.2){ g.state='leave'; } }
+    else if (g.state==='leave'){ g.away += dt*60; }
+    const onPath = g.state==='cross' || (g.state==='graze' && g.y>0.5);
+    if (g.state!=='leave' && Math.abs(g.x - st.x) < 26 && st.v > 15){
+      st.v = -90; st.patience -= 0.08; st.shake = 8; st.honks++;
+      say(pick(Q.goose)); addPart(g.x, 'HONK!', '#fff'); g.state='leave';
+    } else if (onPath && Math.abs(g.x-st.x)<26 && g.state!=='leave'){
+      if (st.v > 0) st.v = 0; // can't pass a standing goose
+    }
+  }
+
+  st.v += a*dt;
+  // letting go = digging in your heels: you slide back, but slowly
+  st.v = Math.max(held ? -160 : -38, Math.min(230, st.v));
+  st.x += st.v*dt;
+  if (st.x < 30){ st.x = 30; st.v = Math.max(0, st.v); }
+
+  // stamina
+  const effort = 0.10 + Math.max(0, Math.sin(ang))*0.85;
+  if (pushing) st.stamina -= dt*effort*0.34;
+  else st.stamina += dt*0.42;
+  st.stamina = Math.max(0, Math.min(1, st.stamina));
+  if (!held && st.v < -20 && st.quipT < 0) say(pick(Q.rest), 1.6);
+  if (st.stamina < 0.08 && held && st.quipT < 0) say("Out of gas! Let go a sec.", 1.6);
+  if (pushing && slope > 0.22 && st.quipT < -2 && Math.random()<dt*0.4) say(pick(Q.steep));
+
+  // bumps
+  for (const b of bumps){
+    if (Math.abs(st.x - b.x) < 8 && !b.hitNow){
+      b.hitNow = true;
+      const speed = Math.abs(st.v), limit = mode==='chair' ? 80 : 85;
+      if (speed > limit){
+        const dmg = Math.min(0.2, (speed-limit)/400 + 0.06) ;
+        st.patience -= dmg; st.v *= 0.35; st.shake = 7; st.jolts++;
+        say(mode==='chair' ? "Front caster caught! Nearly pitched out." : pick(Q.bump));
+        addPart(b.x, mode==='stroller' ? 'WAAAH' : 'JOLT', '#ff8a80');
+      } else { st.v *= 0.8; }
+    }
+    if (Math.abs(st.x - b.x) > 20) b.hitNow = false;
+  }
+  st.roll += st.v*dt;
+  st.patience = Math.max(0, st.patience);
+  for (const p of st.parts){ p.t += dt; }
+  st.parts = st.parts.filter(p=>p.t<1.4);
+  endCheck();
+}
+function addPart(x, txt, col){ st.parts.push({x, txt, col, t:0}); }
+
+function endCheck(){
+  if (st.x >= FINISH){ finish(true); }
+  else if (st.clock >= CLOCK_LIMIT){ finish(false, 'gun'); }
+  else if (st.patience <= 0){ finish(false, 'patience'); }
+}
+function fmtClock(c){ const t = 11*3600+57*60+50 + (Math.min(CLOCK_LIMIT, c)|0); const h=Math.floor(t/3600), m=Math.floor(t%3600/60), ss=t%60; return `${h}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`; }
+
+function finish(win, why){
+  st.phase = 'end'; held = false;
+  if (win || why==='gun') boom = 1.2;
+  const left = Math.max(0, CLOCK_LIMIT - st.clock)|0;
+  const T = document.getElementById('endTitle'), P = document.getElementById('endText');
+  if (win){
+    const best = +(localStorage.getItem('citadel-best-'+mode)||0);
+    let rec = '';
+    try { if (left > best){ localStorage.setItem('citadel-best-'+mode, left); rec = ' New best!'; } } catch(e){}
+    T.textContent = 'Made it! 🎉';
+    P.innerHTML = `Top of Citadel Hill at <b>${fmtClock(st.clock)}</b> with <b>${left}s</b> to spare.${rec}<br>` +
+      (mode==='stroller' ? `Baby jolts: ${st.jolts} · Goose incidents: ${st.honks}.<br>Noon gun goes BOOM. Baby goes WAAAH. Worth it.` :
+       `Jolts: ${st.jolts} · Goose incidents: ${st.honks}.<br>Every stair meant the long way round. Some view though, wha?`);
+  } else if (why==='gun'){
+    T.textContent = 'BOOM. 💥';
+    P.innerHTML = `Noon gun went off and you're still on the hill. Made it ${Math.round(st.x/FINISH*100)}% of the way.<br>Sure, there's always tomorrow. Same time, same hill.`;
+  } else {
+    T.textContent = mode==='stroller' ? 'Meltdown.' : 'That\'s it, I\'m done.';
+    P.innerHTML = mode==='stroller' ? `Too many bumps — the wee one's had enough. Ease off over the rough bits, b'y.` :
+      `One rut too many. Slow down over the bumps or you'll pitch right out.`;
+  }
+  setTimeout(()=>document.getElementById('end').classList.remove('hidden'), 700);
+}
+
+// ---------- Drawing ----------
+let boom = 0;
+const SKY = ['#9cc6dc','#cfe3ea'];
+function draw(){
+  const fogAmt = fogLevel();
+  // camera: player at 35% width, ~62% height
+  const px = st.x, ph = groundH(px);
+  const camX = px - W*0.35;
+  const camY = ph - H*0.38;
+  const sh = st.shake ? (Math.random()-.5)*st.shake : 0;
+  const sx = x => x - camX + sh;
+  const sy = h => H - (h - camY) * 1 + sh*0.6 - H*0.0;
+  // sky
+  const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,SKY[0]); g.addColorStop(1,SKY[1]);
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  // harbour (parallax, lower = further down hill)
+  const harY = H*0.40 + Math.max(-40, Math.min(40, (st.x/FINISH)*80 - 40));
+  ctx.fillStyle = '#4f7f99'; ctx.fillRect(0, harY, W, H-harY);
+  // Dartmouth shore
+  ctx.fillStyle = '#6f8f7a';
+  ctx.beginPath(); ctx.moveTo(0,harY); for (let x=0;x<=W;x+=40){ ctx.lineTo(x, harY - 14 - 8*Math.sin((x+camX*0.1)/90)); } ctx.lineTo(W,harY); ctx.fill();
+  // Georges Island + ferry
+  const gx = ((600 - camX*0.15) % (W+300) + W+300) % (W+300) - 150;
+  ctx.fillStyle = '#7d9a72'; ctx.beginPath(); ctx.ellipse(gx, harY+18, 55, 10, 0, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = '#e8e2d0'; ctx.fillRect(gx-6, harY+2, 12, 8);
+  const fx = ((st.t*14 - camX*0.15 + 200) % (W+200)) - 100;
+  ctx.fillStyle = '#f1f1f1'; ctx.fillRect(fx, harY+34, 34, 7); ctx.fillStyle='#d84a3a'; ctx.fillRect(fx+6, harY+28, 20, 6);
+  // downtown buildings far
+  ctx.fillStyle = '#8ea4b1';
+  for (let k=0;k<14;k++){ const bx = ((k*97 - camX*0.3) % (W+200) + W+200) % (W+200) - 100; const bh = 30+((k*53)%70); ctx.fillRect(bx, harY - bh*0.6 + 30, 46, H); }
+
+  // Old Town Clock near start
+  drawClock(sx(120), sy(baseH(120)));
+
+  // hill body
+  ctx.fillStyle = '#5f9b4a';
+  ctx.beginPath(); ctx.moveTo(-10, H+10);
+  for (let x = camX-20; x <= camX+W+20; x+=6) ctx.lineTo(sx(x), sy(baseH(x)) );
+  ctx.lineTo(W+10, H+10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#6fae57';
+  ctx.beginPath(); ctx.moveTo(-10, H+10);
+  for (let x = camX-20; x <= camX+W+20; x+=6) ctx.lineTo(sx(x), sy(baseH(x))+10);
+  ctx.lineTo(W+10, H+10); ctx.closePath(); ctx.globalAlpha=.35; ctx.fill(); ctx.globalAlpha=1;
+  // path surface (with bumps and stairs)
+  ctx.strokeStyle = '#a58c6a'; ctx.lineWidth = 9; ctx.lineJoin='round';
+  ctx.beginPath();
+  for (let x = camX-20; x <= camX+W+20; x+=3){ const y = sy(groundH(x)); x===camX-20 ? ctx.moveTo(sx(x),y) : ctx.lineTo(sx(x),y); }
+  ctx.stroke();
+  // stairs detail
+  SEGS.forEach((s,i)=>{ if (s.type!=='stairs') return; const x0=segStart[i]; if (x0 > camX+W+50 || x0+s.len < camX-50) return;
+    ctx.fillStyle = '#9b9488';
+    for (let k=0;k<s.steps;k++){ const xa = x0 + k*s.len/s.steps, xb = xa + s.len/s.steps; const y = sy(stairH(xa+1)); ctx.fillRect(sx(xa), y-2, xb-xa+1, 10); ctx.fillStyle = k%2? '#9b9488':'#aaa397'; }
+    // railing
+    ctx.strokeStyle='#3b3b3b'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(sx(x0), sy(baseH(x0))-26); ctx.lineTo(sx(x0+s.len), sy(baseH(x0)+s.g*s.len)-26); ctx.stroke();
+    // sign
+    signpost(sx(x0-30), sy(baseH(x0-30)), mode==='chair' ? 'NO RAMP' : 'STAIRS');
+  });
+  // bumps: roots/rocks
+  ctx.fillStyle = '#6b5236';
+  for (const b of bumps){ if (b.x<camX-40||b.x>camX+W+40) continue; ctx.beginPath(); ctx.ellipse(sx(b.x), sy(baseH(b.x))-2, b.w/2, b.h, 0, Math.PI, 0); ctx.fill(); }
+  // zone signs
+  signpost(sx(segStart[2]+20), sy(baseH(segStart[2]+20)), 'ROUGH');
+  // trees / benches decor
+  for (let x = Math.floor((camX-100)/230)*230; x < camX+W+100; x+=230){ if (x<300 || x>total-300) continue; tree(sx(x+40), sy(baseH(x+40))+4, (x/230)%2); }
+
+  // Citadel at top
+  drawCitadel(sx(FINISH+40), sy(baseH(FINISH+40)));
+  // geese
+  for (const g of st.geese){ if (g.away>200) continue; const gx2 = g.x + (g.state==='leave'? g.away*1.2 : 0); goose(sx(gx2), sy(groundH(gx2)) - 2 - (g.state==='leave'? g.away*0.4:0) + (1-g.y)*10, g.state==='leave'); }
+  // player
+  drawPlayer(sx(px), sy(ph), Math.atan((groundH(px+8)-groundH(px-8))/16));
+  // particles
+  ctx.font = 'bold 16px system-ui'; ctx.textAlign='center';
+  for (const p of st.parts){ ctx.globalAlpha = 1 - p.t/1.4; ctx.fillStyle = p.col; ctx.strokeStyle='#222'; ctx.lineWidth=3; const y = sy(groundH(p.x)) - 60 - p.t*40; ctx.strokeText(p.txt, sx(p.x), y); ctx.fillText(p.txt, sx(p.x), y); }
+  ctx.globalAlpha = 1;
+
+  // fog
+  if (fogAmt>0){
+    ctx.fillStyle = `rgba(232,236,238,${0.62*fogAmt})`; ctx.fillRect(0,0,W,H);
+    for (let k=0;k<6;k++){ const fx2 = ((k*260 + st.t*(st.wind?90:25)) % (W+400)) - 200; ctx.fillStyle = `rgba(245,247,248,${0.35*fogAmt})`; ctx.beginPath(); ctx.ellipse(W - fx2, H*0.3 + k*60, 220, 50, 0, 0, Math.PI*2); ctx.fill(); }
+    if (st.wind){ ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2; for (let k=0;k<10;k++){ const y = (k*73 + st.t*40)%H; const x = W - ((st.t*700 + k*190) % (W+200)); ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+60,y); ctx.stroke(); } }
+  }
+  // noon gun flash
+  if (boom>0){ ctx.fillStyle = `rgba(255,240,200,${Math.min(1,boom)*0.8})`; ctx.fillRect(0,0,W,H); boom -= 1/60; }
+
+  hud();
+}
+function fogLevel(){ const i = SEGS.findIndex(s=>s.type==='fog'); const a = segStart[i]-150, b = segStart[i]+SEGS[i].len+120; if (st.x<a||st.x>b+200) return 0; if (st.x<a+150) return (st.x-a)/150; if (st.x>b) return 1-(st.x-b)/200; return 1; }
+
+function hud(){
+  // clock
+  const left = CLOCK_LIMIT - st.clock;
+  ctx.fillStyle = 'rgba(20,30,40,.72)'; rr(12,12,150,48,12); ctx.fill();
+  ctx.fillStyle = left<30 ? '#ff6b5e' : '#fff'; ctx.font='bold 24px ui-monospace,Menlo,monospace'; ctx.textAlign='left';
+  ctx.fillText(fmtClock(st.clock), 24, 45);
+  ctx.font='11px system-ui'; ctx.fillStyle='#cfd8dc'; ctx.fillText('NOON GUN AT 12:00', 24, 24);
+  // bars
+  bar(W-182, 14, 'PUFF', st.stamina, '#4fc3f7');
+  bar(W-182, 40, mode==='stroller' ? 'BABY MOOD' : 'PATIENCE', st.patience, st.patience<.35 ? '#ff6b5e' : '#ffd166');
+  // progress
+  const pw = Math.min(360, W-48), px0 = (W-pw)/2, py0 = H-26;
+  ctx.fillStyle='rgba(20,30,40,.6)'; rr(px0, py0, pw, 10, 5); ctx.fill();
+  ctx.fillStyle='#b3261e'; rr(px0, py0, Math.max(10, pw*Math.min(1,st.x/FINISH)), 10, 5); ctx.fill();
+  ctx.font='12px system-ui'; ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.fillText('Clock Tower', px0, py0-6); ctx.textAlign='right'; ctx.fillText('Fort', px0+pw, py0-6);
+  // stair prompt
+  if (st.stair){
+    const pulse = 1 + 0.08*Math.sin(st.t*14);
+    ctx.save(); ctx.translate(W/2, H*0.22); ctx.scale(pulse,pulse);
+    ctx.fillStyle='rgba(179,38,30,.92)'; rr(-110,-28,220,56,14); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 24px system-ui'; ctx.textAlign='center'; ctx.fillText(`TAP! ${st.stair.taps}/${st.stair.need}`, 0, 9);
+    ctx.restore();
+  }
+  // quip
+  if (st.quipT>0 && st.phase==='play'){
+    ctx.font='bold 16px system-ui'; const tw = ctx.measureText(st.quip).width;
+    const bx = Math.min(W-tw-30, Math.max(10, W*0.35 - tw/2)), by = H*0.38 - 150;
+    ctx.globalAlpha = Math.min(1, st.quipT*2);
+    ctx.fillStyle='rgba(255,255,255,.95)'; rr(bx, by, tw+24, 34, 12); ctx.fill();
+    ctx.fillStyle='#1f2a33'; ctx.textAlign='left'; ctx.fillText(st.quip, bx+12, by+22); ctx.globalAlpha=1;
+  }
+  // hint at start
+  if (st.phase==='play' && st.t < 4 && !st.stair){ ctx.font='bold 18px system-ui'; ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,'+(1-st.t/4)+')'; ctx.fillText('HOLD to push · let go to rest', W/2, H*0.30); }
+}
+function bar(x,y,label,val,col){ ctx.fillStyle='rgba(20,30,40,.72)'; rr(x,y,168,22,8); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.15)'; rr(x+86,y+6,74,10,5); ctx.fill(); ctx.fillStyle=col; rr(x+86,y+6,Math.max(0,74*val),10,5); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold 11px system-ui'; ctx.textAlign='left'; ctx.fillText(label, x+8, y+15); }
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function signpost(x,y,t){ ctx.fillStyle='#5a4632'; ctx.fillRect(x-2,y-40,4,40); ctx.fillStyle='#f4ead2'; ctx.fillRect(x-30,y-58,60,20); ctx.strokeStyle='#5a4632'; ctx.lineWidth=2; ctx.strokeRect(x-30,y-58,60,20); ctx.fillStyle='#5a4632'; ctx.font='bold 11px system-ui'; ctx.textAlign='center'; ctx.fillText(t,x,y-44); }
+function tree(x,y,v){ ctx.fillStyle='#5b4330'; ctx.fillRect(x-3,y-30,6,30); ctx.fillStyle = v? '#3f7a3a':'#4d8a3f'; ctx.beginPath(); ctx.arc(x,y-40,18,0,7); ctx.arc(x-12,y-30,13,0,7); ctx.arc(x+12,y-30,13,0,7); ctx.fill(); }
+function drawClock(x,y){
+  ctx.fillStyle='#f3efe4'; ctx.fillRect(x-28,y-60,56,60); ctx.fillStyle='#e7e1d2'; ctx.fillRect(x-18,y-92,36,32); ctx.fillRect(x-10,y-112,20,20);
+  ctx.fillStyle='#8a6a45'; ctx.beginPath(); ctx.moveTo(x-12,y-112); ctx.lineTo(x,y-130); ctx.lineTo(x+12,y-112); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y-76,11,0,7); ctx.fill(); ctx.strokeStyle='#222'; ctx.lineWidth=1.5; ctx.stroke();
+  const m = (st.clock/60 + 57.8)/60*Math.PI*2; ctx.beginPath(); ctx.moveTo(x,y-76); ctx.lineTo(x+Math.sin(m)*9, y-76-Math.cos(m)*9); ctx.moveTo(x,y-76); ctx.lineTo(x+Math.sin(-0.02)*6, y-76-6); ctx.stroke();
+  ctx.fillStyle='#2b6c8f'; ctx.fillRect(x-6,y-28,12,28);
+}
+function drawCitadel(x,y){
+  ctx.fillStyle='#7c7568'; ctx.beginPath(); ctx.moveTo(x-90,y); ctx.lineTo(x-70,y-60); ctx.lineTo(x+180,y-60); ctx.lineTo(x+200,y); ctx.fill();
+  ctx.fillStyle='#8d867a'; for (let k=0;k<12;k++) ctx.fillRect(x-70+k*21, y-70, 12, 10);
+  ctx.fillStyle='#4a4339'; rr(x+10,y-40,30,40,14); ctx.fill();
+  // flagpole + flag
+  ctx.fillStyle='#ddd'; ctx.fillRect(x+90,y-150,3,90);
+  const wv = Math.sin(st.t*4)*3;
+  ctx.fillStyle='#d52b1e'; ctx.fillRect(x+93,y-150,12,26); ctx.fillRect(x+129,y-150+wv*.5,12,26);
+  ctx.fillStyle='#fff'; ctx.fillRect(x+105,y-150+wv*.25,24,26);
+  ctx.fillStyle='#d52b1e'; ctx.beginPath(); ctx.arc(x+117,y-137+wv*.25,6,0,7); ctx.fill();
+  // noon gun
+  ctx.fillStyle='#222'; ctx.fillRect(x+140,y-76,34,8); ctx.beginPath(); ctx.arc(x+146,y-68,7,0,7); ctx.fill();
+  if (boom>0){ ctx.fillStyle=`rgba(255,200,80,${boom})`; ctx.beginPath(); ctx.arc(x+184,y-74,30*(1.3-boom)+10,0,7); ctx.fill(); ctx.fillStyle=`rgba(200,200,200,${boom*.8})`; ctx.beginPath(); ctx.arc(x+200,y-90,50*(1.3-boom)+10,0,7); ctx.fill(); }
+}
+function goose(x,y,fly){
+  ctx.save(); ctx.translate(x,y);
+  ctx.fillStyle='#6b5a48'; ctx.beginPath(); ctx.ellipse(0,-10,13,8,0,0,7); ctx.fill();
+  ctx.fillStyle='#1d1d1d'; ctx.fillRect(-12,-30,4,18); ctx.beginPath(); ctx.ellipse(-12,-31,5,4,0,0,7); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.fillRect(-14,-30,3,4);
+  ctx.fillStyle='#e0a04a'; ctx.beginPath(); ctx.moveTo(-17,-32); ctx.lineTo(-23,-30); ctx.lineTo(-17,-29); ctx.fill();
+  if (fly){ ctx.fillStyle='#5a4a3a'; const f = Math.sin(st.t*20)*10; ctx.beginPath(); ctx.moveTo(-2,-12); ctx.lineTo(8,-24-f); ctx.lineTo(12,-10); ctx.fill(); }
+  else { ctx.strokeStyle='#e0a04a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-2,-3); ctx.lineTo(-2,2); ctx.moveTo(3,-3); ctx.lineTo(3,2); ctx.stroke(); }
+  ctx.restore();
+}
+function drawPlayer(x,y,ang){
+  ctx.save(); ctx.translate(x,y-4); ctx.rotate(-ang);
+  const wr = st.roll/8;
+  const bob = st.pushing ? Math.sin(st.t*10)*1.5 : 0;
+  if (mode==='stroller'){
+    // pusher behind (left)
+    person(-34, bob, true);
+    // stroller
+    ctx.strokeStyle='#222'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(-22,-38); ctx.lineTo(-8,-14); ctx.lineTo(18,-14); ctx.stroke(); // handle + frame
+    ctx.fillStyle='#2f5d7c'; ctx.beginPath(); ctx.moveTo(-10,-16); ctx.lineTo(22,-16); ctx.lineTo(20,-30); ctx.quadraticCurveTo(4,-34,-8,-30); ctx.closePath(); ctx.fill(); // basket
+    ctx.fillStyle='#b3261e'; ctx.beginPath(); ctx.moveTo(-8,-30); ctx.quadraticCurveTo(-8,-52,14,-50); ctx.lineTo(4,-30); ctx.closePath(); ctx.fill(); // canopy
+    ctx.fillStyle='#f2c9a0'; ctx.beginPath(); ctx.arc(10,-33,5,0,7); ctx.fill(); // baby
+    if (st.patience<.4){ ctx.fillStyle='#4fc3f7'; ctx.fillRect(14,-33,2,4); }
+    wheel(-6,-5,5,wr*1.6); wheel(18,-5,5,wr*1.6);
+  } else {
+    // wheelchair self-propelled
+    wheel(-2,-14,14,wr); wheel(20,-4,4,wr*3);
+    ctx.strokeStyle='#333'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(-8,-40); ctx.lineTo(-6,-20); ctx.lineTo(16,-20); ctx.lineTo(20,-6); ctx.stroke();
+    ctx.fillStyle='#2f5d7c'; ctx.fillRect(-8,-24,22,5);
+    // rider
+    ctx.fillStyle='#b3261e'; rr(-6,-50,13,28,5); ctx.fill(); // torso
+    ctx.strokeStyle='#22313f'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(4,-22); ctx.lineTo(16,-22); ctx.lineTo(18,-8); ctx.stroke(); // legs
+    ctx.fillStyle='#e8b98f'; ctx.beginPath(); ctx.arc(1,-58,7,0,7); ctx.fill();
+    ctx.fillStyle='#22313f'; ctx.fillRect(-6,-66,14,5); // toque
+    const armA = st.pushing ? Math.sin(st.t*10)*0.6 : 0;
+    ctx.strokeStyle='#b3261e'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,-44); ctx.lineTo(-2+Math.sin(armA)*10, -22+Math.cos(armA)*2); ctx.stroke();
+  }
+  ctx.restore();
+}
+function person(x,bob,leaning){
+  ctx.save(); ctx.translate(x,0);
+  const step = st.pushing ? Math.sin(st.t*10)*6 : 0;
+  ctx.strokeStyle='#22313f'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(0,-26+bob); ctx.lineTo(-5+step,0); ctx.moveTo(0,-26+bob); ctx.lineTo(5-step,0); ctx.stroke();
+  ctx.fillStyle='#e0b13b'; rr(-6,-54+bob,14,30,5); ctx.fill(); // rain jacket
+  ctx.strokeStyle='#e0b13b'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(4,-48+bob); ctx.lineTo(14,-38); ctx.stroke();
+  ctx.fillStyle='#e8b98f'; ctx.beginPath(); ctx.arc(3,-61+bob,7,0,7); ctx.fill();
+  ctx.fillStyle='#b3261e'; ctx.beginPath(); ctx.arc(3,-64+bob,7,Math.PI,0); ctx.fill(); ctx.beginPath(); ctx.arc(3,-72+bob,2.5,0,7); ctx.fill(); // toque w/ pompom
+  if (st.stamina<.2){ ctx.fillStyle='#7fd3ff'; ctx.beginPath(); ctx.arc(-4,-64+bob,2,0,7); ctx.fill(); }
+  ctx.restore();
+}
+function wheel(x,y,r,a){ ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.strokeStyle='#bbb'; ctx.lineWidth=1.2; ctx.beginPath(); for (let k=0;k<3;k++){ const t=a+k*Math.PI/3; ctx.moveTo(x-Math.cos(t)*(r-1.5), y-Math.sin(t)*(r-1.5)); ctx.lineTo(x+Math.cos(t)*(r-1.5), y+Math.sin(t)*(r-1.5)); } ctx.stroke(); }
+
+// ---------- Menus ----------
+function start(m){
+  mode = m; bumps.forEach(b=>b.hitNow=false); reset(); st.phase='play';
+  document.getElementById('title').classList.add('hidden');
+  document.getElementById('end').classList.add('hidden');
+}
+document.getElementById('bStroller').onclick = e=>{ e.stopPropagation(); start('stroller'); };
+document.getElementById('bChair').onclick = e=>{ e.stopPropagation(); start('chair'); };
+document.getElementById('bAgain').onclick = ()=>start(mode);
+document.getElementById('bSwap').onclick = ()=>start(mode==='stroller'?'chair':'stroller');
+
+reset(); st.phase = 'title';
+// attract mode: slow drift so the scene is alive behind the title card
+(function attract(){ if (st.phase==='title'){ st.x = 40 + (Math.sin(performance.now()/4000)+1)*120; } requestAnimationFrame(attract); })();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

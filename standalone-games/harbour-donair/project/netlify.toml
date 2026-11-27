@@ -1,0 +1,9 @@
+# Harbour Donair — Netlify. Nitro's netlify preset writes static files to dist
+# and the server function to .netlify/functions-internal. NETLIFY=true is set by
+# the build image, which switches vite.config.ts off the Vercel preset.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

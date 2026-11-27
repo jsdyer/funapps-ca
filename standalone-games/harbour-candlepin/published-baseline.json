@@ -1,0 +1,6 @@
+{
+  "project": "candlepin-funapps",
+  "deploy": "6b0847ab28e1b0fed94486b6",
+  "source": "Netlify production source upload",
+  "layout": "project"
+}

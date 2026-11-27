@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import zipfile
 from game_favicons import apply_favicons
 
@@ -15,14 +16,26 @@ def package(game, output):
     if target.exists():
         shutil.rmtree(target)
     target.mkdir(parents=True)
-    if (source / 'web' / 'index.html').is_file():
+    layout = game.get('release_layout')
+    if layout == 'project':
+        project = source / 'project'
+        # Package only versioned source. Local environment files and build output stay private.
+        tracked = subprocess.check_output(['git', 'ls-files', '-z', '--', '.'], cwd=project)
+        if not tracked or not (project / 'netlify.toml').is_file():
+            raise ValueError(f"{game['slug']}: missing tracked Netlify project")
+        for relative in tracked.decode().rstrip('\0').split('\0'):
+            destination = target / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(project / relative, destination)
+    elif (source / 'web' / 'index.html').is_file():
         shutil.copytree(source / 'web', target, dirs_exist_ok=True)
     else:
         for path in source.iterdir():
             if path.is_file() and (path.suffix in ('.html', '.js', '.mjs', '.css', '.svg', '.png', '.ico', '.webp', '.jpg') or path.name == '_headers') and not path.name.startswith(('audit-', 'test_')) and '-regression.' not in path.name:
                 shutil.copy2(path, target / path.name)
     # Preserve each live release's metadata and routing while adding portable icons.
-    apply_favicons(game['slug'], target)
+    if layout not in ('project', 'original-static'):
+        apply_favicons(game['slug'], target)
     archive = output / (game['slug'] + '.zip')
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
         for path in sorted(target.rglob('*')):

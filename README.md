@@ -157,13 +157,13 @@ The original activities and their registry live in `games.js`; individual activi
 
 ## Standalone game maintenance
 
-The 22 standalone Netlify games are maintained as complete static releases in `standalone-games/<slug>/web/`. These releases were synchronized with their published Netlify files for the favicon update; earlier root-level source and audit files remain available for reference. Edit the maintained `web/` release, or rebuild it from the relevant source when intentionally changing a game. `published-baseline.json` records the hashes of the original downloaded production files.
+Most independently deployed games are maintained as complete static releases in `standalone-games/<slug>/web/`. These releases were synchronized with their published Netlify files for the favicon update; earlier root-level source and audit files remain available for reference. Edit the maintained `web/` release, or rebuild it from the relevant source when intentionally changing a game. `published-baseline.json` records the hashes of the original downloaded production files.
 
-Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matching ZIP to the existing project. The packager preserves the release's existing metadata, redirects and game files. These games remain Netlify Drop projects, so a hub Git push does not deploy their code. The 13 bundled games continue to publish through the hub under `/play/<slug>/`.
+Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matching ZIP to the existing project. The packager preserves the release's existing metadata, redirects and game files. These games remain Netlify Drop projects, so a hub Git push does not deploy their code. Games marked `release_layout: project` keep their buildable source in `standalone-games/<slug>/project/`. The packager includes their tracked source and Netlify build configuration. Games marked `original-static` retain their original uploaded assets. The bundled games publish through the hub under `/play/<slug>/`.
 
 ### Game icons
 
-Each of the 35 games has its own artwork in `game-icons/<slug>/`: `source.png` (256 px), `favicon.png` (96 px), `favicon.ico` (16, 32, 48 and 64 px), and `apple-touch-icon.png` (180 px). The artwork uses recognizable game-specific subjects and contains no text. `game-icons/designs.json` records the illustration brief for each game.
+Games with a custom FunApps icon set have their artwork in `game-icons/<slug>/`: `source.png` (256 px), `favicon.png` (96 px), `favicon.ico` (16, 32, 48 and 64 px), and `apple-touch-icon.png` (180 px). The artwork uses recognizable game-specific subjects and contains no text. `game-icons/designs.json` records the illustration brief for each game.
 
 Both `build.py` and `scripts/build_standalone.py` apply these icons through `scripts/game_favicons.py`. The regional rebuild script also reapplies them after regenerating framework bundles. Icon URLs are relative to each release, so they work at a `/play/` path, a Netlify address or a future custom subdomain. Existing game-specific SVG files remain available for old bookmarks, while page declarations prefer the new PNG/ICO files.
 

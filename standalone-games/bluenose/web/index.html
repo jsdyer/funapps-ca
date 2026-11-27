@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Bluenose — Race for the Fishermen's Trophy | funapps.ca</title>
+<meta name="description" content="Skipper the Bluenose against the Gloucester schooners. Read the wind, ride the gusts, dodge the fog and squalls, and keep the trophy in Nova Scotia.">
+<meta property="og:title" content="Bluenose — Race for the Fishermen's Trophy">
+<meta property="og:description" content="Skipper the Queen of the North Atlantic. A funapps.ca sailing race.">
+<meta name="theme-color" content="#0b3d5e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛵</text></svg>">
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#08304d;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+canvas{display:block}
+#home{position:fixed;left:12px;bottom:10px;font:600 13px system-ui,-apple-system,"Segoe UI",sans-serif;color:#f3ead2;opacity:.75;text-decoration:none;z-index:2}
+#home:hover{opacity:1}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<a id="home" href="https://funapps.ca">← funapps.ca</a>
+<script>
+(()=>{
+const cv=document.getElementById('c'),cx=cv.getContext('2d'),home=document.getElementById('home');
+let W=0,H=0,DPR=1,Z=1;
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';Z=Math.max(0.55,Math.min(1.05,Math.min(W,H)/760));}
+addEventListener('resize',resize);resize();
+
+const TAU=Math.PI*2,D=Math.PI/180;
+const wrap=a=>{a=(a+Math.PI)%TAU;if(a<0)a+=TAU;return a-Math.PI;};
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function hash(x,y){let h=(x*374761393+y*668265263)|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295;}
+const fmt=t=>{const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1);};
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
+const SANS='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',SERIF='Georgia,"Times New Roman",serif';
+
+const KN=12,MAXKN=13,BOATLEN=150;
+const RACES=[
+ {opp:'Elsie',year:1921,skill:0.9,shift:0.10,hull:'#ece6d6',trim:'#2f6f4e',
+  line:"Fresh off the ways in Lunenburg. Show the Gloucester crowd.",
+  marks:[{x:0,y:-2600,n:'WINDWARD'},{x:0,y:0,n:'FINISH',fin:1}],fog:[],squalls:false,gusts:9,lulls:3},
+ {opp:'Columbia',year:1923,skill:0.94,shift:0.14,hull:'#f2f2ee',trim:'#8a2b2b',
+  line:"Fog's rollin' in off the Banks. Keep your eyes peeled.",
+  marks:[{x:0,y:-2600,n:'WINDWARD'},{x:1700,y:-1300,n:'WING'},{x:0,y:0,n:'FINISH',fin:1}],
+  fog:[[450,-1650,620],[1500,-500,560],[-350,-2350,480],[1150,-2250,520]],squalls:false,gusts:10,lulls:4},
+ {opp:'Gertrude L. Thebaud',year:1938,skill:0.97,shift:0.2,hull:'#e9e3cf',trim:'#24467a',
+  line:"The last great race. Squalls about. Don't haul in the black stuff.",
+  marks:[{x:0,y:-2800,n:'WINDWARD'},{x:-1800,y:-1400,n:'WING'},{x:0,y:500,n:'LEEWARD'},{x:0,y:-2800,n:'WINDWARD'},{x:0,y:0,n:'FINISH',fin:1}],
+  fog:[[-950,-2000,600],[700,-900,520]],squalls:true,gusts:11,lulls:4},
+];
+
+let state='title',raceIdx=0,race=RACES[0],simT=0,raceT=0,countdown=0,stateT=0;
+let player,opp,patches=[],toast=null,cool={},result=null,finishTimer=0,oppFirst=false,lastPos=1,nextSquall=0;
+let cam={x:0,y:0},oppRemAtFinish=0;
+let saved=0;try{saved=+localStorage.getItem('bluenose_race')||0;}catch(e){}
+saved=clamp(saved|0,0,2);
+
+function makeBoat(x,y,h,name){return{x,y,h,v:3*KN,stam:1,heel:0,haul:false,ai:false,mark:0,done:false,finT:0,wake:[],wakeT:0,broach:0,side:1,upwind:false,lastTack:-99,irons:0,sailSide:1,rel:0,a:0,ws:1,sq:0,dirty:false,name,skill:1};}
+
+function windDir(t){return race.shift*(Math.sin(t/21)+0.5*Math.sin(t/8.3+1));}
+
+function newPatch(type,x,y){
+ const p={type,x,y,age:0,paws:[]};
+ if(type==='gust'){p.r=rnd(220,380);p.s=rnd(0.28,0.4);p.spd=38;}
+ else if(type==='lull'){p.r=rnd(260,420);p.s=-rnd(0.25,0.35);p.spd=30;}
+ else if(type==='squall'){p.r=520;p.s=0.62;p.ds=0.3;p.spd=65;}
+ for(let i=0;i<(type==='squall'?40:18);i++){const a=Math.random()*TAU,d=Math.sqrt(Math.random())*p.r*0.8;p.paws.push([Math.cos(a)*d,Math.sin(a)*d,Math.random()*TAU]);}
+ patches.push(p);return p;
+}
+function spawnUpwind(type){
+ const w=windDir(simT),fx=Math.sin(w),fy=-Math.cos(w),px=Math.cos(w),py=Math.sin(w);
+ const d=type==='squall'?1300:rnd(900,1600),lat=type==='squall'?rnd(-350,350):rnd(-1300,1300);
+ const p=newPatch(type,player.x+fx*d+px*lat,player.y+fy*d+py*lat);
+ if(type==='squall')p.age=0;else p.age=0;
+}
+
+function setupRace(i,attract){
+ raceIdx=i;race=RACES[i];raceT=0;simT=0;
+ player=makeBoat(-90,260,-42*D,'BLUENOSE');
+ opp=makeBoat(90,260,42*D,race.opp.toUpperCase());opp.ai=true;opp.skill=race.skill;
+ if(attract){player.ai=true;}
+ patches=[];
+ for(let k=0;k<race.gusts;k++){const p=newPatch('gust',rnd(-1900,1900),rnd(-3100,800));p.age=5;}
+ for(let k=0;k<race.lulls;k++){const p=newPatch('lull',rnd(-1900,1900),rnd(-3100,800));p.age=5;}
+ for(const f of race.fog){patches.push({type:'fog',x:f[0],y:f[1],r:f[2],age:9,paws:[]});}
+ nextSquall=14;
+ cam.x=player.x;cam.y=player.y-120;
+ lastPos=1;cool={};toast=null;finishTimer=0;oppFirst=false;result=null;
+}
+
+function windAt(x,y){
+ let dir=windDir(simT),s=1,sq=0;
+ for(const p of patches){if(p.type==='fog')continue;const dx=x-p.x,dy=y-p.y,d2=dx*dx+dy*dy,r2=p.r*p.r;
+  if(d2<r2){let f=(1-d2/r2)*Math.min(1,p.age/3);s+=p.s*f;if(p.type==='squall'){dir+=p.ds*f;sq=Math.max(sq,f);}}}
+ return{dir,s:Math.max(0.35,s),sq};
+}
+function fogAt(x,y){let f=0;for(const p of patches){if(p.type!=='fog')continue;const d=Math.hypot(x-p.x,y-p.y);f=Math.max(f,clamp((1-d/p.r)*2.2,0,1));}return f;}
+
+function polar(a){const d=a/D;
+ if(d<30)return 0;if(d<45)return lerp(0,0.72,(d-30)/15);if(d<95)return lerp(0.72,1,(d-45)/50);
+ if(d<140)return lerp(1,0.86,(d-95)/45);return lerp(0.86,0.74,(d-140)/40);}
+function power(a){const d=a/D;if(d<30)return 0.15;if(d<110)return 1;return lerp(1,0.45,(d-110)/70);}
+
+function dirtyAir(b,o,w){
+ const dx=b.x-o.x,dy=b.y-o.y,ux=-Math.sin(w),uy=Math.cos(w);
+ const along=dx*ux+dy*uy,lat=Math.abs(dx*uy-dy*ux);
+ return along>20&&along<280&&lat<60+along*0.25;
+}
+
+function updBoat(b,o,dt,steer,haulReq){
+ const w=windAt(b.x,b.y);
+ b.dirty=dirtyAir(b,o,w.dir);
+ const s=w.s*(b.dirty?0.8:1);
+ const rel=wrap(w.dir-b.h),a=Math.abs(rel);
+ b.rel=rel;b.a=a;b.ws=s;b.sq=w.sq;
+ if(a<172*D)b.sailSide=rel>0?-1:1;
+ const sp=b.v/(MAXKN*KN);
+ const tr=(0.9+1.3*Math.min(1,sp))*(b.broach>0?0.4:1);
+ b.h=wrap(b.h+steer*tr*dt);
+ b.haul=haulReq&&b.stam>0.02&&b.broach<=0;
+ if(b.haul)b.stam=Math.max(0,b.stam-0.2*dt);else b.stam=Math.min(1,b.stam+0.09*dt);
+ let tgt=polar(a)*s*MAXKN*KN*(b.haul?1.17:1)*b.skill;
+ if(state==='countdown')tgt*=0.4;
+ if(b.broach>0){b.broach-=dt;tgt*=0.15;}
+ const k=tgt>b.v?0.35:0.8;
+ b.v+=(tgt-b.v)*Math.min(1,k*dt);
+ const ht=s*power(a)*(b.haul?1.25:1)*0.58;
+ b.heel+=(ht-b.heel)*Math.min(1,2.5*dt);
+ if(b.heel>1&&b.broach<=0){b.broach=2.2;b.v*=0.35;b.heel=0.4;
+  if(b===player&&!b.ai)say('broach',"Knocked down! Don't haul in a squall, b'y.",0,true);}
+ if(a<30*D)b.irons+=dt;else b.irons=0;
+ b.x+=Math.sin(b.h)*b.v*dt;b.y-=Math.cos(b.h)*b.v*dt;
+ b.wakeT+=dt;
+ if(b.wakeT>0.06){b.wakeT=0;b.wake.push({x:b.x-Math.sin(b.h)*60,y:b.y+Math.cos(b.h)*60,h:b.h,t:simT,v:b.v});if(b.wake.length>45)b.wake.shift();}
+}
+
+function aiSteer(b){
+ if(b.done)return 0;
+ const m=race.marks[b.mark];
+ const w=windAt(b.x,b.y).dir;
+ const brg=Math.atan2(m.x-b.x,-(m.y-b.y));
+ const rel=wrap(brg-w),TA=46*D;
+ let want;
+ if(Math.abs(rel)>TA+2*D){want=brg;b.upwind=false;}
+ else{
+  if(!b.upwind){b.upwind=true;b.side=wrap(b.h-w)>=0?1:-1;}
+  const since=simT-b.lastTack;
+  if(b.side*rel<-(TA-3*D)&&since>3){b.side*=-1;b.lastTack=simT;}
+  else if(since>14&&b.side*rel<0&&Math.random()<0.004){b.side*=-1;b.lastTack=simT;}
+  want=w+b.side*TA;
+ }
+ return clamp(wrap(want-b.h)*3,-1,1);
+}
+
+function remaining(b){if(b.done)return 0;const M=race.marks;let d=dist(b,M[b.mark]);for(let k=b.mark;k<M.length-1;k++)d+=dist(M[k],M[k+1]);return d;}
+
+function checkMarks(b){
+ if(b.done)return;const m=race.marks[b.mark];
+ if(dist(b,m)<(m.fin?200:130)){
+  b.mark++;
+  if(b.mark>=race.marks.length){b.done=true;b.finT=raceT;
+   if(b===opp&&!player.done){oppFirst=true;if(!player.ai)say('oppfin',race.opp+" crossed first! Bring her home anyway.",0,true);}
+   if(b===player&&!player.ai){oppRemAtFinish=remaining(opp);}
+  }else if(b===player&&!player.ai){say('mark'+b.mark,pick(["Rounded the "+m.n.toLowerCase()+" mark!","Nice roundin', skipper!","Mark's behind us. Next one!"]),0,true);}
+ }
+}
+
+function collide(){
+ const dx=opp.x-player.x,dy=opp.y-player.y,d=Math.hypot(dx,dy);
+ if(d<64&&d>0.01){const p=(64-d)/2,nx=dx/d,ny=dy/d;player.x-=nx*p;player.y-=ny*p;opp.x+=nx*p;opp.y+=ny*p;}
+}
+
+function updatePatches(dt){
+ const w=windDir(simT),ux=-Math.sin(w),uy=Math.cos(w);
+ for(const p of patches){p.age+=dt;const sp=p.type==='fog'?5:p.spd;p.x+=ux*sp*dt;p.y+=uy*sp*dt;}
+ patches=patches.filter(p=>p.type==='fog'||dist(p,player)<2700);
+ let g=0,l=0;for(const p of patches){if(p.type==='gust')g++;else if(p.type==='lull')l++;}
+ while(g++<race.gusts)spawnUpwind('gust');
+ while(l++<race.lulls)spawnUpwind('lull');
+ if(race.squalls&&simT>nextSquall&&state!=='title'){spawnUpwind('squall');nextSquall=simT+rnd(26,38);}
+}
+
+// ---------- input ----------
+const keys={};
+addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();if(!e.repeat)advance();});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;ptrs.clear();});
+const ptrs=new Map();
+let touchUI=false;try{touchUI=matchMedia('(pointer: coarse)').matches;}catch(e){}
+cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touchUI=true;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});advance();e.preventDefault();});
+cv.addEventListener('pointermove',e=>{if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});});
+const up=e=>ptrs.delete(e.pointerId);
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',up);
+let tSteer=0,tHaul=false;
+function readTouch(){tSteer=0;tHaul=false;for(const p of ptrs.values()){if(p.y<H*0.25)continue;if(p.x<W*0.33)tSteer-=1;else if(p.x>W*0.67)tSteer+=1;else tHaul=true;}}
+const inSteer=()=>clamp((keys.ArrowLeft||keys.KeyA?-1:0)+(keys.ArrowRight||keys.KeyD?1:0)+tSteer,-1,1);
+const inHaul=()=>!!(keys.Space||keys.ArrowUp||keys.KeyW||tHaul);
+
+function startRace(i){setupRace(i,false);state='countdown';countdown=3.6;stateT=0;}
+function advance(){
+ if(state==='title'){startRace(saved);}
+ else if(state==='result'&&stateT>0.9){startRace(result.won?raceIdx+1:raceIdx);}
+ else if(state==='champion'&&stateT>1.2){saved=0;startRace(0);}
+}
+
+function say(key,text,cd,force){
+ if(!force&&cool[key]&&simT<cool[key])return;
+ cool[key]=simT+(cd||10);toast={text,t:simT};
+}
+
+function endRace(){
+ const won=!oppFirst;
+ let margin;
+ if(won){margin=opp.done?'by '+(opp.finT-player.finT).toFixed(1)+' seconds':(n=>'by '+n+(n===1?' boat length':' boat lengths'))(Math.max(1,Math.round(oppRemAtFinish/BOATLEN)));}
+ else margin='by '+(player.finT-opp.finT).toFixed(1)+' seconds';
+ result={won,margin,time:player.finT,
+  flav:won?pick(["Lunenburg's buying tonight!","Some good sailin', b'y!","Proper Nova Scotia seamanship.","Gloucester can have the leftovers."])
+          :pick(["Beat by a Gloucesterman. Not today, b'y.","Wicked close. Have another go?","Shake it off. Tide's turnin'."])};
+ stateT=0;
+ if(won&&raceIdx===RACES.length-1){state='champion';saved=0;}
+ else{state='result';if(won)saved=raceIdx+1;}
+ try{localStorage.setItem('bluenose_race',saved);}catch(e){}
+}
+
+// ---------- update ----------
+function simulate(dt){
+ simT+=dt;
+ updatePatches(dt);
+ let ps=0,ph=false;
+ if(player.ai)ps=aiSteer(player);
+ else if(!player.done&&state!=='result'&&state!=='champion'){ps=inSteer();ph=inHaul();}
+ updBoat(player,opp,dt,ps,ph);
+ updBoat(opp,player,dt,aiSteer(opp),false);
+ collide();
+ if(state!=='countdown'){checkMarks(player);checkMarks(opp);}
+ const la=0.9*Z;
+ const tx=player.x+Math.sin(player.h)*player.v*la,ty=player.y-Math.cos(player.h)*player.v*la;
+ cam.x+=(tx-cam.x)*Math.min(1,2*dt);cam.y+=(ty-cam.y)*Math.min(1,2*dt);
+}
+
+function events(){
+ const p=player;
+ if(p.done)return;
+ if(p.sq>0.3)say('squall',"Squall! Ease off — don't haul or she'll go over.",15);
+ else if(p.ws>1.2)say('gust',pick(["Puff comin' — she's liftin'!","Wind's honkin' now, b'y!","Here's a nice puff. Ride it!"]),12);
+ else if(p.ws<0.82&&!p.dirty)say('lull',"Wind's gone soft. Find some breeze.",14);
+ if(fogAt(p.x,p.y)>0.6)say('fog',pick(["Some foggy out here, b'y.","Fog's thicker than chowder.","Can't see a thing. Trust the arrow."]),20);
+ if(p.irons>1.1)say('irons',"In irons! Turn off the wind!",6);
+ if(p.dirty&&raceT>4)say('dirty',"Stuck in their dirty air — get clear!",10);
+ if(p.stam<0.02)say('tired',"Crew's tuckered out. Give 'em a breather.",12);
+ const pos=remaining(p)<=remaining(opp)?1:2;
+ if(pos!==lastPos&&raceT>5){if(pos===1)say('pos',pick(["Passed 'em!","We're out front, b'y!"]),4,true);else say('pos',"They got by us — reel 'em in!",4,true);}
+ lastPos=pos;
+}
+
+function update(dt){
+ stateT+=dt;readTouch();
+ if(state==='title'){simulate(dt);if(player.done||opp.done||simT>200)setupRace(0,true);return;}
+ if(state==='countdown'){simulate(dt);countdown-=dt;if(countdown<=0){state='race';say('go',pick(["Some day for a sail, b'y!","Let 'er go!","Away we go!"]),0,true);}return;}
+ if(state==='race'){raceT+=dt;simulate(dt);events();if(player.done){finishTimer+=dt;if(finishTimer>1.6)endRace();}return;}
+ simulate(dt);
+}
+
+// ---------- render ----------
+function worldTf(){cx.setTransform(DPR*Z,0,0,DPR*Z,DPR*(W/2-cam.x*Z),DPR*(H/2-cam.y*Z));}
+function screenTf(){cx.setTransform(DPR,0,0,DPR,0,0);}
+const toScr=(x,y)=>[W/2+(x-cam.x)*Z,H/2+(y-cam.y)*Z];
+
+function drawWaves(v){
+ const w=windDir(simT),ux=-Math.sin(w),uy=Math.cos(w),px=-uy,py=ux,cell=80;
+ cx.lineWidth=1.6;cx.lineCap='round';
+ const x0=Math.floor(v.x0/cell)-1,x1=Math.ceil(v.x1/cell)+1,y0=Math.floor(v.y0/cell)-1,y1=Math.ceil(v.y1/cell)+1;
+ for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){
+  const h1=hash(i,j),h2=hash(j,i+7);
+  const c=(simT*0.45+h1)%1;
+  const bx=i*cell+h2*cell+ux*c*44,by=j*cell+h1*cell+uy*c*44;
+  const a=Math.sin(c*Math.PI)*0.24,L=7+h2*7;
+  cx.strokeStyle='rgba(185,222,240,'+a.toFixed(3)+')';
+  cx.beginPath();cx.moveTo(bx-px*L,by-py*L);cx.quadraticCurveTo(bx-ux*5,by-uy*5,bx+px*L,by+py*L);cx.stroke();
+ }
+}
+
+function drawPatches(v,types){
+ for(const p of patches){
+  if(!types.includes(p.type))continue;
+  if(p.x+p.r<v.x0||p.x-p.r>v.x1||p.y+p.r<v.y0||p.y-p.r>v.y1)continue;
+  const f=Math.min(1,p.age/3);
+  const g=cx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+  if(p.type==='gust'){g.addColorStop(0,'rgba(2,22,40,'+(0.42*f)+')');g.addColorStop(1,'rgba(2,22,40,0)');}
+  else if(p.type==='lull'){g.addColorStop(0,'rgba(140,195,220,'+(0.2*f)+')');g.addColorStop(1,'rgba(140,195,220,0)');}
+  else if(p.type==='squall'){g.addColorStop(0,'rgba(8,12,20,'+(0.62*f)+')');g.addColorStop(0.7,'rgba(10,16,26,'+(0.4*f)+')');g.addColorStop(1,'rgba(10,16,26,0)');}
+  else{g.addColorStop(0,'rgba(226,233,237,0.8)');g.addColorStop(0.55,'rgba(226,233,237,0.55)');g.addColorStop(1,'rgba(226,233,237,0)');}
+  cx.fillStyle=g;cx.beginPath();cx.arc(p.x,p.y,p.r,0,TAU);cx.fill();
+  if(p.type==='gust'||p.type==='squall'){
+   cx.strokeStyle=p.type==='gust'?'rgba(1,14,28,'+(0.45*f)+')':'rgba(200,210,220,'+(0.25*f)+')';cx.lineWidth=1.4;
+   for(const q of p.paws){const fl=0.5+0.5*Math.sin(simT*3+q[2]);if(fl<0.3)continue;const x=p.x+q[0],y=p.y+q[1];
+    cx.beginPath();cx.moveTo(x-5,y);cx.lineTo(x+5,y-2);cx.moveTo(x-3,y+4);cx.lineTo(x+6,y+3);cx.stroke();}
+  }
+ }
+}
+
+function drawBuoy(x,y,col,big){
+ const bob=Math.sin(simT*2.2+x*0.01)*1.5;
+ cx.fillStyle='rgba(0,0,0,.25)';cx.beginPath();cx.arc(x+3,y+4,big?13:10,0,TAU);cx.fill();
+ cx.strokeStyle='rgba(255,255,255,.35)';cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,(big?16:13)+bob,0,TAU);cx.stroke();
+ cx.fillStyle=col;cx.beginPath();cx.arc(x,y,big?12:9,0,TAU);cx.fill();
+ cx.fillStyle='#fff';cx.fillRect(x-(big?12:9),y-2,(big?24:18),4);
+}
+
+function drawMarks(){
+ const M=race.marks,next=player.mark;
+ // gate (start/finish)
+ const gateNext=M[next]&&M[next].fin||state==='countdown'||state==='title';
+ cx.setLineDash([14,12]);cx.lineWidth=3;cx.strokeStyle=gateNext?'rgba(255,255,255,.55)':'rgba(255,255,255,.18)';
+ cx.beginPath();cx.moveTo(-200,0);cx.lineTo(200,0);cx.stroke();cx.setLineDash([]);
+ drawBuoy(-200,0,'#d23b2e',true);
+ // committee boat
+ cx.save();cx.translate(222,6);cx.fillStyle='rgba(0,0,0,.25)';rr(-9,-20,22,44,8);cx.fill();cx.fillStyle='#d9d4c4';rr(-12,-24,24,46,9);cx.fill();cx.fillStyle='#6d6a60';cx.fillRect(-6,-8,12,14);
+ cx.strokeStyle='#333';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(0,-8);cx.lineTo(0,-36);cx.stroke();cx.fillStyle='#d23b2e';cx.fillRect(0,-36,12,7);cx.restore();
+ cx.font='700 15px '+SANS;cx.textAlign='center';cx.fillStyle='rgba(255,255,255,.7)';
+ cx.fillText(state==='countdown'?'START':'FINISH',0,-24);
+ for(let k=0;k<M.length;k++){const m=M[k];if(m.fin)continue;
+  const isNext=k===next&&!player.done;
+  const dup=M.findIndex(q=>q.x===m.x&&q.y===m.y);
+  if(dup!==k&&!isNext&&next>dup)continue;
+  if(isNext){const pr=130+Math.sin(simT*3)*6;cx.setLineDash([10,10]);cx.lineDashOffset=-simT*20;cx.strokeStyle='rgba(255,207,77,.75)';cx.lineWidth=3;cx.beginPath();cx.arc(m.x,m.y,pr,0,TAU);cx.stroke();cx.setLineDash([]);}
+  drawBuoy(m.x,m.y,isNext?'#ff8a1f':'#b86a2b',true);
+  cx.fillStyle=isNext?'#ffcf4d':'rgba(255,255,255,.45)';cx.font='700 16px '+SANS;cx.fillText(m.n,m.x,m.y-28);
+ }
+ if(M[next]&&M[next].fin&&!player.done){const pr=200+Math.sin(simT*3)*6;cx.setLineDash([10,10]);cx.lineDashOffset=-simT*20;cx.strokeStyle='rgba(255,207,77,.6)';cx.lineWidth=3;cx.beginPath();cx.arc(0,0,pr,0,TAU);cx.stroke();cx.setLineDash([]);}
+ drawBuoy(200,0,'#2e9e55',true);
+}
+
+function drawWake(b){
+ const n=b.wake.length;if(n<2)return;
+ cx.lineCap='round';
+ for(let i=1;i<n;i++){const p=b.wake[i],q=b.wake[i-1],age=simT-p.t;if(age>2.6)continue;
+  const al=(1-age/2.6)*0.4*Math.min(1,p.v/80);if(al<0.01)continue;
+  const off=5+age*20,o2=5+(simT-q.t)*20;
+  const px=Math.cos(p.h),py=Math.sin(p.h),qx=Math.cos(q.h),qy=Math.sin(q.h);
+  cx.strokeStyle='rgba(235,245,250,'+al.toFixed(3)+')';cx.lineWidth=2+age*1.5;
+  cx.beginPath();cx.moveTo(q.x+qx*o2,q.y+qy*o2);cx.lineTo(p.x+px*off,p.y+py*off);
+  cx.moveTo(q.x-qx*o2,q.y-qy*o2);cx.lineTo(p.x-px*off,p.y-py*off);cx.stroke();
+  cx.strokeStyle='rgba(200,230,245,'+(al*0.6).toFixed(3)+')';cx.lineWidth=6;cx.beginPath();cx.moveTo(q.x,q.y);cx.lineTo(p.x,p.y);cx.stroke();
+ }
+}
+
+function sail(mx,my,bx,by,gx,gy,side,bul,col){
+ // mast -> boom end (bulged) -> gaff end -> mast
+ const dx=bx-mx,dy=by-my,L=Math.hypot(dx,dy);let nx=-dy/L,ny=dx/L;if(nx*side<0){nx=-nx;ny=-ny;}
+ const ex=gx-mx,ey=gy-my,L2=Math.hypot(ex,ey);let n2x=-ey/L2,n2y=ex/L2;if(n2x*side<0){n2x=-n2x;n2y=-n2y;}
+ cx.beginPath();cx.moveTo(mx,my);
+ cx.quadraticCurveTo((mx+bx)/2+nx*L*bul,(my+by)/2+ny*L*bul,bx,by);
+ cx.lineTo(gx,gy);
+ cx.quadraticCurveTo((mx+gx)/2+n2x*L2*bul*1.3,(my+gy)/2+n2y*L2*bul*1.3,mx,my);
+ cx.closePath();cx.fillStyle=col;cx.fill();cx.strokeStyle='rgba(120,100,70,.55)';cx.lineWidth=1;cx.stroke();
+ cx.strokeStyle='#3b2a1a';cx.lineWidth=2.2;cx.beginPath();cx.moveTo(mx,my);cx.lineTo(bx,by);cx.stroke();
+}
+function headsail(tx,ty,len,sw,side,bul,col){
+ const cxp=tx+side*Math.sin(sw)*len,cyp=ty+Math.cos(sw)*len;
+ const dx=cxp-tx,dy=cyp-ty,L=Math.hypot(dx,dy);let nx=-dy/L,ny=dx/L;if(nx*side<0){nx=-nx;ny=-ny;}
+ cx.beginPath();cx.moveTo(tx,ty);cx.quadraticCurveTo((tx+cxp)/2+nx*L*bul*1.6,(ty+cyp)/2+ny*L*bul*1.6,cxp,cyp);cx.closePath();
+ cx.fillStyle=col;cx.fill();cx.strokeStyle='rgba(120,100,70,.55)';cx.lineWidth=1;cx.stroke();
+}
+
+function drawBoat(b,hull,trim,deck,crew){
+ cx.save();cx.translate(b.x,b.y);cx.scale(1.4,1.4);
+ const side=b.sailSide,a=b.a,luff=a<30*D;
+ cx.rotate(b.h);
+ // bow spray
+ if(b.v>70){const s=(b.v-70)/90;cx.strokeStyle='rgba(240,250,255,'+(0.5*s)+')';cx.lineWidth=2;for(const sg of[-1,1]){cx.beginPath();cx.moveTo(sg*4,-46);cx.quadraticCurveTo(sg*(14+Math.sin(simT*9)*2),-36,sg*(18+s*6),-22);cx.stroke();}}
+ // shadow
+ cx.save();cx.translate(side*b.heel*8,4);cx.fillStyle='rgba(0,10,20,.35)';hullPath();cx.fill();cx.restore();
+ cx.save();cx.scale(1-b.heel*0.12,1);
+ cx.fillStyle=hull;hullPath();cx.fill();
+ cx.strokeStyle=trim;cx.lineWidth=2;hullPath(0.9);cx.stroke();
+ cx.fillStyle=deck;hullPath(0.76);cx.fill();
+ cx.fillStyle='rgba(60,40,20,.5)';rr(-5,-28,10,12,2);cx.fill();rr(-6,16,12,14,2);cx.fill();
+ // crew in oilskins on windward rail
+ const ws=-side;
+ for(let k=0;k<5;k++){const bob=b.haul?Math.sin(simT*14+k*1.3)*2.5:0;cx.fillStyle='#f2c230';cx.beginPath();cx.arc(ws*8+bob*ws*0.4,-26+k*11+bob,2.6,0,TAU);cx.fill();}
+ cx.restore();
+ cx.strokeStyle='#3b2a1a';cx.lineWidth=2.5;cx.beginPath();cx.moveTo(0,-50);cx.lineTo(0,-70);cx.stroke();
+ const sw=(clamp((a/D-28)/150,0,1)*78+6)*D;
+ const bul=luff?0.04+0.07*Math.sin(simT*30+b.x*0.1):0.2;
+ const tw=luff?0.08:0.38;
+ const sc='rgba(244,236,214,.96)',sc2='rgba(236,226,200,.96)';
+ headsail(0,-69,34,sw*0.85,side,bul,sc2);
+ headsail(0,-50,26,sw*0.9,side,bul,sc2);
+ sail(0,-18,side*Math.sin(sw)*28,-18+Math.cos(sw)*28,side*Math.sin(sw+tw)*23,-18+Math.cos(sw+tw)*23,side,bul,sc);
+ sail(0,8,side*Math.sin(sw)*50,8+Math.cos(sw)*50,side*Math.sin(sw+tw)*40,8+Math.cos(sw+tw)*40,side,bul,sc);
+ cx.fillStyle='#2a1c10';cx.beginPath();cx.arc(0,-18,2.8,0,TAU);cx.arc(0,8,3.2,0,TAU);cx.fill();
+ // masthead pennant (points downwind)
+ const pr=b.rel+Math.PI,pl=16;cx.strokeStyle='#d23b2e';cx.lineWidth=2.4;cx.beginPath();cx.moveTo(0,8);
+ cx.quadraticCurveTo(Math.sin(pr)*pl*0.5+Math.sin(simT*12)*2,8-Math.cos(pr)*pl*0.5,Math.sin(pr)*pl,8-Math.cos(pr)*pl);cx.stroke();
+ cx.restore();
+ cx.font='700 13px '+SANS;cx.textAlign='center';cx.fillStyle=crew?'rgba(255,215,90,.9)':'rgba(255,255,255,.75)';
+ cx.fillText(b.name,b.x,b.y+96);
+}
+function hullPath(s){s=s||1;cx.beginPath();cx.moveTo(0,-50*s);cx.bezierCurveTo(10*s,-38*s,14*s,-15*s,13*s,5*s);cx.bezierCurveTo(12*s,25*s,10*s,38*s,7*s,46*s);cx.lineTo(-7*s,46*s);cx.bezierCurveTo(-10*s,38*s,-12*s,25*s,-13*s,5*s);cx.bezierCurveTo(-14*s,-15*s,-10*s,-38*s,0,-50*s);cx.closePath();}
+
+let rain=[];for(let i=0;i<120;i++)rain.push([Math.random(),Math.random(),rnd(0.6,1.4)]);
+function drawWeatherOverlay(){
+ screenTf();
+ const [px,py]=toScr(player.x,player.y);
+ const f=fogAt(player.x,player.y);
+ if(f>0.01){const g=cx.createRadialGradient(px,py,100*Z,px,py,380*Z);g.addColorStop(0,'rgba(218,226,231,0)');g.addColorStop(1,'rgba(218,226,231,'+(0.93*f)+')');cx.fillStyle=g;cx.fillRect(0,0,W,H);}
+ const sq=player.sq;
+ if(sq>0.08){cx.fillStyle='rgba(10,16,26,'+(0.3*sq)+')';cx.fillRect(0,0,W,H);
+  const w=windDir(simT),ux=-Math.sin(w),uy=Math.cos(w);cx.strokeStyle='rgba(200,215,230,'+(0.45*sq)+')';cx.lineWidth=1.3;cx.beginPath();
+  for(const r of rain){const x=((r[0]*W+simT*ux*300*r[2])%W+W)%W,y=((r[1]*H+simT*900*r[2])%H+H)%H;cx.moveTo(x,y);cx.lineTo(x+ux*8-0,y+16);}cx.stroke();}
+}
+
+// wind streaks in screen space
+let streaks=[];for(let i=0;i<18;i++)streaks.push({x:Math.random(),y:Math.random(),l:Math.random(),s:rnd(0.7,1.3)});
+function drawStreaks(dt){
+ const w=windDir(simT),ux=-Math.sin(w),uy=Math.cos(w);
+ cx.lineCap='round';cx.lineWidth=1.2;
+ for(const s of streaks){s.l+=dt*0.35*s.s;if(s.l>1){s.l=0;s.x=Math.random();s.y=Math.random();}
+  const x=s.x*W+ux*s.l*220,y=s.y*H+uy*s.l*220,a=Math.sin(s.l*Math.PI)*0.09;
+  cx.strokeStyle='rgba(255,255,255,'+a.toFixed(3)+')';cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+ux*20,y+uy*20);cx.stroke();}
+}
+
+function panel(x,y,w,h){cx.fillStyle='rgba(4,22,36,.62)';rr(x,y,w,h,12);cx.fill();}
+
+function drawCompass(x,y,r){
+ panel(x-r-10,y-r-10,2*r+20,2*r+34);
+ const w=windAt(player.x,player.y).dir;
+ cx.strokeStyle='rgba(255,255,255,.3)';cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,r,0,TAU);cx.stroke();
+ // no-go wedge (direction wind comes from)
+ cx.fillStyle='rgba(230,70,60,.35)';cx.beginPath();cx.moveTo(x,y);cx.arc(x,y,r,w-Math.PI/2-30*D,w-Math.PI/2+30*D);cx.closePath();cx.fill();
+ // best-speed zones
+ cx.strokeStyle='rgba(90,220,140,.55)';cx.lineWidth=5;
+ for(const sg of[-1,1]){cx.beginPath();cx.arc(x,y,r-3,w-Math.PI/2+sg*70*D-sg*25*D,w-Math.PI/2+sg*70*D+sg*25*D,sg<0);cx.stroke();}
+ cx.fillStyle='rgba(255,255,255,.55)';cx.font='700 10px '+SANS;cx.textAlign='center';cx.textBaseline='middle';cx.fillText('N',x,y-r+9);
+ // wind arrow (blowing toward)
+ const fx=Math.sin(w),fy=-Math.cos(w);
+ cx.strokeStyle='#9fd8ff';cx.fillStyle='#9fd8ff';cx.lineWidth=3;
+ cx.beginPath();cx.moveTo(x+fx*r*0.85,y+fy*r*0.85);cx.lineTo(x-fx*r*0.45,y-fy*r*0.45);cx.stroke();
+ cx.beginPath();cx.moveTo(x-fx*r*0.75,y-fy*r*0.75);cx.lineTo(x-fx*r*0.4+fy*7,y-fy*r*0.4-fx*7);cx.lineTo(x-fx*r*0.4-fy*7,y-fy*r*0.4+fx*7);cx.closePath();cx.fill();
+ // boat heading
+ const hx=Math.sin(player.h),hy=-Math.cos(player.h);
+ cx.strokeStyle='#ffcf4d';cx.lineWidth=3;cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+hx*r*0.92,y+hy*r*0.92);cx.stroke();
+ cx.fillStyle='#ffcf4d';cx.beginPath();cx.arc(x+hx*r*0.92,y+hy*r*0.92,4,0,TAU);cx.fill();
+ cx.textBaseline='alphabetic';cx.fillStyle='rgba(255,255,255,.7)';cx.font='700 11px '+SANS;cx.fillText('WIND',x,y+r+18);
+}
+
+function drawMinimap(x,y,s){
+ const M=race.marks;let x0=-250,x1=250,y0=-250,y1=400;
+ for(const m of M){x0=Math.min(x0,m.x-300);x1=Math.max(x1,m.x+300);y0=Math.min(y0,m.y-300);y1=Math.max(y1,m.y+300);}
+ const sc=Math.min(s/(x1-x0),s/(y1-y0)),ox=x+(s-(x1-x0)*sc)/2,oy=y+(s-(y1-y0)*sc)/2;
+ const P=(px,py)=>[ox+(px-x0)*sc,oy+(py-y0)*sc];
+ panel(x-8,y-8,s+16,s+16);
+ cx.save();cx.beginPath();cx.rect(x-8,y-8,s+16,s+16);cx.clip();
+ for(const p of patches){if(p.type!=='fog'&&p.type!=='squall')continue;const [a,b]=P(p.x,p.y);cx.fillStyle=p.type==='fog'?'rgba(230,235,240,.25)':'rgba(0,0,0,.45)';cx.beginPath();cx.arc(a,b,p.r*sc,0,TAU);cx.fill();}
+ cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=1;cx.setLineDash([3,3]);cx.beginPath();
+ let [sx,sy]=P(0,0);cx.moveTo(sx,sy);for(const m of M){const [a,b]=P(m.x,m.y);cx.lineTo(a,b);}cx.stroke();cx.setLineDash([]);
+ M.forEach((m,k)=>{const [a,b]=P(m.x,m.y);cx.fillStyle=k===player.mark?'#ffcf4d':'rgba(255,160,60,.7)';cx.beginPath();cx.arc(a,b,k===player.mark?4.5:3,0,TAU);cx.fill();});
+ const fogged=fogAt(player.x,player.y)>0.5&&dist(player,opp)>320;
+ if(!fogged){const [a,b]=P(opp.x,opp.y);cx.fillStyle='#fff';cx.beginPath();cx.arc(a,b,3.5,0,TAU);cx.fill();}
+ const [a,b]=P(player.x,player.y);cx.fillStyle='#ffcf4d';cx.strokeStyle='#000';cx.lineWidth=1.5;cx.beginPath();cx.arc(a,b,4.5,0,TAU);cx.fill();cx.stroke();
+ cx.restore();
+}
+
+function bar(x,y,w,label,v,col,flash){
+ cx.fillStyle='rgba(255,255,255,.7)';cx.font='700 11px '+SANS;cx.textAlign='left';cx.fillText(label,x,y-5);
+ cx.fillStyle='rgba(255,255,255,.15)';rr(x,y,w,9,4.5);cx.fill();
+ cx.fillStyle=flash?'#fff':col;rr(x,y,Math.max(9,w*clamp(v,0,1)),9,4.5);cx.fill();
+}
+
+function pointOfSail(a){const d=a/D;
+ if(d<30)return['IN IRONS','#ff6b5e'];if(d<60)return['CLOSE-HAULED','#ffd166'];if(d<115)return['BEAM REACH','#5fe39a'];if(d<155)return['BROAD REACH','#9be37a'];return['RUNNING','#ffd166'];}
+
+function drawHUD(){
+ screenTf();
+ const sc=clamp(W/900,0.72,1);
+ // top-left race info
+ panel(12,12,210*sc+20,74*sc+10);
+ cx.textAlign='left';cx.fillStyle='rgba(255,255,255,.65)';cx.font='700 '+Math.round(11*sc)+'px '+SANS;
+ cx.fillText('RACE '+(raceIdx+1)+' OF 3 · '+race.year,24,32*sc+4);
+ cx.fillStyle='#f3ead2';cx.font='700 '+Math.round(16*sc)+'px '+SERIF;cx.fillText('vs '+race.opp,24,52*sc+4);
+ cx.fillStyle='#fff';cx.font='600 '+Math.round(13*sc)+'px '+SANS;
+ cx.fillText(fmt(player.done?player.finT:raceT)+'   Mark '+Math.min(player.mark+1,race.marks.length)+'/'+race.marks.length,24,74*sc+4);
+ // position
+ if(state==='race'){
+  const pr=remaining(player),or=remaining(opp);const first=player.done?!oppFirst:pr<=or;
+  cx.textAlign='center';cx.font='900 '+Math.round(34*sc)+'px '+SERIF;cx.fillStyle=first?'#ffcf4d':'#ff8b7e';
+  cx.fillText(first?'1ST':'2ND',W/2,46*sc);
+  if(!player.done){const gap=Math.round(Math.abs(or-pr)/BOATLEN);cx.font='600 '+Math.round(12*sc)+'px '+SANS;cx.fillStyle='rgba(255,255,255,.8)';
+   cx.fillText(gap<1?'neck and neck':(first?'ahead by ':'behind by ')+gap+(gap===1?' length':' lengths'),W/2,64*sc);}
+ }
+ // compass + minimap
+ const cr=36*sc+4;drawCompass(W-cr-22,cr+22,cr);
+ const ms=Math.round(120*sc);drawMinimap(W-ms-20,2*cr+70,ms);
+ // bottom gauges
+ const by=H-(touchUI?168:44);
+ const kn=player.v/KN;const [pos,pc]=pointOfSail(player.a);
+ cx.textAlign='center';cx.fillStyle='#fff';cx.font='800 '+Math.round(28*sc)+'px '+SANS;cx.fillText(kn.toFixed(1),W/2-18,by-26);
+ cx.font='700 13px '+SANS;cx.textAlign='left';cx.fillStyle='rgba(255,255,255,.7)';cx.fillText('kn',W/2+kn.toFixed(1).length*7-12,by-26);
+ cx.textAlign='center';cx.fillStyle=pc;cx.font='800 12px '+SANS;cx.fillText(pos,W/2,by-8);
+ const bw=Math.round(130*sc);
+ bar(W/2-bw-90*sc,by-22,bw,player.haul?'CREW · HAULING!':'CREW',player.stam,'#ffcf4d',player.haul&&Math.sin(simT*20)>0);
+ const hc=player.heel>0.85?'#ff5a4a':player.heel>0.65?'#ffb347':'#5fe39a';
+ bar(W/2+90*sc,by-22,bw,player.broach>0?'KNOCKED DOWN!':'HEEL',player.heel,hc,player.broach>0&&Math.sin(simT*20)>0);
+ if(raceIdx===0&&raceT<9&&state!=='result'){cx.textAlign='center';cx.font='600 13px '+SANS;cx.fillStyle='rgba(255,255,255,.85)';
+  cx.fillText(touchUI?'Hold left / right to steer · hold HAUL for a crew boost':'← → steer  ·  hold SPACE to haul (crew boost)',W/2,by+22);
+  cx.fillText('Stay out of the red wedge. Ride the dark puffs.',W/2,by+40);}
+ if(touchUI)drawTouch();
+}
+
+function drawTouch(){
+ const y=H-74,r=50;
+ for(const [x,dir] of [[72,-1],[W-72,1]]){const on=tSteer===dir||(tSteer!==0&&Math.sign(tSteer)===dir);
+  cx.fillStyle=on?'rgba(255,207,77,.45)':'rgba(4,22,36,.5)';cx.beginPath();cx.arc(x,y,r,0,TAU);cx.fill();
+  cx.strokeStyle='rgba(255,255,255,.4)';cx.lineWidth=2;cx.stroke();
+  cx.fillStyle='#fff';cx.beginPath();cx.moveTo(x+dir*16,y);cx.lineTo(x-dir*10,y-16);cx.lineTo(x-dir*10,y+16);cx.closePath();cx.fill();}
+ const hw=Math.min(180,W*0.3),ok=player.stam>0.02;
+ cx.fillStyle=tHaul&&ok?'rgba(255,207,77,.85)':'rgba(4,22,36,.55)';rr(W/2-hw/2,y-30,hw,60,30);cx.fill();
+ cx.strokeStyle='rgba(255,207,77,.8)';cx.lineWidth=2;cx.stroke();
+ cx.fillStyle=tHaul&&ok?'#1a1208':(ok?'#ffcf4d':'rgba(255,255,255,.4)');cx.font='900 20px '+SANS;cx.textAlign='center';cx.textBaseline='middle';cx.fillText('HAUL!',W/2,y+1);cx.textBaseline='alphabetic';
+}
+
+function drawMarkArrow(){
+ if(player.done)return;const m=race.marks[player.mark];const [mx,my]=toScr(m.x,m.y);
+ const pad=56;if(mx>pad&&mx<W-pad&&my>pad+60&&my<H-pad-80)return;
+ const ang=Math.atan2(my-H/2,mx-W/2),c=Math.cos(ang),s=Math.sin(ang);
+ const ex=(W/2-pad)/Math.max(0.001,Math.abs(c)),ey=(H/2-pad-50)/Math.max(0.001,Math.abs(s)),t=Math.min(ex,ey);
+ const x=W/2+c*t,y=H/2+s*t;
+ cx.save();cx.translate(x,y);cx.rotate(ang);cx.fillStyle='#ffcf4d';cx.strokeStyle='rgba(0,0,0,.5)';cx.lineWidth=2;
+ cx.beginPath();cx.moveTo(18,0);cx.lineTo(-10,-12);cx.lineTo(-4,0);cx.lineTo(-10,12);cx.closePath();cx.fill();cx.stroke();cx.restore();
+ cx.fillStyle='#ffcf4d';cx.font='800 12px '+SANS;cx.textAlign='center';cx.fillText(m.n,x-c*28,y-s*28+4);
+}
+
+function drawToast(){
+ if(!toast)return;const age=simT-toast.t;if(age>2.8){toast=null;return;}
+ const a=Math.min(1,age*5,(2.8-age)*2.5);
+ cx.font='italic 700 '+Math.round(clamp(W/40,15,21))+'px '+SERIF;cx.textAlign='center';
+ const tw=cx.measureText(toast.text).width+36,y=H*0.27;
+ cx.globalAlpha=a;cx.fillStyle='rgba(4,22,36,.72)';rr(W/2-tw/2,y-24,tw,38,19);cx.fill();
+ cx.fillStyle='#f3ead2';cx.fillText(toast.text,W/2,y+2);cx.globalAlpha=1;
+}
+
+function centerCard(lines){
+ // lines: [text,font,color,gap]
+ let h=0;for(const l of lines)h+=l[3];
+ const w=Math.min(W-30,560),x=W/2-w/2,y=H/2-h/2-20;
+ cx.fillStyle='rgba(4,22,36,.82)';rr(x,y,w,h+40,18);cx.fill();
+ cx.strokeStyle='rgba(212,175,55,.6)';cx.lineWidth=2;cx.stroke();
+ let cy=y+20;cx.textAlign='center';
+ for(const l of lines){cy+=l[3];cx.font=l[1];cx.fillStyle=l[2];cx.fillText(l[0],W/2,cy-8);}
+}
+
+function drawTitle(){
+ screenTf();
+ const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(3,18,30,.75)');g.addColorStop(0.55,'rgba(3,18,30,.25)');g.addColorStop(1,'rgba(3,18,30,.6)');
+ cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ const big=clamp(W/7,46,118);
+ cx.textAlign='center';cx.fillStyle='#f3ead2';cx.font='700 '+Math.round(big)+'px '+SERIF;
+ cx.shadowColor='rgba(0,0,0,.5)';cx.shadowBlur=18;cx.fillText('BLUENOSE',W/2,H*0.3);cx.shadowBlur=0;
+ cx.fillStyle='#d4af37';cx.fillRect(W/2-big*1.6,H*0.3+big*0.22,big*3.2,2);
+ cx.font='italic '+Math.round(clamp(W/36,15,24))+'px '+SERIF;cx.fillStyle='#f3ead2';
+ cx.fillText("Queen of the North Atlantic · Race for the Fishermen's Trophy",W/2,H*0.3+big*0.55);
+ const p=0.75+0.25*Math.sin(simT*3);
+ cx.font='800 '+Math.round(clamp(W/40,15,20))+'px '+SANS;cx.fillStyle='rgba(255,207,77,'+p+')';
+ cx.fillText(saved>0?'▶  TAP TO SAIL · RACE '+(saved+1)+' OF 3':'▶  TAP OR PRESS ANY KEY TO SAIL',W/2,H*0.62);
+ cx.font='600 14px '+SANS;cx.fillStyle='rgba(255,255,255,.8)';
+ cx.fillText(touchUI?'Hold left / right to steer   ·   hold HAUL for a boost':'← →  steer     ·     SPACE  haul the sheets',W/2,H*0.62+30);
+ cx.fillText("Can't sail into the wind. Ride the dark puffs. Respect the squalls.",W/2,H*0.62+52);
+ cx.font='600 12px '+SANS;cx.fillStyle='rgba(243,234,210,.6)';cx.fillText('Out of Lunenburg, Nova Scotia · 1921',W/2,H-16);
+}
+
+function render(dt){
+ screenTf();
+ const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0e4c70');g.addColorStop(1,'#08304d');cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ const v={x0:cam.x-W/2/Z,x1:cam.x+W/2/Z,y0:cam.y-H/2/Z,y1:cam.y+H/2/Z};
+ worldTf();
+ drawPatches(v,['lull','gust']);
+ drawWaves(v);
+ drawMarks();
+ drawWake(opp);drawWake(player);
+ drawBoat(opp,race.hull,race.trim,'#b59670',false);
+ drawBoat(player,'#121619','#d4af37','#a7835a',true);
+ drawPatches(v,['squall','fog']);
+ drawWeatherOverlay();
+ screenTf();drawStreaks(dt);
+ home.style.display=(state==='title'||state==='result'||state==='champion')?'block':'none';
+ if(state==='title'){drawTitle();return;}
+ drawHUD();drawMarkArrow();drawToast();
+ if(state==='countdown'){
+  const n=Math.ceil(countdown-0.6);
+  centerCard([['RACE '+(raceIdx+1)+' · '+race.year,'700 13px '+SANS,'rgba(255,255,255,.7)',22],
+   ['Bluenose vs '+race.opp,'700 '+Math.round(clamp(W/24,20,30))+'px '+SERIF,'#f3ead2',38],
+   [race.line,'italic 15px '+SERIF,'#f3ead2',28],
+   [n>0?String(n):'GO!','900 44px '+SANS,'#ffcf4d',54]]);
+ }
+ if(state==='result'){
+  const r=result;
+  centerCard([[r.won?'BLUENOSE WINS!':race.opp.toUpperCase()+' TAKES IT','700 '+Math.round(clamp(W/18,24,40))+'px '+SERIF,r.won?'#ffcf4d':'#ff8b7e',48],
+   [r.margin+' · '+fmt(r.time),'600 15px '+SANS,'#fff',28],
+   [r.flav,'italic 17px '+SERIF,'#f3ead2',32],
+   [stateT>0.9?(r.won?'▶ Tap or press a key for Race '+(raceIdx+2):'▶ Tap or press a key to race again'):' ','800 15px '+SANS,'#ffcf4d',38]]);
+ }
+ if(state==='champion'){
+  centerCard([['QUEEN OF THE NORTH ATLANTIC','700 '+Math.round(clamp(W/26,18,32))+'px '+SERIF,'#ffcf4d',44],
+   ['Bluenose beat '+race.opp+' '+result.margin+'.','600 15px '+SANS,'#fff',28],
+   ["The International Fishermen's Trophy stays in Nova Scotia.",'italic 16px '+SERIF,'#f3ead2',26],
+   ["Lunenburg's buying. Every round.",'italic 16px '+SERIF,'#f3ead2',26],
+   [stateT>1.2?'▶ Tap to sail the series again':' ','800 15px '+SANS,'#ffcf4d',38]]);
+ }
+}
+
+setupRace(0,true);
+let last=performance.now();
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;update(dt);render(dt);requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -6,3 +6,4 @@ __pycache__/
 standalone-dist/
 node_modules/
 *.tsbuildinfo
+standalone-games/pepperoni-rain/project/site/

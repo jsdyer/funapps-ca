@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Stay Off the Black Rocks! — Peggy's Cove | funapps.ca</title>
+<meta name="description" content="Peggy's Cove, Nova Scotia. The come-from-aways are on the black rocks again. Tap them back to safety before the rogue wave hits.">
+<meta name="theme-color" content="#1b3a52">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#1b3a52;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh;height:100dvh}
+  #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(10px + env(safe-area-inset-top)) 14px 0;color:#fff;font-weight:800;font-size:22px;text-shadow:0 2px 0 rgba(0,0,0,.45);pointer-events:none}
+  #hud small{display:block;font-size:12px;font-weight:600;opacity:.85}
+  #lives{letter-spacing:2px}
+  #over{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,25,40,.6);z-index:5}
+  #over .card{background:#f4f1ea;color:#1d2a33;border-radius:18px;padding:24px 26px;max-width:340px;width:84%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4);border-top:10px solid #c8282d}
+  #over h1{margin:0 0 6px;font-size:24px;line-height:1.15}
+  #over .score{font-size:48px;font-weight:900;margin:6px 0 0}
+  #over .best{font-size:14px;opacity:.7;margin-bottom:10px}
+  #over .quote{font-style:italic;font-size:15px;margin:10px 0 18px}
+  #over button{font:inherit;font-weight:800;font-size:19px;background:#c8282d;color:#fff;border:0;border-radius:12px;padding:12px 26px;cursor:pointer}
+  #over a{display:block;margin-top:14px;color:#1b5a86;font-size:14px;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div><span id="score">0</span><small id="best">Best 0</small></div>
+  <div id="lives">🛟🛟🛟</div>
+</div>
+<div id="over"><div class="card">
+  <h1 id="otitle">Soaked!</h1>
+  <div class="score" id="oscore">0</div>
+  <div class="best" id="obest"></div>
+  <div class="quote" id="oquote"></div>
+  <button id="again">Again, b'y</button>
+  <a href="https://funapps.ca">More games at funapps.ca →</a>
+</div></div>
+<script>
+(() => {
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+let W, H, S, DPR;
+let granite = [], blackR = [], shrubs = [], wetGlints = [];
+const SEA = 0.83;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pick = a => a[(Math.random() * a.length) | 0];
+const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+
+const JACKETS = ['#e8432e', '#f2b705', '#2f80ed', '#9b51e0', '#27ae60', '#ff6fae', '#f2994a', '#56ccf2', '#eb5757'];
+const SKINS = ['#f1c9a5', '#e0ac85', '#c68e64', '#8d5a3b', '#f6d8bf'];
+const SHOUTS = ["Off the rocks, b'y!", "Wrong rocks!", "Not the black ones!", "The sign says!", "Back up, buddy!", "Get off of there!", "Mind the waves!", "Ya can't swim in that!"];
+const QUOTES = [
+  "Every summer. Every single summer.",
+  "The sign's right there, b'y. In three languages.",
+  "Some come-from-aways just gotta learn the hard way.",
+  "That's a wet ride home to Ontario.",
+  "Worth it for the selfie? Ask 'em.",
+  "The white rocks are RIGHT THERE.",
+  "The North Atlantic always wins."
+];
+
+function blackTop(x) { return H * 0.585 + Math.sin(x * 0.013 + 0.4) * H * 0.028 + Math.sin(x * 0.041 + 1.3) * H * 0.012; }
+const heathY = () => H * 0.16;
+
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  S = clamp(Math.min(W, H) / 32, 10, 19);
+  build();
+}
+function build() {
+  granite = []; blackR = []; shrubs = []; wetGlints = [];
+  const area = W * H;
+  for (let i = 0; i < area / 5200; i++) {
+    const x = rnd(-20, W + 20), top = heathY() - S, bot = blackTop(x);
+    const y = rnd(top, bot);
+    const r = rnd(S * 1.4, S * 5);
+    const c = (196 + Math.random() * 34) | 0;
+    granite.push({ x, y, rx: r, ry: r * rnd(0.45, 0.7), c: `rgb(${c},${c - 4},${c - 12})`, a: rnd(-0.4, 0.4) });
+  }
+  granite.sort((a, b) => a.y - b.y);
+  for (let i = 0; i < area / 6000; i++) {
+    const x = rnd(-20, W + 20), y = rnd(blackTop(x) + S * 0.5, H * SEA + S * 2);
+    const r = rnd(S * 1.2, S * 3.8), c = (26 + Math.random() * 22) | 0;
+    blackR.push({ x, y, rx: r, ry: r * rnd(0.4, 0.65), c: `rgb(${c},${c + 2},${c + 6})`, a: rnd(-0.4, 0.4) });
+  }
+  blackR.sort((a, b) => a.y - b.y);
+  for (let i = 0; i < W / 14; i++) shrubs.push({ x: rnd(0, W), y: rnd(0, heathY() - 4), r: rnd(S * 0.6, S * 1.6), c: pick(['#5d6b3a', '#6f7d44', '#4f5c33', '#7d6a3e', '#8a4b3a']) });
+  for (let i = 0; i < W / 9; i++) { const x = rnd(0, W); wetGlints.push({ x, y: rnd(blackTop(x) + S, H * SEA), w: rnd(S * 0.6, S * 2) }); }
+}
+window.addEventListener('resize', resize);
+
+// ---------- audio ----------
+let ac = null;
+function au() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (ac && ac.state === 'suspended') ac.resume(); }
+function whistle() {
+  if (!ac) return; const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(1900, t); o.frequency.linearRampToValueAtTime(2600, t + 0.08); o.frequency.linearRampToValueAtTime(2100, t + 0.16);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.2);
+}
+function whoosh(dur = 1.6, vol = 0.35) {
+  if (!ac) return; const t = ac.currentTime, n = ac.sampleRate * dur, b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const s = ac.createBufferSource(); s.buffer = b;
+  const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(300, t); f.frequency.linearRampToValueAtTime(1800, t + dur * 0.35); f.frequency.linearRampToValueAtTime(200, t + dur);
+  const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f).connect(g).connect(ac.destination); s.start(t);
+}
+function horn() {
+  if (!ac) return; const t = ac.currentTime;
+  [0, 0.5].forEach(off => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = 110;
+    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500;
+    g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(0.09, t + off + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.4);
+    o.connect(f).connect(g).connect(ac.destination); o.start(t + off); o.stop(t + off + 0.45); });
+}
+
+// ---------- state ----------
+let tourists, floats, score, lives, elapsed, spawnT, wave, wet, shake, running, overT, hintT, best = 0, time = 0;
+try { best = +localStorage.getItem('blackrocks-best') || 0; } catch (e) {}
+
+function reset() {
+  tourists = []; floats = []; score = 0; lives = 3; elapsed = 0; spawnT = 0.2; wet = 0; shake = 0; running = true; overT = 0; hintT = 4.5;
+  wave = { phase: 'calm', t: 6.5, k: 0 };
+  $('over').style.display = 'none'; hud();
+  for (let i = 0; i < 3; i++) spawn(i * 0.25);
+}
+function hud() { $('score').textContent = score; $('best').textContent = 'Best ' + Math.max(best, score); $('lives').textContent = '🛟'.repeat(Math.max(0, lives)) + '·'.repeat(3 - Math.max(0, lives)); }
+
+const pBlack = () => Math.min(0.85, 0.5 + elapsed * 0.007);
+const spawnGap = () => Math.max(0.42, 1.45 - elapsed * 0.016);
+const walkSpeed = () => H * Math.min(0.15, 0.075 + elapsed * 0.0011);
+
+function spawn(head = 0) {
+  if (tourists.length > 28) return;
+  const x = rnd(W * 0.05, W * 0.95);
+  const goBlack = Math.random() < pBlack();
+  const tx = clamp(x + rnd(-W * 0.22, W * 0.22), W * 0.04, W * 0.96);
+  const ty = goBlack ? rnd(blackTop(tx) + S * 1.2, H * SEA - S * 0.6) : rnd(heathY() + S * 3, blackTop(tx) - S * 2.5);
+  tourists.push({ x, y: heathY() - S * 0.5 + head * H * 0.1, tx, ty, goBlack, state: 'walk', sp: walkSpeed() * rnd(0.8, 1.25),
+    col: pick(JACKETS), skin: pick(SKINS), hat: Math.random() < 0.45 ? pick(['#c8282d', '#1d4e89', '#f2f2f2', '#2b2b2b']) : null,
+    wait: rnd(2, 5), ph: Math.random() * 6, flash: rnd(0.5, 2), bubble: 0, fade: 1, dx: 0, dy: 0, stick: Math.random() < 0.3 });
+}
+const onBlack = p => p.y > blackTop(p.x) - S * 0.2;
+
+function waterLine(x) {
+  const base = H * SEA + Math.sin(time * 1.6 + x * 0.025) * S * 0.35 + Math.sin(time * 2.7 - x * 0.06) * S * 0.18;
+  const k = wave.k;
+  if (k <= 0) return base;
+  const peak = blackTop(x) - S * 0.6 + Math.sin(x * 0.05 + time * 5) * S * 0.4;
+  return base + (peak - base) * k;
+}
+
+function addFloat(x, y, text, col = '#fff', size = 1) { floats.push({ x, y, text, col, life: 1.2, size }); }
+
+// ---------- input ----------
+cv.addEventListener('pointerdown', e => {
+  au();
+  if (!running) return;
+  const px = e.clientX, py = e.clientY;
+  let bestP = null, bd = 1e9;
+  for (const p of tourists) {
+    if (p.state === 'swept' || p.state === 'shoo' || p.state === 'leave') continue;
+    const d = Math.hypot(p.x - px, p.y - S * 1.2 - py);
+    const pri = (p.goBlack ? 0 : S * 2);
+    if (d < S * 2.6 && d + pri < bd) { bd = d + pri; bestP = p; }
+  }
+  if (!bestP) return;
+  if (!bestP.goBlack) { addFloat(bestP.x, bestP.y - S * 3, "They're grand", '#dfe9f0', 0.8); return; }
+  const wasOn = onBlack(bestP);
+  let pts = wasOn ? 10 : 5;
+  if (wave.phase === 'warn' || wave.phase === 'surge') { pts += 10; addFloat(bestP.x, bestP.y - S * 4.6, 'CLOSE ONE!', '#ffd84d', 1); }
+  score += pts; hud();
+  bestP.state = 'shoo'; bestP.bubble = 1.1; bestP.sp = walkSpeed() * 2.6;
+  bestP.tx = clamp(bestP.x + rnd(-S * 3, S * 3), W * 0.04, W * 0.96);
+  bestP.ty = Math.min(blackTop(bestP.tx) - S * 3, bestP.y - S * 2);
+  addFloat(bestP.x, bestP.y - S * 3.3, '+' + pts + '  ' + pick(SHOUTS), '#fff', 1);
+  whistle();
+});
+$('again').addEventListener('click', () => { au(); reset(); });
+
+// ---------- update ----------
+function update(dt) {
+  time += dt;
+  if (hintT > 0) hintT -= dt;
+  if (shake > 0) shake = Math.max(0, shake - dt * 2);
+  wet = Math.max(0, wet - dt * 0.25);
+  if (running) {
+    elapsed += dt;
+    spawnT -= dt; if (spawnT <= 0) { spawn(); spawnT = spawnGap() * rnd(0.7, 1.3); }
+  }
+  // wave machine
+  wave.t -= dt;
+  if (wave.phase === 'calm') { wave.k = 0; if (wave.t <= 0 && running) { wave.phase = 'warn'; wave.t = 1.7; horn(); } }
+  else if (wave.phase === 'warn') { wave.k = 0.06 * (1 - wave.t / 1.7); if (wave.t <= 0) { wave.phase = 'surge'; wave.t = 0.6; whoosh(2.2, 0.4); } }
+  else if (wave.phase === 'surge') { wave.k = 0.06 + 0.94 * ease(1 - wave.t / 0.6); if (wave.t <= 0) { wave.phase = 'hold'; wave.t = 0.4; } }
+  else if (wave.phase === 'hold') { wave.k = 1; if (wave.t <= 0) { wave.phase = 'recede'; wave.t = 1.3; } }
+  else if (wave.phase === 'recede') { wave.k = 1 - ease(1 - wave.t / 1.3); wet = 1; if (wave.t <= 0) { wave.phase = 'calm'; wave.t = Math.max(3.2, 8.5 - elapsed * 0.045) + rnd(0, 2.5); } }
+
+  for (const p of tourists) {
+    p.ph += dt * 9;
+    if (p.state === 'swept') {
+      p.x += p.dx * dt; p.y += p.dy * dt; p.dy += H * 0.02 * dt; p.fade -= dt * 0.6; continue;
+    }
+    if (p.bubble > 0) p.bubble -= dt;
+    if (p.state === 'walk' || p.state === 'shoo' || p.state === 'leave') {
+      const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy), st = p.sp * dt;
+      if (d <= st) {
+        p.x = p.tx; p.y = p.ty;
+        if (p.state === 'walk') p.state = p.goBlack ? 'selfie' : 'look';
+        else if (p.state === 'shoo') { p.goBlack = false; p.state = 'look'; p.wait = rnd(0.6, 1.6); }
+        else if (p.state === 'leave') p.dead = true;
+      } else { p.x += dx / d * st; p.y += dy / d * st; }
+    } else if (p.state === 'look') {
+      p.wait -= dt;
+      if (p.wait <= 0) { p.state = 'leave'; p.tx = clamp(p.x + rnd(-W * 0.2, W * 0.2), 0, W); p.ty = -S * 4; p.sp = walkSpeed() * 0.9; }
+    } else if (p.state === 'selfie') {
+      p.flash -= dt; if (p.flash < -0.12) p.flash = rnd(0.8, 2.2);
+    }
+    // soaked?
+    if (wave.k > 0.15 && p.state !== 'leave' && p.y > waterLine(p.x) - S * 0.2) {
+      p.state = 'swept'; p.dx = rnd(-W * 0.05, W * 0.05); p.dy = H * 0.05; p.fade = 1;
+      if (running) {
+        lives--; shake = 1; hud();
+        addFloat(p.x, p.y - S * 3, 'SOAKED!', '#ff5a4f', 1.4);
+        if (lives <= 0) gameOver();
+      }
+    }
+  }
+  tourists = tourists.filter(p => !p.dead && p.fade > 0);
+  for (const f of floats) { f.life -= dt; f.y -= dt * S * 2.2; }
+  floats = floats.filter(f => f.life > 0);
+}
+
+function gameOver() {
+  running = false;
+  if (score > best) { best = score; try { localStorage.setItem('blackrocks-best', best); } catch (e) {} }
+  setTimeout(() => {
+    $('otitle').textContent = score >= 300 ? 'Peggy\'s Cove Legend!' : score >= 120 ? 'Not bad, b\'y!' : 'Swept off the black rocks!';
+    $('oscore').textContent = score;
+    $('obest').textContent = 'Best: ' + best;
+    $('oquote').textContent = '“' + pick(QUOTES) + '”';
+    $('over').style.display = 'flex';
+  }, 1300);
+}
+
+// ---------- draw ----------
+function ell(x, y, rx, ry, a, c) { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, a, 0, Math.PI * 2); ctx.fill(); }
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function drawLand() {
+  // heath
+  ctx.fillStyle = '#6a7442'; ctx.fillRect(0, 0, W, heathY() + S);
+  for (const s of shrubs) ell(s.x, s.y, s.r, s.r * 0.7, 0, s.c);
+  // road / boardwalk
+  ctx.fillStyle = '#54585c'; ctx.fillRect(0, heathY() * 0.25, W, S * 1.4);
+  ctx.strokeStyle = '#e8d36b'; ctx.lineWidth = 2; ctx.setLineDash([S, S]); ctx.beginPath(); ctx.moveTo(0, heathY() * 0.25 + S * 0.7); ctx.lineTo(W, heathY() * 0.25 + S * 0.7); ctx.stroke(); ctx.setLineDash([]);
+  // granite base
+  ctx.fillStyle = '#cfc9be';
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let x = 0; x <= W + 10; x += 10) ctx.lineTo(x, heathY() + Math.sin(x * 0.03) * S * 0.8);
+  ctx.lineTo(W, H); ctx.fill();
+  for (const g of granite) { ell(g.x + S * 0.25, g.y + S * 0.3, g.rx, g.ry, g.a, 'rgba(90,85,75,.25)'); ell(g.x, g.y, g.rx, g.ry, g.a, g.c); ell(g.x - g.rx * 0.2, g.y - g.ry * 0.3, g.rx * 0.5, g.ry * 0.35, g.a, 'rgba(255,255,255,.18)'); }
+  // black rocks
+  ctx.save();
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let x = 0; x <= W + 8; x += 8) ctx.lineTo(x, blackTop(x));
+  ctx.lineTo(W, H); ctx.closePath();
+  ctx.fillStyle = '#2a2c30'; ctx.fill(); ctx.clip();
+  for (const b of blackR) { ell(b.x, b.y, b.rx, b.ry, b.a, b.c); }
+  // slimy seaweed tint near the water
+  const sg = ctx.createLinearGradient(0, H * 0.62, 0, H * SEA);
+  sg.addColorStop(0, 'rgba(40,60,30,0)'); sg.addColorStop(1, 'rgba(60,80,30,.35)');
+  ctx.fillStyle = sg; ctx.fillRect(0, H * 0.5, W, H * 0.5);
+  // wet glints
+  const ga = 0.15 + wet * 0.55;
+  ctx.strokeStyle = `rgba(200,225,245,${ga})`; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  for (const g of wetGlints) { const o = Math.sin(time * 2 + g.x) * 2; ctx.beginPath(); ctx.moveTo(g.x + o, g.y); ctx.lineTo(g.x + g.w + o, g.y - 2); ctx.stroke(); }
+  ctx.restore();
+  // edge line
+  ctx.strokeStyle = 'rgba(20,20,22,.5)'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let x = 0; x <= W + 8; x += 8) x ? ctx.lineTo(x, blackTop(x)) : ctx.moveTo(x, blackTop(x)); ctx.stroke();
+}
+
+function drawSign() {
+  const x = W * 0.14, y = blackTop(W * 0.14) - S * 2.6;
+  ctx.fillStyle = '#6b5a45'; ctx.fillRect(x - S * 0.12, y - S * 2.2, S * 0.24, S * 2.2);
+  ell(x, y, S * 0.6, S * 0.2, 0, 'rgba(0,0,0,.25)');
+  const w = S * 4.6, h = S * 2.2;
+  ctx.fillStyle = '#f7f3e6'; rr(x - w / 2, y - S * 2.2 - h, w, h, 4); ctx.fill();
+  ctx.fillStyle = '#c8282d'; ctx.fillRect(x - w / 2, y - S * 2.2 - h, w, h * 0.34);
+  ctx.fillStyle = '#fff'; ctx.font = `900 ${S * 0.55}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('DANGER', x, y - S * 2.2 - h + h * 0.17);
+  ctx.fillStyle = '#1d1d1d'; ctx.font = `800 ${S * 0.38}px system-ui,sans-serif`;
+  ctx.fillText('STAY OFF THE', x, y - S * 2.2 - h * 0.45);
+  ctx.fillText('BLACK ROCKS', x, y - S * 2.2 - h * 0.18);
+}
+
+function drawSea() {
+  const warnDark = wave.phase === 'warn' ? 0.25 * (1 - wave.t / 1.7) : wave.k * 0.2;
+  const g = ctx.createLinearGradient(0, H * 0.55, 0, H);
+  g.addColorStop(0, `rgb(${50 - warnDark * 60},${118 - warnDark * 70},${150 - warnDark * 60})`);
+  g.addColorStop(1, `rgb(${18},${50 - warnDark * 30},${78 - warnDark * 30})`);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let x = 0; x <= W + 8; x += 8) ctx.lineTo(x, waterLine(x));
+  ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  // foam
+  ctx.strokeStyle = `rgba(255,255,255,${0.75 + wave.k * 0.25})`; ctx.lineWidth = S * (0.35 + wave.k * 0.6); ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let x = 0; x <= W + 8; x += 8) { const y = waterLine(x); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.stroke();
+  // foam flecks
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  for (let i = 0; i < W / 18; i++) {
+    const x = (i * 37.3 + time * 12 * ((i % 3) - 1)) % (W + 40) - 20, base = waterLine(Math.max(0, x));
+    const y = base + S * (0.8 + (i * 7 % 13) * 0.35) + Math.sin(time * 2 + i) * 2;
+    ell(x, y, S * (0.3 + (i % 4) * 0.15), S * 0.12, 0, 'rgba(255,255,255,.4)');
+  }
+  // spray during surge
+  if (wave.k > 0.5 && (wave.phase === 'surge' || wave.phase === 'hold')) {
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < W / 10; i++) { const x = Math.random() * W, y = waterLine(x) - Math.random() * S * 3; ell(x, y, S * 0.25, S * 0.25, 0, 'rgba(255,255,255,.7)'); }
+  }
+}
+
+function drawLighthouse(lx, ly) {
+  const h = S * 9.5, bw = S * 2.7, tw = S * 1.9;
+  ell(lx + S * 1.2, ly + S * 0.2, bw * 1.3, S * 0.7, 0, 'rgba(60,55,45,.3)');
+  ell(lx, ly, bw * 0.95, S * 0.6, 0, '#bdb6a9');
+  ctx.fillStyle = '#fbfaf6';
+  ctx.beginPath(); ctx.moveTo(lx - bw / 2, ly); ctx.lineTo(lx - tw / 2, ly - h); ctx.lineTo(lx + tw / 2, ly - h); ctx.lineTo(lx + bw / 2, ly); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.08)';
+  ctx.beginPath(); ctx.moveTo(lx + bw * 0.1, ly); ctx.lineTo(lx + tw * 0.1, ly - h); ctx.lineTo(lx + tw / 2, ly - h); ctx.lineTo(lx + bw / 2, ly); ctx.closePath(); ctx.fill();
+  // door + window
+  ctx.fillStyle = '#c8282d'; rr(lx - S * 0.4, ly - S * 1.4, S * 0.8, S * 1.4, 3); ctx.fill();
+  ctx.fillStyle = '#2b3a46'; ctx.fillRect(lx - S * 0.25, ly - h * 0.6, S * 0.5, S * 0.7);
+  // gallery
+  ctx.fillStyle = '#2b2b2b'; ctx.fillRect(lx - tw * 0.75, ly - h - S * 0.25, tw * 1.5, S * 0.3);
+  // lantern
+  ctx.fillStyle = '#c8282d'; ctx.fillRect(lx - tw * 0.42, ly - h - S * 1.5, tw * 0.84, S * 1.25);
+  const lit = 0.5 + 0.5 * Math.sin(time * 3);
+  ctx.fillStyle = `rgba(255,230,140,${0.6 + lit * 0.4})`; ctx.fillRect(lx - tw * 0.3, ly - h - S * 1.35, tw * 0.6, S * 0.85);
+  ctx.fillStyle = '#c8282d';
+  ctx.beginPath(); ctx.moveTo(lx - tw * 0.55, ly - h - S * 1.5); ctx.lineTo(lx, ly - h - S * 2.4); ctx.lineTo(lx + tw * 0.55, ly - h - S * 1.5); ctx.fill();
+  // beam
+  const ang = time * 0.9, bx = lx, by = ly - h - S * 0.9;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const len = Math.max(W, H) * 0.6, sp = 0.09;
+  const g = ctx.createRadialGradient(bx, by, 0, bx, by, len); g.addColorStop(0, 'rgba(255,240,180,.35)'); g.addColorStop(1, 'rgba(255,240,180,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(bx, by);
+  ctx.lineTo(bx + Math.cos(ang - sp) * len, by + Math.sin(ang - sp) * len * 0.5);
+  ctx.lineTo(bx + Math.cos(ang + sp) * len, by + Math.sin(ang + sp) * len * 0.5); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawTourist(p) {
+  const moving = p.state === 'walk' || p.state === 'shoo' || p.state === 'leave';
+  const bob = moving ? Math.abs(Math.sin(p.ph)) * S * 0.15 : 0;
+  const lg = moving ? Math.sin(p.ph) * S * 0.3 : 0;
+  ctx.save(); ctx.translate(p.x, p.y);
+  if (p.state === 'swept') { ctx.globalAlpha = clamp(p.fade, 0, 1); ctx.rotate(Math.sin(time * 6 + p.ph) * 0.5); }
+  if (p.state !== 'swept') ell(0, 0, S * 0.7, S * 0.22, 0, 'rgba(0,0,0,.28)');
+  // legs
+  ctx.strokeStyle = '#2d3a4a'; ctx.lineWidth = S * 0.28; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-S * 0.2, -S * 0.85); ctx.lineTo(-S * 0.22 + lg, -S * 0.05); ctx.moveTo(S * 0.2, -S * 0.85); ctx.lineTo(S * 0.22 - lg, -S * 0.05); ctx.stroke();
+  // body (rain jacket)
+  ctx.fillStyle = p.col; rr(-S * 0.5, -S * 1.95 - bob, S, S * 1.2, S * 0.3); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(-S * 0.05, -S * 1.85 - bob, S * 0.1, S * 1.05);
+  // head
+  ctx.fillStyle = p.skin; ctx.beginPath(); ctx.arc(0, -S * 2.35 - bob, S * 0.42, 0, Math.PI * 2); ctx.fill();
+  if (p.hat) { ctx.fillStyle = p.hat; ctx.beginPath(); ctx.arc(0, -S * 2.45 - bob, S * 0.44, Math.PI, 0); ctx.fill(); ctx.beginPath(); ctx.arc(0, -S * 2.92 - bob, S * 0.14, 0, Math.PI * 2); ctx.fill(); }
+  // selfie arm
+  if (p.state === 'selfie' || (p.state === 'walk' && p.goBlack && onBlack(p))) {
+    const ax = S * 0.45, ay = -S * 1.8 - bob, hx = p.stick ? S * 1.9 : S * 1.0, hy = p.stick ? -S * 3.6 : -S * 2.9;
+    ctx.strokeStyle = p.col; ctx.lineWidth = S * 0.24; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(S * 0.85, -S * 2.6 - bob); ctx.stroke();
+    if (p.stick) { ctx.strokeStyle = '#888'; ctx.lineWidth = S * 0.08; ctx.beginPath(); ctx.moveTo(S * 0.85, -S * 2.6 - bob); ctx.lineTo(hx, hy - bob); ctx.stroke(); }
+    ctx.fillStyle = '#111'; rr(hx - S * 0.18, hy - S * 0.3 - bob, S * 0.36, S * 0.6, 2); ctx.fill();
+    if (p.state === 'selfie' && p.flash < 0) { ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.arc(hx, hy - bob, S * 0.7, 0, Math.PI * 2); ctx.fill(); }
+  }
+  if (p.state === 'swept') { ctx.strokeStyle = p.col; ctx.lineWidth = S * 0.24; ctx.beginPath(); ctx.moveTo(-S * 0.45, -S * 1.8); ctx.lineTo(-S * 0.9, -S * 2.8); ctx.moveTo(S * 0.45, -S * 1.8); ctx.lineTo(S * 0.9, -S * 2.8); ctx.stroke(); }
+  // sorry bubble
+  if (p.bubble > 0) {
+    ctx.globalAlpha = clamp(p.bubble * 2, 0, 1);
+    ctx.fillStyle = '#fff'; rr(-S * 1.6, -S * 4.4, S * 3.2, S * 1.1, S * 0.4); ctx.fill();
+    ctx.fillStyle = '#222'; ctx.font = `800 ${S * 0.6}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('Sorry!', 0, -S * 3.85);
+  }
+  ctx.restore();
+}
+
+function drawText(text, x, y, size, col, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha; ctx.font = `900 ${size}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = size * 0.18; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round'; ctx.strokeText(text, x, y);
+  ctx.fillStyle = col; ctx.fillText(text, x, y); ctx.restore();
+}
+
+function draw() {
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random() - 0.5) * shake * 10, (Math.random() - 0.5) * shake * 10);
+  drawLand();
+  drawSign();
+  drawSea();
+  const lx = W * 0.8, ly = Math.min(H * 0.4, blackTop(W * 0.8) - S * 3);
+  const list = tourists.slice().sort((a, b) => a.y - b.y);
+  let lhDone = false;
+  for (const p of list) { if (!lhDone && p.y > ly) { drawLighthouse(lx, ly); lhDone = true; } drawTourist(p); }
+  if (!lhDone) drawLighthouse(lx, ly);
+  for (const f of floats) drawText(f.text, f.x, f.y, S * 1.05 * f.size, f.col, clamp(f.life * 1.5, 0, 1));
+  if (wave.phase === 'warn') {
+    const a = 0.6 + 0.4 * Math.sin(time * 22);
+    drawText('🌊 ROGUE WAVE! 🌊', W / 2, H * 0.47, Math.min(W * 0.085, S * 3), '#fff', a);
+  }
+  if (hintT > 0) {
+    const a = clamp(hintT, 0, 1);
+    drawText('Tap tourists on the black rocks', W / 2, H * 0.3, Math.min(W * 0.055, S * 1.7), '#fff', a);
+    drawText('before the wave gets them!', W / 2, H * 0.3 + Math.min(W * 0.065, S * 2), Math.min(W * 0.055, S * 1.7), '#ffd84d', a);
+  }
+  ctx.restore();
+}
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  update(dt); draw();
+  requestAnimationFrame(loop);
+}
+resize(); reset(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
