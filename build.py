@@ -23,6 +23,8 @@ PUBLIC_FILES = (
     "postcard-maker.js", "extensions.js", "app.js", "catalogue.js",
 )
 PACKET_FILES = ("index.html", "app.js", "styles.css", "engine.js", "scene.js")
+BLACK_FRIDAY_PATH = "/articles/avro-arrow-black-friday/"
+BLACK_FRIDAY_PUBLISHED = "2026-11-26"
 
 
 def esc(value):
@@ -155,6 +157,8 @@ def detail_page(config, game, games, apps=()):
     companion = next((app for app in apps if app["related_game"]["slug"] == game["slug"]), None)
     app_link = (f'<p><a href="/apps/{companion["slug"]}/">{esc(companion["action"])} with {esc(companion["name"])}</a></p>'
                 if companion else "")
+    story_link = (f'<p><a href="{BLACK_FRIDAY_PATH}">Read the story behind Canada’s other Black Friday</a></p>'
+                  if game["slug"] == "avro-arrow" else "")
     related = sorted((other for other in games if other["slug"] != game["slug"]),
                      key=lambda other: other["category"] != game["category"])[:3]
     return page_head(game["name"] + " — Play online | FunApps", game["description"], canonical, data) + f'''
@@ -164,7 +168,7 @@ def detail_page(config, game, games, apps=()):
 <div class="detail-copy"><p class="eyebrow">{esc(game['category'])} · A FunApps game</p>
 <h1>{esc(game['name'])}</h1><p class="detail-description">{esc(game['description'])}</p>
 <a data-umami-event="game-launch" data-umami-event-game="{game['slug']}" class="button button-dark detail-play" href="{esc(game['url'])}">Play {esc(game['name'])}</a>
-<p class="detail-note">Opens the game in this tab. No download needed.</p>{app_link}</div>
+<p class="detail-note">Opens the game in this tab. No download needed.</p>{app_link}{story_link}</div>
 <div class="detail-art" style="--card-color: {game['color']}" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="128" height="128"><span class="detail-art-label">A little time, well wasted.</span></div>
 </section>{controls}
 <section class="detail-related" aria-labelledby="more-title"><p class="eyebrow">Keep the good time going</p><h2 id="more-title">One more round?</h2><div class="arcade-grid">{''.join(game_card(other) for other in related)}</div></section>
@@ -172,10 +176,29 @@ def detail_page(config, game, games, apps=()):
 </body></html>'''
 
 
+def black_friday_page(base, games):
+    canonical = base + BLACK_FRIDAY_PATH
+    headline = "Canada’s other Black Friday: the day the Avro Arrow was cancelled"
+    description = "Discover Canada’s aviation Black Friday on February 20, 1959, how it differs from retail Black Friday and Cyber Monday, and play the free Avro Arrow game."
+    arrow = next(game for game in games if game["slug"] == "avro-arrow")
+    data = {"@context": "https://schema.org", "@type": "Article",
+            "headline": headline, "description": description, "url": canonical,
+            "mainEntityOfPage": canonical, "datePublished": BLACK_FRIDAY_PUBLISHED,
+            "dateModified": BLACK_FRIDAY_PUBLISHED, "inLanguage": "en-CA",
+            "author": {"@type": "Organization", "name": "FunApps", "url": base + "/"},
+            "publisher": {"@type": "Organization", "name": "FunApps", "url": base + "/"}}
+    head = page_head("Canada’s Other Black Friday: The Avro Arrow, 1959 | FunApps",
+                     description, canonical, data)
+    head = head.replace('property="og:type" content="website"', 'property="og:type" content="article"')
+    head = head.replace("</head>", f'<meta property="article:published_time" content="{BLACK_FRIDAY_PUBLISHED}">\n</head>')
+    body = (ROOT / "articles" / "avro-arrow-black-friday.html").read_text(encoding="utf-8")
+    return head + body.replace("<!-- ARROW_PLAY_URL -->", esc(arrow["url"]))
+
+
 def sitemap_urls(config, games, apps=None):
     base = config["base_url"].rstrip("/")
     host = urlsplit(base).hostname
-    urls = [base + "/"] + [base + detail_path(game) for game in games] + [base + "/packet-trace/"]
+    urls = [base + "/"] + [base + detail_path(game) for game in games] + [base + "/packet-trace/", base + BLACK_FRIDAY_PATH]
     if apps is None:
         apps = lifestyle.read("apps.json")
     urls.extend(base + path for path in lifestyle.routes(apps))
@@ -251,6 +274,9 @@ def build():
             page = re.sub(r'<link\b[^>]*rel=[\"\']canonical[\"\'][^>]*>\s*', '', page, flags=re.I)
             page = page.replace("</head>", f'<link rel="canonical" href="{esc(game["url"])}">\n<meta name="funapps-game-id" content="{game["slug"]}">\n</head>', 1)
             (play_dir / "index.html").write_text(page)
+    story = DIST / BLACK_FRIDAY_PATH.strip("/")
+    story.mkdir(parents=True)
+    (story / "index.html").write_text(black_friday_page(base, games), encoding="utf-8")
     lifestyle.publish(DIST, base, page_head, apps)
     app_urls = {base + path for path in lifestyle.routes(apps)}
     ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
@@ -259,6 +285,8 @@ def build():
         element = ET.SubElement(sitemap, "url")
         ET.SubElement(element, "loc").text = url
         modified = config.get("updated_at") if url in (base + "/", base + "/packet-trace/") else None
+        if url == base + BLACK_FRIDAY_PATH:
+            modified = BLACK_FRIDAY_PUBLISHED
         if url in app_urls:
             modified = lifestyle.CHECKED
         for game in games:
@@ -272,7 +300,7 @@ def build():
             ET.SubElement(element, "lastmod").text = date.fromisoformat(modified).isoformat()
     ET.indent(sitemap)
     ET.ElementTree(sitemap).write(DIST / "sitemap.xml", encoding="utf-8", xml_declaration=True)
-    (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n")
+    (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nAllow: {BLACK_FRIDAY_PATH}\n\nSitemap: {base}/sitemap.xml\n")
     (DIST / "_redirects").write_text(
         f"https://www.funapps.ca/* {base}/:splat 301!\n"
         "/games-sitemap.xml /sitemap.xml 301\n/sitemap.php /sitemap.xml 301\n"

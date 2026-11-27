@@ -24,3 +24,30 @@
 [hidden] {display:none !important;}
 @media(max-width:760px) {.detail-hero {grid-template-columns:1fr;gap:30px;}.detail-art {min-height:260px;}.detail-related .arcade-grid {grid-template-columns:1fr;}.detail-main {padding-top:24px;}.breadcrumbs {margin-bottom:26px;}.detail-copy h1 {letter-spacing:-1px;}.detail-header {padding:20px 6%;}.detail-header > a:last-child {font-size:13px;}}
 @media(prefers-reduced-motion:reduce) {* {scroll-behavior:auto !important;}}
+
+/* Long-form Canadian stories */
+.story-main {max-width:1020px;}
+.story-article {max-width:780px;margin:auto;}
+.story-heading h1 {font:clamp(38px,6vw,68px)/1.08 Georgia,serif;letter-spacing:-1.4px;margin:18px 0 24px;}
+.story-deck {font-size:clamp(19px,2.4vw,23px);line-height:1.6;color:var(--muted);}
+.story-meta {font-size:14px;color:var(--muted);margin:20px 0 30px;}
+.story-dates {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:32px 0 44px;}
+.story-dates > div {border:1px solid var(--border);border-radius:12px;padding:18px;background:#e8ede2;display:grid;gap:7px;color:#253f36;}
+.story-dates strong {font-size:18px;}
+.story-dates span {font-size:14px;}
+.story-article section {margin:36px 0;}
+.story-article h2 {font-size:clamp(27px,4vw,36px);line-height:1.2;margin:0 0 18px;}
+.story-article h3 {font-size:20px;line-height:1.4;margin:25px 0 8px;}
+.story-article p:not(.eyebrow):not(.story-meta):not(.story-deck),.story-article li {font-size:18px;line-height:1.75;}
+.story-article section p {margin:0 0 16px;}
+.story-article a:not(.button) {text-decoration:underline;text-underline-offset:4px;}
+.story-sources {border-top:1px solid var(--border);padding-top:28px;}
+.story-sources ul {padding-left:24px;}
+.story-sources li {margin:8px 0;}
+.story-game {display:flex;align-items:flex-start;gap:24px;padding:28px;background:#e2ecec;color:#253f36;border-radius:16px;margin:40px 0;}
+.story-game img {border-radius:16px;flex-shrink:0;}
+.story-game h2 {margin:10px 0 14px;}
+.story-game .button {margin:12px 12px 8px 0;}
+.story-inline-link {display:inline-block;}
+.story-end {border-top:1px solid var(--border);padding-top:20px;}
+@media(max-width:640px) {.story-dates {grid-template-columns:1fr;}.story-game {flex-direction:column;padding:22px;}.story-heading h1 {letter-spacing:-.5px;}}
