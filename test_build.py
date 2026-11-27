@@ -2,6 +2,7 @@
 import copy
 import json
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import build
@@ -20,7 +21,29 @@ class CatalogueBuildTests(unittest.TestCase):
         self.assertIn("https://funapps.ca/packet-trace/", urls)
         self.assertTrue(all("netlify.app" not in url for url in urls))
         expected_play = sum(bool(game.get("include_play_url_in_sitemap")) for game in games)
-        self.assertEqual(len(games) + 2 + expected_play, len(urls))
+        self.assertEqual(len(games) + 2 + expected_play + len(build.lifestyle.routes(build.lifestyle.read("apps.json"))), len(urls))
+
+    def test_analytics_requires_an_explicit_public_site(self):
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(build.analytics_tag(), "")
+        options = {"UMAMI_SCRIPT_URL": "https://stats.example.com/script.js",
+                   "UMAMI_WEBSITE_ID": "bf1a19b6-e3a8-44fa-9480-d2edb6355047"}
+        with patch.dict("os.environ", options):
+            self.assertIn('data-domains="funapps.ca,www.funapps.ca"', build.analytics_tag())
+        with patch.dict("os.environ", {**options, "UMAMI_SCRIPT_URL": "javascript:alert(1)"}):
+            with self.assertRaises(ValueError):
+                build.analytics_tag()
+
+    def test_every_lifestyle_app_and_regional_guide_has_a_sitemap_url(self):
+        apps = build.lifestyle.read("apps.json")
+        games = build.validate_config(self.config)
+        urls = set(build.sitemap_urls(self.config, games))
+        for path in build.lifestyle.routes(apps):
+            self.assertIn(self.config["base_url"] + path, urls)
+        labels = {g["slug"]: g["name"] for g in games}
+        for app in apps:
+            related = app["related_game"]
+            self.assertEqual(labels[related["slug"]], related["name"])
 
     def test_duplicate_game_rejected(self):
         self.config["games"].append(copy.deepcopy(self.config["games"][0]))

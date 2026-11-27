@@ -1,8 +1,62 @@
 {
   "base_url": "https://funapps.ca",
-  "title": "FunApps — Free Canadian Browser Games & Little Escapes",
-  "description": "A little Canadian arcade: Maritime food games, curious adventures, clickers, puzzles and creative escapes. Pick something and play.",
+  "title": "FunApps — Canadian Games, Local Outings & Small Finds",
+  "description": "Play Canadian browser games, find a short outing in Halifax or Langley, and pick a game or gift priced in Canadian dollars.",
   "games": [
+    {
+      "slug": "crokinole-night",
+      "name": "Crokinole Night",
+      "url": "https://funapps.ca/play/crokinole-night/",
+      "description": "Pass one board between two players. Flick discs around eight pegs, bank a centre-hole 20, or knock your opponent into the ditch.",
+      "category": "Tabletop & puzzles",
+      "icon": "🔴",
+      "color": "#d9bd91",
+      "controls": [
+        "Choose a starting position, aim and strength with the sliders. Press Flick disc.",
+        "Pass the screen after each shot. Each player gets six discs. Discs left on the board score by ring."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "play_updated_at": "2026-11-26",
+      "detail_updated_at": "2026-11-26"
+    },
+    {
+      "slug": "rideau-lockmaster",
+      "name": "Rideau Lockmaster",
+      "url": "https://funapps.ca/play/rideau-lockmaster/",
+      "description": "Guide a boat through three miniature canal locks. Match the water levels and work the gates in as few moves as possible.",
+      "category": "Tabletop & puzzles",
+      "icon": "🛥️",
+      "color": "#a7c7bd",
+      "controls": [
+        "Match the chamber to the entry level, open the entry gate and move the boat inside.",
+        "Close the gate, match the exit level and move out. Try all three passages."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "play_updated_at": "2026-11-26",
+      "detail_updated_at": "2026-11-26"
+    },
+    {
+      "slug": "sugar-shack-shift",
+      "name": "Sugar Shack Shift",
+      "url": "https://funapps.ca/play/sugar-shack-shift/",
+      "description": "Run a Québec sugar shack in twelve turns. Watch the wind, feed the fire and draw each batch when the pan turns amber.",
+      "category": "Food & frenzy",
+      "icon": "🍁",
+      "color": "#e7be88",
+      "controls": [
+        "Add a log or let the pan simmer. The next wind and the heat determine how quickly the pan concentrates.",
+        "Draw between 65 and 85 on the syrup gauge. A reading of 75 gives the best score."
+      ],
+      "featured": true,
+      "local_bundle": true,
+      "include_play_url_in_sitemap": true,
+      "play_updated_at": "2026-11-26",
+      "detail_updated_at": "2026-11-26"
+    },
     {
       "slug": "last-boat",
       "name": "Last Boat",
@@ -17,7 +71,6 @@
         "Down arrow, S, or the left side ducks under spruce.",
         "P pauses. Make the dock before the clock runs out."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-26"
@@ -36,7 +89,6 @@
         "W or Ahead goes forward. Slow down beside a red buoy, then haul.",
         "Tie up at the wharf before the bell. Blue buoys are not yours."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-26"
@@ -74,7 +126,6 @@
         "Collect postcards and clear the rocks in a short mountain run.",
         "Pause when needed, then replay after the run."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -93,7 +144,6 @@
         "Collect postcards and avoid obstacles while the wind nudges your yacht.",
         "Finish the short mail run and try to beat your score."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -112,7 +162,6 @@
         "Collect supply crates and avoid dark ice.",
         "Pause or replay the short sled run."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -150,7 +199,6 @@
         "Stay close to the signal’s centre for more precision points while receiving three dots: Morse S.",
         "Catch the signal before the 40-second round ends, then replay to improve your score."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -169,7 +217,6 @@
         "Guide the falling water into the glowing target.",
         "Fill three basins and replay for a better score."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -188,7 +235,6 @@
         "Collect floating supplies and avoid exposed rocks.",
         "Play a short tide run, pause, or try again."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -207,7 +253,6 @@
         "The car accelerates automatically; brake when needed.",
         "Collect photo pickups and complete the scenic drive."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -226,7 +271,6 @@
         "Hold Space or Sit up to peek over the wall; every second of real ocean scores, double on the hump. Steering goes soft while you gawk.",
         "The car cruises. Ease off with S, the down arrow, or the brake when a trailer fills the lane. A full case of white knuckles ends the crossing early."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-26"
@@ -245,7 +289,6 @@
         "Collect camera pickups and dodge logs.",
         "Finish the 50-second trail ride and replay for a higher score."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -264,7 +307,6 @@
         "Leave the rocks and build a harvest streak.",
         "Finish the short picking round and try again."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -283,7 +325,6 @@
         "Load the arriving vehicles using the picture cues.",
         "Complete the loading rush and watch the ferry sail."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -296,7 +337,6 @@
       "category": "Quick challenges",
       "icon": "🏠",
       "color": "#f0c7b0",
-      "featured": true,
       "controls": [
         "Tap a paint colour, then tap the house with the matching jellybean.",
         "Keys 1–6 pick a colour. Q W E R T paint the five houses from left to right.",
@@ -322,7 +362,6 @@
         "The van drives automatically; collect up to ten postcards in 48 seconds.",
         "Pause with P or Escape and replay to improve your score."
       ],
-      "featured": true,
       "local_bundle": true,
       "include_play_url_in_sitemap": true,
       "audited_at": "2026-11-23"
@@ -355,7 +394,6 @@
       "category": "Food & frenzy",
       "icon": "🍟",
       "color": "#d9e2c5",
-      "featured": true,
       "include_play_url_in_sitemap": true,
       "controls": [
         "Manage the clam fryer and chip fryer separately.",
@@ -375,7 +413,6 @@
       "category": "Food & frenzy",
       "icon": "🦞",
       "color": "#f2c4b4",
-      "featured": true,
       "controls": [
         "Tap a claw, knuckle or the tail again and again to crack it open.",
         "Tap the meat to dunk it in butter and eat it. Quick bites build a combo.",
@@ -395,7 +432,6 @@
       "category": "Quick challenges",
       "icon": "⛷️",
       "color": "#cfe3f5",
-      "featured": true,
       "controls": [
         "Drag, move the mouse, or use the left and right arrow keys to steer.",
         "Dodge trees, rocks, elk and tourists. Hit the bumps to jump over trouble.",
@@ -415,7 +451,6 @@
       "category": "Quick challenges",
       "icon": "🦌",
       "color": "#c9dcc0",
-      "featured": true,
       "controls": [
         "Drag, move the mouse, or use the left and right arrow keys to steer.",
         "Hold BRAKE (or the down arrow or space) when cars stop dead or people step into the road.",
@@ -439,7 +474,12 @@
       "domain_ready": true,
       "netlify_host": "polite-flan-9cfec6.netlify.app",
       "domain_configured": true,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Pick Snack Run for a first round. Use WASD, the arrow keys or the touch joystick to reach a guest.",
+        "Fetch what the guest needs before time runs out, then try one of the other three modes."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "souwester-survival",
@@ -454,7 +494,12 @@
       "domain_ready": true,
       "netlify_host": "grand-mermaid-96fb8f.netlify.app",
       "domain_configured": true,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Move left or right with A/D or the arrow keys. On a phone, hold the side of the screen you want to move toward.",
+        "Catch donairs, bottles and fiddles. Leave room for geese and snowballs to pass."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "true-north-turbo",
@@ -469,7 +514,12 @@
       "domain_ready": true,
       "netlify_host": "startling-sunburst-a54d03.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Read the instruction at the start of each microgame and act before its timer expires.",
+        "When an upgrade is offered, pick one to move on to the next round."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "coast-to-coast-chaos",
@@ -484,7 +534,12 @@
       "domain_ready": true,
       "netlify_host": "deluxe-crepe-96ca99.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Move with WASD or the arrows and pick up a supply. The carrying indicator shows what you have.",
+        "Take it to the guest who wants it. Press Space to drop a supply you no longer need."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "one-more-tune",
@@ -499,7 +554,12 @@
       "domain_ready": true,
       "netlify_host": "earnest-licorice-5a7566.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Read the arriving guest’s request and send them to the matching station.",
+        "Tap the spoons in time with the beat to keep the party spirit up."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "double-double-empire",
@@ -514,7 +574,12 @@
       "domain_ready": true,
       "netlify_host": "delightful-basbousa-d3a469.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Tap the coffee cup to earn loonies. Watch the balance until you can afford an upgrade.",
+        "Choose between improving each sip and earning loonies automatically."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "great-maritime-gauntlet",
@@ -529,7 +594,12 @@
       "domain_ready": true,
       "netlify_host": "zesty-strudel-74c18c.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Choose Give ’Er, read the short challenge, then start the round.",
+        "Use the arrows and spacebar on desktop or follow the tap and drag prompts on a phone. Your three mittens are your lives."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "some-good-kitchen-party",
@@ -544,7 +614,12 @@
       "domain_ready": true,
       "netlify_host": "tourmaline-vacherin-14601c.netlify.app",
       "domain_configured": false,
-      "include_play_url_in_sitemap": true
+      "include_play_url_in_sitemap": true,
+      "controls": [
+        "Move through the kitchen with WASD or the arrows. Go to the food before approaching a hungry guest.",
+        "Press E or Space to pick up food, hand it over or play a tune when prompted."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "trans-canada-trek",
@@ -558,7 +633,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "teal-puffpuff-416dc8.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Choose Drive to advance one day, or change pace and rest before the next leg.",
+        "At a city, budget your toonies for gas, repairs and food before getting back on the road."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "keep-er-goin",
@@ -572,7 +652,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "superlative-valkyrie-a47571.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Watch for a request at the kettle, food table or music corner and respond before the mood drops.",
+        "A special challenge changes the controls. Tap the candle during a blackout or tap the spoons when a tune is requested."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "yes-by",
@@ -586,7 +671,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "super-malasada-822d82.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Click the lobster to haul your first traps. Spend the proceeds when an upgrade becomes affordable.",
+        "Watch your income per second and use it to build up the wharf."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "out-for-a-rip",
@@ -600,7 +690,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "loquacious-kashata-3d2d49.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Follow the large arrow to the delivery beacon before the clock runs out.",
+        "Hold Space or use the coffee button for a boost when you have a clear stretch."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "maritime-merchant",
@@ -614,7 +709,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "stirring-capybara-79a5a5.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Check the local prices, buy a small cargo, then choose another port and compare its prices.",
+        "Sell where demand is higher. Use your profit to trade larger loads and improve your vessel."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "kitchen-party-tycoon",
@@ -628,7 +728,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "bucolic-starship-966249.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Tap the lobster to earn Sociables, then buy your first affordable upgrade.",
+        "Compare each upgrade’s cost with the extra Sociables per second it produces."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "east-coast-mayhem",
@@ -642,7 +747,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "golden-blancmange-09bd5c.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Choose Gives ’er, then follow the short prompt for each round before the timer shrinks.",
+        "Tap the target, use its number key, or press Space for a full-screen action. You start with three lobster lives."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "fog-over-fundy",
@@ -656,7 +766,12 @@
       "audited_at": "2026-11-23",
       "domain_ready": false,
       "netlify_host": "kaleidoscopic-mochi-6070f2.netlify.app",
-      "domain_configured": false
+      "domain_configured": false,
+      "controls": [
+        "Move the boat with WASD or the arrows. Aim with the mouse or press Space to fire along your heading.",
+        "Use Shift to dash out of trouble and watch the hull indicator between waves."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "harbour-donair",
@@ -668,7 +783,12 @@
       "color": "#f3bd83",
       "audited_at": "2026-11-26",
       "release_layout": "project",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Start the rush and hold to stretch the dough. Release inside the gold ring.",
+        "Follow the meat, cheese, oven and sauce prompts to finish each pizza before the crowd arrives."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "powerline-pedal",
@@ -680,7 +800,12 @@
       "color": "#b6cba5",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Steer your bike with the arrow keys or drag on a phone.",
+        "Keep a clear path past the dogs. Press Space to ring the bell."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "one-bar",
@@ -692,7 +817,12 @@
       "color": "#aac7d2",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Open the phone and read the family messages as the car travels east.",
+        "Watch the signal. Choose when to send or call and retry a message that failed to deliver."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "harbour-candlepin",
@@ -704,7 +834,12 @@
       "color": "#d6b4a7",
       "audited_at": "2026-11-26",
       "release_layout": "project",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Choose Let’s bowl. Set your aim, hold to build your throw, then release.",
+        "You have three balls per frame. Fallen pins stay on the lane and can help knock over the rest."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "return-chute",
@@ -716,7 +851,12 @@
       "color": "#d3c6a4",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Read the item coming down the chute and decide whether it belongs to the Library, Archives, Museum or bin.",
+        "Use left, up, right or down respectively. You can also tap or swipe."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "avro-arrow",
@@ -728,7 +868,12 @@
       "color": "#a6ccdc",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Start the flight and drag, move the mouse or use the arrows to steer into the test rings.",
+        "Keep clear of gulls, red tape and missiles as the test programme advances."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "loonie-meltdown",
@@ -740,7 +885,12 @@
       "color": "#e2ca85",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Slide the bin beneath falling loonies and let the bent duds pass.",
+        "Park under a jammed press to clear it, then get back to catching coins."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "black-rocks",
@@ -752,7 +902,12 @@
       "color": "#abcbd1",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Look for tourists standing on black rocks near the water.",
+        "Tap them back to safety before the next wave reaches the rocks."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "parking-scramble",
@@ -764,7 +919,12 @@
       "color": "#bacaa8",
       "audited_at": "2026-11-26",
       "release_layout": "project",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Pick Lake Louise or Moraine Lake. Steer with A/D and use W/S for gas and reverse.",
+        "Reach an open stall and stop inside the painted lines before the convoy fills the lot."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "park-hopper",
@@ -776,7 +936,12 @@
       "color": "#a6c4aa",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Choose a park on the map and read its mini-game prompt.",
+        "Finish the challenge to earn stars, then visit another province or territory."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "mountie-ride-home",
@@ -788,7 +953,12 @@
       "color": "#d4b7ab",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Tap or press Space to jump over an obstacle on the ride east.",
+        "Tap again while airborne for a double jump. Time it for the wider obstacles."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "last-spot",
@@ -800,7 +970,12 @@
       "color": "#c3cbaa",
       "audited_at": "2026-11-26",
       "release_layout": "project",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Start the evening. Steer with A/D and use W/S to move around the lot.",
+        "Find an open stall and park within its lines before the lighthouse gate closes."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "citadel-hill-climb",
@@ -812,7 +987,12 @@
       "color": "#c6c8ae",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Choose the stroller or wheelchair. Hold the screen or Space to push uphill, then release to catch your breath.",
+        "Tap repeatedly at the stairs and ration your effort to reach the fort before the noon gun."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "bluenose",
@@ -824,7 +1004,12 @@
       "color": "#a4c7d6",
       "audited_at": "2026-11-26",
       "release_layout": "original-static",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Tap to sail. Steer with the arrows or the left and right controls to work with the wind.",
+        "Hold Space or Haul for a crew boost and steer clear of fog and squalls."
+      ],
+      "detail_updated_at": "2026-11-26"
     },
     {
       "slug": "pepperoni-rain",
@@ -836,7 +1021,12 @@
       "color": "#e4b797",
       "audited_at": "2026-11-26",
       "release_layout": "project",
-      "play_updated_at": "2026-11-26"
+      "play_updated_at": "2026-11-26",
+      "controls": [
+        "Slide the bag sideways or use the left and right arrows to catch falling pepperoni sticks.",
+        "Let the charcoal lumps fall past the bag."
+      ],
+      "detail_updated_at": "2026-11-26"
     }
   ],
   "updated_at": "2026-11-26",

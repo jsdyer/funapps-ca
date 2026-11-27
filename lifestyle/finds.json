@@ -1,0 +1,65 @@
+{
+  "checked": "2026-11-26",
+  "items": [
+    {
+      "id": "pico-w",
+      "name": "A pocket-sized coding project",
+      "mood": "Tech & making",
+      "shop": "PiShop.ca",
+      "cents": 845,
+      "description": "The Raspberry Pi Pico W is a small Wi-Fi microcontroller. Give it to a tinkerer with a challenge: blink the onboard LED in Morse code. A USB data cable is needed.",
+      "origin": "Canadian retailer. Raspberry Pi designed the board in the UK.",
+      "link": "https://www.pishop.ca/product/raspberry-pi-pico-w/"
+    },
+    {
+      "id": "playing-cards",
+      "name": "Lee Valley playing cards",
+      "mood": "Tabletop",
+      "shop": "Lee Valley",
+      "cents": 650,
+      "description": "A deck illustrated with tools from the Lee Valley collection. Pair it with a handwritten invitation to a game of crib.",
+      "origin": "Canadian family-owned retailer. Manufacturing origin unverified.",
+      "link": "https://www.leevalley.com/en-ca/shop/home/toys-and-games/games/115825-lee-valley-playing-cards"
+    },
+    {
+      "id": "peace-bar",
+      "name": "Milk chocolate Peace Bar",
+      "mood": "Snacks",
+      "shop": "Peace by Chocolate",
+      "cents": 425,
+      "description": "A small milk chocolate bar for a stocking, a desk drawer or a board-game snack break.",
+      "origin": "From Peace by Chocolate, a Nova Scotia chocolate maker.",
+      "link": "https://peacebychocolate.ca/products/46g-new-peace-bar-milk-chocolate"
+    },
+    {
+      "id": "peaceflake",
+      "name": "Peppermint Peaceflake",
+      "mood": "Snacks",
+      "shop": "Peace by Chocolate",
+      "cents": 650,
+      "description": "A peppermint chocolate snowflake for someone who likes a little winter in their snack drawer.",
+      "origin": "From Peace by Chocolate, a Nova Scotia chocolate maker.",
+      "link": "https://peacebychocolate.ca/products/peppermint-peaceflake"
+    },
+    {
+      "id": "tock",
+      "name": "Tock board game",
+      "mood": "Tabletop",
+      "shop": "Lee Valley",
+      "cents": 3750,
+      "description": "Race your pieces around a wooden board using playing cards to decide each move.",
+      "origin": "Canadian family-owned retailer. Manufacturing origin unverified.",
+      "link": "https://www.leevalley.com/en-ca/shop/home/toys-and-games/games/77035-tock-board-game"
+    },
+    {
+      "id": "cornhole",
+      "name": "Tabletop cornhole",
+      "mood": "Tabletop",
+      "shop": "Lee Valley",
+      "cents": 2900,
+      "description": "A rainy-day version of beanbag toss that fits on a table.",
+      "origin": "Canadian family-owned retailer. Manufacturing origin unverified.",
+      "link": "https://www.leevalley.com/en-ca/shop/home/toys-and-games/games/119307-tabletop-cornhole"
+    }
+  ]
+}

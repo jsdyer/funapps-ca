@@ -1,0 +1,50 @@
+{
+  "checked": "2026-11-27T03:32:45Z",
+  "prices": {
+    "1055540": {
+      "cents": 899,
+      "regular": 899,
+      "discount": 0
+    },
+    "504230": {
+      "cents": 649,
+      "regular": 2599,
+      "discount": 75
+    },
+    "473950": {
+      "cents": 2599,
+      "regular": 2599,
+      "discount": 0
+    },
+    "287980": {
+      "cents": 1099,
+      "regular": 1099,
+      "discount": 0
+    },
+    "360740": {
+      "cents": 97,
+      "regular": 389,
+      "discount": 75
+    },
+    "572890": {
+      "cents": 424,
+      "regular": 1699,
+      "discount": 75
+    },
+    "251470": {
+      "cents": 399,
+      "regular": 1999,
+      "discount": 80
+    },
+    "448510": {
+      "cents": 1899,
+      "regular": 1899,
+      "discount": 0
+    },
+    "1102130": {
+      "cents": 199,
+      "regular": 799,
+      "discount": 75
+    }
+  }
+}

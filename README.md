@@ -170,3 +170,11 @@ The nine inline activities use 96 px card images from `activity-icons/<activity-
 Regenerate the sizes from the committed source images with `python scripts/render_game_icons.py` (Pillow is needed only for this artwork step; production builds still use Python's standard library). Keep the filenames stable. Google selects one favicon per hostname, so games under the same `funapps.ca` hostname retain the hub icon in Google Search even though browser tabs can show their own game icons.
 
 See [the current production inventory and audit](docs/FUNAPPS-AUDIT-2026-11-26.md), [the November 2026 domain setup guide](docs/FUNAPPS-AUDIT-2026-11-23.md) and [DNS mapping](docs/funapps-dns.csv). The hub keeps working Netlify launch URLs while new domains await setup. Once DNS and HTTPS are ready, `python scripts/activate_domains.py --apply` verifies each game identity, changes ready links and rebuilds the sitemap; commit and push afterward.
+
+## Lifestyle apps and analytics
+
+The hub builds the four apps under `/apps/` from `lifestyle/`. Outdoor plans include permanent Halifax and Langley guides. The gift shortlist stores selections in the visitor’s browser. Gift prices are dated editorial checks in Canadian dollars. Update the item and verification date together when checking a shop again.
+
+Game Night requests Canadian prices for the titles in `lifestyle/store-games.json` through the Netlify function `game-prices`. The response is cached at the edge for 30 minutes. The app can use its committed snapshot for up to 24 hours if the store is unavailable. After that, it labels suggestions as unpriced. Both the store request and the four apps work without private API keys. Run `netlify dev` to exercise the function locally or serve `dist/` to check the static fallback.
+
+To activate Umami for the hub, add `UMAMI_SCRIPT_URL` and `UMAMI_WEBSITE_ID` to the Netlify project's build environment and rebuild. Both values are public fields from the site's Umami tracking snippet. Supply both together. The hub tracks pageviews, arcade launches, activity opens and saves, and outbound deal clicks. Standalone Netlify projects keep their own deployment settings.

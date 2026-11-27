@@ -1,0 +1,102 @@
+[
+  {
+    "slug": "two-hour-escape",
+    "name": "Two-Hour Escape",
+    "section": "Go out",
+    "description": "Choose Halifax or Langley, pick how much time you have, and find a short outdoor detour with a plan you can take along.",
+    "intro": "Your time budget starts when you arrive. Choose a region and a visit length to find a walk that fits.",
+    "action": "Find a walk",
+    "color": "#c3cead",
+    "filters": [
+      [
+        "region",
+        "Starting area"
+      ],
+      [
+        "minutes",
+        "Time on site"
+      ],
+      [
+        "mood",
+        "Mood"
+      ]
+    ],
+    "related_game": {
+      "slug": "rideau-lockmaster",
+      "name": "Rideau Lockmaster"
+    }
+  },
+  {
+    "slug": "rainy-saturday",
+    "name": "Rainy Saturday",
+    "section": "Go out",
+    "description": "Build a rainy-day plan around a library, gallery or museum in Halifax or Langley, with a free indoor backup.",
+    "intro": "Pick a region and an admission preference. Open a venue card for a small challenge to try while you’re there.",
+    "action": "Plan a rainy day",
+    "color": "#aeccd3",
+    "filters": [
+      [
+        "region",
+        "Starting area"
+      ],
+      [
+        "admission",
+        "Admission"
+      ]
+    ],
+    "related_game": {
+      "slug": "harbour-candlepin",
+      "name": "Harbour Candlepin"
+    }
+  },
+  {
+    "slug": "game-night",
+    "name": "Game Night Under $15 CAD",
+    "section": "Find a deal",
+    "description": "Find a PC game for tonight by mood or player count, with Canadian Steam prices and a sale-only filter.",
+    "intro": "Choose the kind of evening you want. Prices are in Canadian dollars before tax, for the base game on Steam Canada.",
+    "action": "Find a game",
+    "color": "#c6d8bd",
+    "filters": [
+      [
+        "mood",
+        "Tonight’s mood"
+      ],
+      [
+        "players",
+        "Players"
+      ],
+      [
+        "sale",
+        "Price filter"
+      ]
+    ],
+    "related_game": {
+      "slug": "crokinole-night",
+      "name": "Crokinole Night"
+    }
+  },
+  {
+    "slug": "canadian-finds",
+    "name": "Canadian Finds Under $50",
+    "section": "Find a deal",
+    "description": "Pick a Canadian shop find for a snack lover, tinkerer or tabletop fan and build a gift shortlist within your budget.",
+    "intro": "Mix a snack, a tabletop pick or an electronics kit. Add items to a shortlist to see your estimated total before tax and shipping.",
+    "action": "Browse small finds",
+    "color": "#e7c69a",
+    "filters": [
+      [
+        "budget",
+        "Budget per item"
+      ],
+      [
+        "mood",
+        "Interest"
+      ]
+    ],
+    "related_game": {
+      "slug": "sugar-shack-shift",
+      "name": "Sugar Shack Shift"
+    }
+  }
+]

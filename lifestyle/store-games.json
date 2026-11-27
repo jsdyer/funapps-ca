@@ -1,0 +1,65 @@
+[
+  {
+    "id": "1055540",
+    "name": "A Short Hike",
+    "mood": "Wander",
+    "players": "Solo",
+    "description": "Walk, climb and glide up Hawk Peak. A good pick for an evening when you want to set your own pace."
+  },
+  {
+    "id": "504230",
+    "name": "Celeste",
+    "mood": "A challenge",
+    "players": "Solo",
+    "description": "Help Madeline climb a mountain one precise jump at a time. Short rooms make it easy to trade attempts."
+  },
+  {
+    "id": "473950",
+    "name": "Manifold Garden",
+    "mood": "Puzzle",
+    "players": "Solo",
+    "description": "Turn gravity sideways and fit impossible rooms together. Share the screen with a friend who likes spotting patterns."
+  },
+  {
+    "id": "287980",
+    "name": "Mini Metro",
+    "mood": "Puzzle",
+    "players": "Solo",
+    "description": "Draw subway lines, move carriages and try to keep a growing city connected."
+  },
+  {
+    "id": "360740",
+    "name": "Downwell",
+    "mood": "A challenge",
+    "players": "Solo",
+    "description": "Drop into a vertical arcade run. One more attempt fits into a short break."
+  },
+  {
+    "id": "572890",
+    "name": "Pikuniku",
+    "mood": "Wander",
+    "players": "Couch co-op",
+    "description": "Explore an odd little world solo or try the separate local two-player co-op levels."
+  },
+  {
+    "id": "251470",
+    "name": "TowerFall Ascension",
+    "mood": "A challenge",
+    "players": "Couch co-op",
+    "description": "Share a screen for archery battles or tackle the base game’s two-player Quest mode."
+  },
+  {
+    "id": "448510",
+    "name": "Overcooked",
+    "mood": "A challenge",
+    "players": "Couch co-op",
+    "description": "Share a chaotic kitchen, divide the work and call out the next order."
+  },
+  {
+    "id": "1102130",
+    "name": "Florence",
+    "mood": "Wander",
+    "players": "Solo",
+    "description": "A short illustrated story told through small interactions. A quiet pick for one sitting."
+  }
+]

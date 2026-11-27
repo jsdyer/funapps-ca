@@ -2,6 +2,9 @@
 """Build the static FunApps hub from its editable catalogue. No dependencies."""
 
 import html
+import os
+from uuid import UUID
+from scripts import lifestyle
 from scripts.game_favicons import apply_favicons
 from datetime import date
 import json
@@ -87,15 +90,27 @@ def detail_path(game):
     return f"/games/{game['slug']}/"
 
 
+def analytics_tag():
+    url = os.environ.get("UMAMI_SCRIPT_URL", "").strip()
+    website = os.environ.get("UMAMI_WEBSITE_ID", "").strip()
+    if not url and not website:
+        return ""
+    validate_url(url, "UMAMI_SCRIPT_URL")
+    website_id = UUID(website)
+    return f'<script defer src="{esc(url)}" data-website-id="{website_id}" data-domains="funapps.ca,www.funapps.ca" data-do-not-track="true"></script>'
+
+
 def game_card(game):
     classes = "arcade-card featured" if game.get("featured") else "arcade-card"
+    event = f'data-umami-event="game-launch" data-umami-event-game="{esc(game["slug"])}"'
+    category = ("Featured · " if game.get("featured") else "") + game["category"]
     search = " ".join(game[field] for field in ("name", "description", "category"))
     return f'''<article class="{classes}" data-category="{esc(game['category'])}" data-search="{esc(search)}">
-  <a class="arcade-art" href="{esc(game['url'])}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="84" height="84" loading="lazy" decoding="async"></a>
-  <div class="arcade-body"><span class="game-tag">{esc(game['category'])}</span>
-    <h3><a href="{esc(game['url'])}">{esc(game['name'])}</a></h3>
+  <a {event} class="arcade-art" href="{esc(game['url'])}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="84" height="84" loading="lazy" decoding="async"></a>
+  <div class="arcade-body"><span class="game-tag">{esc(category)}</span>
+    <h3><a {event} href="{esc(game['url'])}">{esc(game['name'])}</a></h3>
     <p>{esc(game['description'])}</p>
-    <div class="arcade-actions"><a class="arcade-direct" href="{esc(game['url'])}" aria-label="Play {esc(game['name'])}">Play now</a>
+    <div class="arcade-actions"><a {event} class="arcade-direct" href="{esc(game['url'])}" aria-label="Play {esc(game['name'])}">Play now</a>
     <a class="arcade-about" href="{detail_path(game)}">About this game</a></div>
   </div>
 </article>'''
@@ -104,7 +119,7 @@ def game_card(game):
 def page_head(title, description, canonical, data=None):
     return f'''<!doctype html>
 <html lang="en-CA"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">{analytics_tag()}<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title><meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{esc(canonical)}"><meta name="theme-color" content="#253f36">
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">
@@ -118,7 +133,7 @@ def page_head(title, description, canonical, data=None):
 <header class="site-header"><div class="header-inner detail-header"><a class="brand" href="/" aria-label="FunApps home"><span class="brand-mark" aria-hidden="true">✳</span> funapps<span>.ca</span></a><a href="/#arcade">All games</a></div></header>'''
 
 
-def detail_page(config, game, games):
+def detail_page(config, game, games, apps=()):
     base = config["base_url"].rstrip("/")
     canonical = base + detail_path(game)
     data = {"@context": "https://schema.org", "@graph": [
@@ -137,6 +152,9 @@ def detail_page(config, game, games):
         controls = '<section class="detail-instructions"><h2>How to play</h2><ul>' + "".join(
             f"<li>{esc(item)}</li>" for item in game["controls"]
         ) + "</ul></section>"
+    companion = next((app for app in apps if app["related_game"]["slug"] == game["slug"]), None)
+    app_link = (f'<p><a href="/apps/{companion["slug"]}/">{esc(companion["action"])} with {esc(companion["name"])}</a></p>'
+                if companion else "")
     related = sorted((other for other in games if other["slug"] != game["slug"]),
                      key=lambda other: other["category"] != game["category"])[:3]
     return page_head(game["name"] + " — Play online | FunApps", game["description"], canonical, data) + f'''
@@ -145,8 +163,8 @@ def detail_page(config, game, games):
 <section class="detail-hero">
 <div class="detail-copy"><p class="eyebrow">{esc(game['category'])} · A FunApps game</p>
 <h1>{esc(game['name'])}</h1><p class="detail-description">{esc(game['description'])}</p>
-<a class="button button-dark detail-play" href="{esc(game['url'])}">Play {esc(game['name'])}</a>
-<p class="detail-note">Opens the game in this tab. No download needed.</p></div>
+<a data-umami-event="game-launch" data-umami-event-game="{game['slug']}" class="button button-dark detail-play" href="{esc(game['url'])}">Play {esc(game['name'])}</a>
+<p class="detail-note">Opens the game in this tab. No download needed.</p>{app_link}</div>
 <div class="detail-art" style="--card-color: {game['color']}" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="128" height="128"><span class="detail-art-label">A little time, well wasted.</span></div>
 </section>{controls}
 <section class="detail-related" aria-labelledby="more-title"><p class="eyebrow">Keep the good time going</p><h2 id="more-title">One more round?</h2><div class="arcade-grid">{''.join(game_card(other) for other in related)}</div></section>
@@ -154,10 +172,13 @@ def detail_page(config, game, games):
 </body></html>'''
 
 
-def sitemap_urls(config, games):
+def sitemap_urls(config, games, apps=None):
     base = config["base_url"].rstrip("/")
     host = urlsplit(base).hostname
     urls = [base + "/"] + [base + detail_path(game) for game in games] + [base + "/packet-trace/"]
+    if apps is None:
+        apps = lifestyle.read("apps.json")
+    urls.extend(base + path for path in lifestyle.routes(apps))
     # A verified funapps.ca domain property covers these subdomains, but not
     # unrelated netlify.app hostnames. Keep those launch links out of this sitemap.
     for game in games:
@@ -170,6 +191,7 @@ def sitemap_urls(config, games):
 def build():
     config = json.loads((ROOT / "site.config.json").read_text())
     games = validate_config(config)
+    apps = lifestyle.read("apps.json")
     # Framework bundles are committed alongside their source, keeping the hub's
     # deployment dependency-free. Never publish a catalogue link to a missing game.
     for game in games:
@@ -185,10 +207,14 @@ def build():
     base = config["base_url"].rstrip("/")
     data = {"@context": "https://schema.org", "@type": "CollectionPage", "url": base + "/",
             "name": config["title"], "description": config["description"],
-            "mainEntity": {"@type": "ItemList", "numberOfItems": len(games), "itemListElement": [
+            "mainEntity": {"@type": "ItemList", "numberOfItems": len(games) + len(apps), "itemListElement": [
                 {"@type": "ListItem", "position": position, "name": game["name"],
-                 "url": base + detail_path(game)} for position, game in enumerate(games, 1)]}}
+                 "url": base + detail_path(game)} for position, game in enumerate(games, 1)] + [
+                    {"@type":"ListItem", "position":position, "name":app["name"], "url":base + "/apps/" + app["slug"] + "/"}
+                    for position, app in enumerate(apps, len(games) + 1)]}}
     source = source.replace("<!-- STRUCTURED_DATA -->", '<script type="application/ld+json">' + json_ld(data) + '</script>')
+    source = source.replace("<!-- APP_SHELVES -->", lifestyle.home_sections(apps))
+    source = source.replace("<!-- ANALYTICS -->", analytics_tag())
     source = source.replace("<!-- GAME_COUNT -->", str(len(games)))
     source = re.sub(r"<!-- CATALOGUE_START -->.*?<!-- CATALOGUE_END -->",
                     lambda _: '<div class="arcade-grid" id="arcade-grid">\n' + "\n".join(game_card(game) for game in games) + '\n</div>',
@@ -215,7 +241,7 @@ def build():
     for game in games:
         destination = DIST / "games" / game["slug"]
         destination.mkdir(parents=True)
-        (destination / "index.html").write_text(detail_page(config, game, games))
+        (destination / "index.html").write_text(detail_page(config, game, games, apps))
         apply_favicons(game["slug"], destination)
         if game.get("local_bundle"):
             play_dir = DIST / "play" / game["slug"]
@@ -225,12 +251,16 @@ def build():
             page = re.sub(r'<link\b[^>]*rel=[\"\']canonical[\"\'][^>]*>\s*', '', page, flags=re.I)
             page = page.replace("</head>", f'<link rel="canonical" href="{esc(game["url"])}">\n<meta name="funapps-game-id" content="{game["slug"]}">\n</head>', 1)
             (play_dir / "index.html").write_text(page)
+    lifestyle.publish(DIST, base, page_head, apps)
+    app_urls = {base + path for path in lifestyle.routes(apps)}
     ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
     sitemap = ET.Element("{http://www.sitemaps.org/schemas/sitemap/0.9}urlset")
     for url in sitemap_urls(config, games):
         element = ET.SubElement(sitemap, "url")
         ET.SubElement(element, "loc").text = url
         modified = config.get("updated_at") if url in (base + "/", base + "/packet-trace/") else None
+        if url in app_urls:
+            modified = lifestyle.CHECKED
         for game in games:
             if url == base + detail_path(game):
                 modified = game.get("detail_updated_at", config.get("game_pages_updated_at"))

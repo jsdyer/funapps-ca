@@ -24,6 +24,7 @@
     catch (_) { storageAvailable = false; }
   }
   function openGame(game, trigger) {
+    window.umami?.track?.("activity-open", { activity: game.id });
     if (game.href) {
       window.location.assign(game.href);
       return;
@@ -62,6 +63,7 @@
       favorite.addEventListener('click', () => {
         if (favorites.has(game.id)) favorites.delete(game.id); else favorites.add(game.id);
         saveFavorites();
+        if (favorites.has(game.id)) window.umami?.track?.('activity-save', { activity: game.id });
         if (selectedFilter === 'favorites') {
           render(); document.querySelector('[data-filter="favorites"]').focus();
         } else {
@@ -76,7 +78,11 @@
       const desc = document.createElement('p'); desc.textContent = game.description;
       const button = document.createElement(game.href ? 'a' : 'button');
       const explore = isExploration(game);
-      if (game.href) button.href = game.href;
+      if (game.href) {
+        button.href = game.href;
+        button.dataset.umamiEvent = 'activity-open';
+        button.dataset.umamiEventActivity = game.id;
+      }
       else button.type = 'button';
       button.className = 'play-button';
       button.setAttribute('aria-label', `${explore ? 'Open' : 'Play'} ${game.title}`);
