@@ -54,7 +54,9 @@
       const card = document.createElement('article'); card.className = 'game-card';
       if (game.id === 'packet-trace') card.classList.add('packet-card');
       const art = document.createElement('div'); art.className = 'card-art';
-      const icon = document.createElement('span'); icon.className = 'card-symbol'; icon.setAttribute('aria-hidden','true'); icon.textContent = game.icon || '✳';
+      const icon = document.createElement('img');
+      icon.className = 'card-symbol'; icon.src = '/icons/' + game.id + '.png';
+      icon.alt = ''; icon.width = 84; icon.height = 84; icon.loading = 'lazy';
       const favorite = document.createElement('button'); favorite.type = 'button'; favorite.className = 'card-favorite';
       const active = favorites.has(game.id); favorite.setAttribute('aria-pressed', String(active)); favorite.setAttribute('aria-label', `Save ${game.title}`); favorite.textContent = active ? '♥' : '♡';
       favorite.addEventListener('click', () => {

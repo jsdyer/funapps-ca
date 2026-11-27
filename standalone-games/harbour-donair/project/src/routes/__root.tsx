@@ -21,7 +21,8 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: import.meta.env.DEV ? appCss : "/game.css" },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", sizes: "16x16 32x32 48x48 64x64", href: "/favicon.ico" },
+      { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon.png" },
 
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },

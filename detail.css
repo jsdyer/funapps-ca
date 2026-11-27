@@ -9,7 +9,7 @@
 .detail-play {display:inline-flex;margin-top:14px;gap:20px;align-items:center;font-size:16px;}
 .detail-note {font-size:14px;color:var(--muted);margin-top:16px;}
 .detail-art {min-height:350px;border-radius:12px;background:var(--card-color);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:32px;overflow:hidden;position:relative;border:1px solid #253f361a;}
-.detail-art > span:first-child {font-size:110px;filter:drop-shadow(0 9px 0 #253f3614);}
+.detail-art > img {border-radius:18px;filter:drop-shadow(0 9px 0 #253f3614);}
 .detail-art-label {text-transform:uppercase;font-weight:700;font-size:11px;letter-spacing:2px;color:#253f36;}
 .detail-instructions {border-top:1px solid var(--border);padding:32px 0;max-width:760px;}
 .detail-main h2 {font-family:Georgia,serif;font-size:36px;font-weight:400;margin:10px 0 24px;}

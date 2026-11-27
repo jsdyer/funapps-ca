@@ -27,8 +27,8 @@
   games.list.unshift({
     id: 'packet-trace',
     title: 'Packet Trace',
-    description: 'Investigate a breach on a 3D network map. Trace the pivot, contain it, and bring services back online.',
-    tag: '3D INCIDENT RESPONSE',
+    description: 'Get a Halifax ferry board back online, untangle a Langley homelab, or rescue a Yukon photo archive.',
+    tag: 'CANADIAN NETWORK PUZZLES',
     icon: '⌬',
     href: 'packet-trace/'
   });

@@ -91,7 +91,7 @@ def game_card(game):
     classes = "arcade-card featured" if game.get("featured") else "arcade-card"
     search = " ".join(game[field] for field in ("name", "description", "category"))
     return f'''<article class="{classes}" data-category="{esc(game['category'])}" data-search="{esc(search)}">
-  <a class="arcade-art" href="{esc(game['url'])}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><span>{esc(game['icon'])}</span></a>
+  <a class="arcade-art" href="{esc(game['url'])}" style="--card-color: {game['color']}" tabindex="-1" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="84" height="84" loading="lazy" decoding="async"></a>
   <div class="arcade-body"><span class="game-tag">{esc(game['category'])}</span>
     <h3><a href="{esc(game['url'])}">{esc(game['name'])}</a></h3>
     <p>{esc(game['description'])}</p>
@@ -127,6 +127,7 @@ def detail_page(config, game, games):
          "mainEntity": {"@id": canonical + "#game"}},
         {"@type": "VideoGame", "@id": canonical + "#game", "name": game["name"],
          "description": game["description"], "url": game["url"],
+         "image": base + "/icons/" + game["slug"] + ".png",
          "gamePlatform": "Web browser", "applicationCategory": "Game"},
         {"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "FunApps", "item": base + "/"},
@@ -146,7 +147,7 @@ def detail_page(config, game, games):
 <h1>{esc(game['name'])}</h1><p class="detail-description">{esc(game['description'])}</p>
 <a class="button button-dark detail-play" href="{esc(game['url'])}">Play {esc(game['name'])}</a>
 <p class="detail-note">Opens the game in this tab. No download needed.</p></div>
-<div class="detail-art" style="--card-color: {game['color']}" aria-hidden="true"><span>{esc(game['icon'])}</span><span class="detail-art-label">A little time, well wasted.</span></div>
+<div class="detail-art" style="--card-color: {game['color']}" aria-hidden="true"><img src="/icons/{game['slug']}.png" alt="" width="128" height="128"><span class="detail-art-label">A little time, well wasted.</span></div>
 </section>{controls}
 <section class="detail-related" aria-labelledby="more-title"><p class="eyebrow">Keep the good time going</p><h2 id="more-title">One more round?</h2><div class="arcade-grid">{''.join(game_card(other) for other in related)}</div></section>
 </main><footer class="detail-footer"><a href="/">Back to all FunApps</a><span>Small games. Good company.</span><a href="https://coolcode.ca/">Explore CoolCode</a></footer>
@@ -199,10 +200,15 @@ def build():
     (DIST / "index.html").write_text(source)
     for name in PUBLIC_FILES:
         shutil.copy2(ROOT / name, DIST / name)
+    icons = DIST / "icons"
+    shutil.copytree(ROOT / "activity-icons", icons)
+    for slug in [game["slug"] for game in games] + ["packet-trace"]:
+        shutil.copy2(ROOT / "game-icons" / slug / "favicon.png", icons / (slug + ".png"))
     packet_dir = DIST / "packet-trace"
     packet_dir.mkdir()
     for name in PACKET_FILES:
         shutil.copy2(ROOT / "packet-trace" / name, packet_dir / name)
+    apply_favicons("packet-trace", packet_dir)
     packet = (packet_dir / "index.html").read_text()
     packet = packet.replace("</head>", f'<link rel="canonical" href="{esc(base)}/packet-trace/">\n</head>')
     (packet_dir / "index.html").write_text(packet)
@@ -210,6 +216,7 @@ def build():
         destination = DIST / "games" / game["slug"]
         destination.mkdir(parents=True)
         (destination / "index.html").write_text(detail_page(config, game, games))
+        apply_favicons(game["slug"], destination)
         if game.get("local_bundle"):
             play_dir = DIST / "play" / game["slug"]
             shutil.copytree(ROOT / "standalone-games" / game["slug"] / "web", play_dir)
@@ -225,8 +232,11 @@ def build():
         ET.SubElement(element, "loc").text = url
         modified = config.get("updated_at") if url in (base + "/", base + "/packet-trace/") else None
         for game in games:
-            if url in (base + detail_path(game), game["url"]):
-                modified = game.get("audited_at")
+            if url == base + detail_path(game):
+                modified = game.get("detail_updated_at", config.get("game_pages_updated_at"))
+                break
+            if url == game["url"]:
+                modified = game.get("play_updated_at")
                 break
         if modified:
             ET.SubElement(element, "lastmod").text = date.fromisoformat(modified).isoformat()

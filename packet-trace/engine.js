@@ -9,10 +9,10 @@
   const scenarios = [
     {
       id: 'harbour',
-      title: 'Harbour Signal',
+      title: 'Halifax Harbour: The Silent Ferry Board',
       summary: 'Trace an unexpected outbound connection from a ferry information network.',
       difficulty: 'Orientation',
-      briefing: 'The ferry network’s gateway flagged a new outbound destination. A public status feed is unusually quiet. Find the foothold before the attacker reuses a service credential.',
+      briefing: 'Commuters in Dartmouth are waiting for the next boat across Halifax Harbour. The departure board has stopped updating and the ferry network flagged unexpected traffic. Find the foothold before the attacker reuses a service credential.',
       objective: 'Remove the foothold and any later pivots, then bring every device back online.',
       limit: 15,
       efficientTurns: 5,
@@ -68,10 +68,10 @@
     },
     {
       id: 'homelab',
-      title: 'Midnight Maintenance',
+      title: 'Langley: Midnight at the Homelab',
       summary: 'Separate ordinary overnight activity from a stolen service identity.',
       difficulty: 'Operator',
-      briefing: 'A homelab’s nightly jobs are due. Monitoring saw a dashboard session outside the maintenance window and an unrecognised process on the job runner. Some alerts are normal maintenance.',
+      briefing: 'A hobbyist in Langley, BC, is backing up the family media collection overnight. Monitoring saw a dashboard session outside the maintenance window and an unrecognised process on the job runner. Some alerts are normal maintenance.',
       objective: 'Follow the session trail and restore all systems before the maintenance window closes.',
       limit: 21,
       efficientTurns: 9,
@@ -138,10 +138,10 @@
     },
     {
       id: 'backcountry',
-      title: 'The Quiet Tunnel',
+      title: 'Yukon: The Field Photo Archive',
       summary: 'Contain a second route into an isolated-looking backup network.',
       difficulty: 'Expert',
-      briefing: 'A photo archive’s nightly replication is still running. At the same time, a second tunnel appeared between the ingest and recovery networks. Trace both paths before the next replication cycle.',
+      briefing: 'A Yukon field crew has just sent a batch of autumn photos back to Whitehorse. The archive is still copying them overnight. At the same time, a second tunnel appeared between the ingest and recovery networks. Trace both paths before the next replication cycle.',
       objective: 'Remediate every compromised system and return the archive network to full availability.',
       limit: 25,
       efficientTurns: 11,

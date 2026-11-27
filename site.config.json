@@ -8,7 +8,7 @@
       "name": "Last Boat",
       "url": "https://funapps.ca/play/last-boat/",
       "description": "The horn already went at Western Brook Pond. Run the boardwalk, jump the rocks, duck the spruce, and reach the dock before the tour boat slips into the fjord.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🚤",
       "color": "#9ec4c8",
       "technology": "React + Canvas 2D",
@@ -65,7 +65,7 @@
       "name": "Westward: Mountain Run",
       "url": "https://funapps.ca/play/rockies-explorer/",
       "description": "Jump into a mountain run. Hop over rocks, collect postcards, and watch Banff-inspired peaks give way to Jasper.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🏔️",
       "color": "#b8ccd3",
       "technology": "Svelte + TypeScript + SVG",
@@ -198,7 +198,7 @@
       "name": "Cabot Trail: Postcard Cruise",
       "url": "https://funapps.ca/play/cabot-trail/",
       "description": "The car is rolling and Cape Breton’s curves are ahead. Steer through the scenery and collect photo pickups along the road.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🚙",
       "color": "#c3d3b5",
       "technology": "Canvas 2D",
@@ -217,7 +217,7 @@
       "name": "Hemmed In: Confederation Bridge",
       "url": "https://funapps.ca/play/confederation-bridge/",
       "description": "Twelve point nine kilometres, one lane each way, and concrete tall enough to edit out the ocean. Weave past trucks, fight the Strait's wind, and sit up to sneak a look over the wall — if you can still steer.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🌉",
       "color": "#c9cfc8",
       "technology": "Canvas 2D",
@@ -236,7 +236,7 @@
       "name": "Kouchibouguac: Trail Ride",
       "url": "https://funapps.ca/play/kouchibouguac-cycle/",
       "description": "Hop on and start pedalling. Steer through a moving park-inspired trail, collect camera pickups, and dodge the fallen logs.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🚲",
       "color": "#bcd6bc",
       "technology": "Phaser 3",
@@ -551,7 +551,7 @@
       "name": "The Trans-Canada Trek",
       "url": "https://teal-puffpuff-416dc8.netlify.app/",
       "description": "Set out from St. John’s for Vancouver. Balance fuel, money, car health, and morale on a road trip across Canada.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "🚙",
       "color": "#c9d9c3",
       "custom_domain": "trek.funapps.ca",
@@ -593,7 +593,7 @@
       "name": "Out for a Rip",
       "url": "https://loquacious-kashata-3d2d49.netlify.app/",
       "description": "Head out on an Atlantic delivery run. Get the errands done while the weather does its best to complicate your day.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "🛻",
       "color": "#cbd7dd",
       "custom_domain": "rip.funapps.ca",
@@ -607,7 +607,7 @@
       "name": "Maritime Merchant: The Cabot Trail",
       "url": "https://stirring-capybara-79a5a5.netlify.app/",
       "description": "Trade between ports and put your earnings into a better vessel. Make your way through a Maritime merchant’s life.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "⛵",
       "color": "#c2d7d4",
       "custom_domain": "merchant.funapps.ca",
@@ -649,7 +649,7 @@
       "name": "Fog Over Fundy",
       "url": "https://kaleidoscopic-mochi-6070f2.netlify.app/",
       "description": "Pilot a boat through the fog, use signal flares, and make upgrades while keeping an eye out for the creatures in the mist.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "🚤",
       "color": "#c6d2cd",
       "custom_domain": "fundy.funapps.ca",
@@ -667,29 +667,32 @@
       "icon": "🍕",
       "color": "#f3bd83",
       "audited_at": "2026-11-26",
-      "release_layout": "project"
+      "release_layout": "project",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "powerline-pedal",
       "name": "Powerline Pedal",
       "url": "https://powerline-funapps.netlify.app/",
       "description": "Bike the Powerline Trail (Mainland North Trail) in Halifax, NS and dodge the dogs that dart out — leashed or not. A funapps.ca game.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🚲",
       "color": "#b6cba5",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "one-bar",
       "name": "One Bar — Dead Zone: Trans-Canada",
       "url": "https://one-bar-funapps.netlify.app/",
       "description": "Vancouver to Nan's in Halifax for Christmas Eve. 5,725 km. Darrell's driving. You're on the phone — and you've got one bar. A funapps.ca road-trip game.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "📱",
       "color": "#aac7d2",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "harbour-candlepin",
@@ -700,7 +703,8 @@
       "icon": "🎳",
       "color": "#d6b4a7",
       "audited_at": "2026-11-26",
-      "release_layout": "project"
+      "release_layout": "project",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "return-chute",
@@ -711,7 +715,8 @@
       "icon": "📚",
       "color": "#d3c6a4",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "avro-arrow",
@@ -722,7 +727,8 @@
       "icon": "✈️",
       "color": "#a6ccdc",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "loonie-meltdown",
@@ -733,7 +739,8 @@
       "icon": "🪙",
       "color": "#e2ca85",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "black-rocks",
@@ -744,40 +751,44 @@
       "icon": "🌊",
       "color": "#abcbd1",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "parking-scramble",
       "name": "Parking Scramble",
       "url": "https://parking-scramble-funapps.netlify.app/",
       "description": "A dawn arcade about the Lake Louise and Moraine Lake parking scramble. Beat the convoy. Stop inside the lines.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🅿️",
       "color": "#bacaa8",
       "audited_at": "2026-11-26",
-      "release_layout": "project"
+      "release_layout": "project",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "park-hopper",
       "name": "Park Hopper",
       "url": "https://park-hopper-funapps.netlify.app/",
       "description": "A Maritimer's road trip through Canada's national parks: one quick mini-game in every province and territory.",
-      "category": "Roads & adventures",
+      "category": "Road trips & exploration",
       "icon": "🏕️",
       "color": "#a6c4aa",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "mountie-ride-home",
       "name": "Mountie Ride Home",
       "url": "https://rcmp-funapps.netlify.app/",
       "description": "Gallop a Mountie from Depot in Regina all the way home to Halifax. Jump hay bales, moose and Ontario construction. A funapps.ca game.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🐎",
       "color": "#d4b7ab",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "last-spot",
@@ -788,18 +799,20 @@
       "icon": "🚗",
       "color": "#c3cbaa",
       "audited_at": "2026-11-26",
-      "release_layout": "project"
+      "release_layout": "project",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "citadel-hill-climb",
       "name": "Citadel Hill Climb",
       "url": "https://citadel-funapps.netlify.app/",
       "description": "Push a stroller or wheelchair up Halifax's Citadel Hill before the noon gun goes off. A funapps.ca game.",
-      "category": "Roads & trails",
+      "category": "Road trips & exploration",
       "icon": "🏰",
       "color": "#c6c8ae",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "bluenose",
@@ -810,7 +823,8 @@
       "icon": "⛵",
       "color": "#a4c7d6",
       "audited_at": "2026-11-26",
-      "release_layout": "original-static"
+      "release_layout": "original-static",
+      "play_updated_at": "2026-11-26"
     },
     {
       "slug": "pepperoni-rain",
@@ -821,8 +835,10 @@
       "icon": "🍕",
       "color": "#e4b797",
       "audited_at": "2026-11-26",
-      "release_layout": "project"
+      "release_layout": "project",
+      "play_updated_at": "2026-11-26"
     }
   ],
-  "updated_at": "2026-11-26"
+  "updated_at": "2026-11-26",
+  "game_pages_updated_at": "2026-11-26"
 }

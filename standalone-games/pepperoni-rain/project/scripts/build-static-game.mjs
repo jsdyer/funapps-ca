@@ -21,7 +21,9 @@ const html = `<!DOCTYPE html>
   <title>Pepperoni Rain</title>
   <meta name="description" content="Catch maple-smoked Halifax pepperoni as it tumbles out of the smokehouse." />
   <meta name="theme-color" content="#1a0e0a" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48 64x64" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@500;700&display=swap" rel="stylesheet" />
@@ -54,9 +56,7 @@ const html = `<!DOCTYPE html>
 `;
 
 await writeFile("site/index.html", html);
-try {
-  await copyFile("public/favicon.svg", "site/favicon.svg");
-} catch {
-  /* favicon is optional for the static bundle */
+for (const name of ["favicon.svg", "favicon.ico", "favicon.png", "apple-touch-icon.png"]) {
+  await copyFile(`public/${name}`, `site/${name}`);
 }
 console.log("static game written to site/");

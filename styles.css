@@ -66,7 +66,7 @@
 .arcade-art{height:170px;display:flex;align-items:center;justify-content:center;background:var(--card-color,#d9e2c5);font-size:70px;position:relative;overflow:hidden}
 .arcade-art::before{content:'';position:absolute;width:170px;height:170px;border:1px solid #253f3620;border-radius:50%;transform:translate(60px,35px)}
 .arcade-art::after{content:'✳';position:absolute;right:22px;top:16px;font-size:24px;opacity:.6;color:var(--ink)}
-.arcade-art span{position:relative;z-index:1;filter:drop-shadow(0 6px 0 #253f3615)}
+.arcade-art img,.card-art img.card-symbol{border-radius:14px;position:relative;z-index:1;filter:drop-shadow(0 6px 0 #253f3615)}
 .arcade-body{padding:24px;display:flex;flex-direction:column;flex:1}
 .arcade-body h3{font:400 28px/1.12 Georgia,serif;letter-spacing:-.6px;margin:12px 0}
 .arcade-body h3 a{text-decoration:none}

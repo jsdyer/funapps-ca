@@ -34,7 +34,7 @@ def package(game, output):
             if path.is_file() and (path.suffix in ('.html', '.js', '.mjs', '.css', '.svg', '.png', '.ico', '.webp', '.jpg') or path.name == '_headers') and not path.name.startswith(('audit-', 'test_')) and '-regression.' not in path.name:
                 shutil.copy2(path, target / path.name)
     # Preserve each live release's metadata and routing while adding portable icons.
-    if layout not in ('project', 'original-static'):
+    if layout != 'project':
         apply_favicons(game['slug'], target)
     archive = output / (game['slug'] + '.zip')
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
