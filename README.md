@@ -28,11 +28,11 @@ The Netlify output does not include the optional multiplayer Node server or its 
 
 Add **funapps.ca** and **www.funapps.ca** as domains on this Netlify project before changing DNS. With external DNS, use the target Netlify recommends for the apex; if your DNS provider only supports an A record, the fallback is `@ A 75.2.60.5`. Use `www CNAME funapps-hub.netlify.app`. Keep existing game subdomains pointed at their own projects. In particular, do not point Donair or Clams at this hub.
 
-Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, the bundled games, Packet Trace, and the verified Donair/Clams custom URLs. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
+Submit **https://funapps.ca/sitemap.xml** in the verified `funapps.ca` Google Search Console domain property once the domain serves this deployment. It contains the hub, game detail pages, the bundled games, Packet Trace, and the verified game subdomains listed in the catalogue. The foreign `netlify.app` game URLs remain working play links but are excluded from this domain's sitemap. A sitemap helps discovery; it does not guarantee indexing.
 
 ## Favicon
 
-The gold game-controller mark is provided as `favicon.png` (96 × 96), `favicon.ico` (16–256 px), and `apple-touch-icon.png` (180 × 180). These files are included in the production build and linked from the homepage, game detail pages, and Packet Trace. The former `/favicon.svg` URL redirects to the PNG. Keep these URLs stable for browser caches and Google Search; search-result icons update after Google recrawls the homepage and image.
+The gold game-controller mark is provided as `favicon.png` (96 × 96), `favicon.ico` (16–256 px), and `apple-touch-icon.png` (180 × 180). The homepage and inline activities share this tab icon. Each standalone game, its detail page, and Packet Trace use their own icon set. The former `/favicon.svg` URL redirects to the PNG. Keep these URLs stable for browser caches and Google Search; search-result icons update after Google recrawls the homepage and image.
 
 ## Add or edit a standalone game
 
@@ -163,10 +163,10 @@ Build deployment ZIPs with `python scripts/build_standalone.py`; upload the matc
 
 ### Game icons
 
-Games with a custom FunApps icon set have their artwork in `game-icons/<slug>/`: `source.png` (256 px), `favicon.png` (96 px), `favicon.ico` (16, 32, 48 and 64 px), and `apple-touch-icon.png` (180 px). The artwork uses recognizable game-specific subjects and contains no text. `game-icons/designs.json` records the illustration brief for each game.
+Every standalone game and Packet Trace keep four files in `game-icons/<slug>/`: `source.png` (256 px), `favicon.png` (96 px), `favicon.ico` (16, 32, 48 and 64 px), and `apple-touch-icon.png` (180 px). The artwork uses recognizable game-specific subjects and contains no text. `game-icons/designs.json` records the illustration brief for each game.
 
-Both `build.py` and `scripts/build_standalone.py` apply these icons through `scripts/game_favicons.py`. The regional rebuild script also reapplies them after regenerating framework bundles. Icon URLs are relative to each release, so they work at a `/play/` path, a Netlify address or a future custom subdomain. Existing game-specific SVG files remain available for old bookmarks, while page declarations prefer the new PNG/ICO files.
+The nine inline activities use 96 px card images from `activity-icons/<activity-id>.png`. Add a matching file when registering another inline activity. The hub emits card art under `/icons/`. Static releases use `scripts/game_favicons.py`. For a standalone framework project, copy the generated favicon formats into its public assets and update its page head and any install icon. The regional rebuild script also reapplies them after regenerating framework bundles. Icon URLs are relative to each release, so they work at a `/play/` path, a Netlify address or a future custom subdomain. Existing game-specific SVG files remain available for old bookmarks, while page declarations prefer the new PNG/ICO files.
 
 Regenerate the sizes from the committed source images with `python scripts/render_game_icons.py` (Pillow is needed only for this artwork step; production builds still use Python's standard library). Keep the filenames stable. Google selects one favicon per hostname, so games under the same `funapps.ca` hostname retain the hub icon in Google Search even though browser tabs can show their own game icons.
 
-See [the November 2026 audit and domain setup guide](docs/FUNAPPS-AUDIT-2026-11-23.md) and [DNS mapping](docs/funapps-dns.csv). The hub keeps working Netlify launch URLs while new domains await setup. Once DNS and HTTPS are ready, `python scripts/activate_domains.py --apply` verifies each game identity, changes ready links and rebuilds the sitemap; commit and push afterward.
+See [the current production inventory and audit](docs/FUNAPPS-AUDIT-2026-11-26.md), [the November 2026 domain setup guide](docs/FUNAPPS-AUDIT-2026-11-23.md) and [DNS mapping](docs/funapps-dns.csv). The hub keeps working Netlify launch URLs while new domains await setup. Once DNS and HTTPS are ready, `python scripts/activate_domains.py --apply` verifies each game identity, changes ready links and rebuilds the sitemap; commit and push afterward.

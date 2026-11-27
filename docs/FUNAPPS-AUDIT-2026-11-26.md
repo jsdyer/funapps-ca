@@ -24,6 +24,18 @@ The live homepage lists 53 arcade games and 10 Little Breaks activities. Fifteen
 - Prairie Windrider now serves the p5 diagnostic dictionaries with the game. Browsers using regional English locales previously requested a missing file on startup. The game’s 17 automated tests passed.
 - The extra YES B’Y project now serves the same release and icons as the primary copy. The catalogue lists the game once.
 
+## Artwork, release parity and catalogue review
+
+Every arcade entry now has distinct artwork on its card, detail page and playable release. Packet Trace has its own icon set. The nine inline Little Breaks have individual card art and share the homepage tab. The 63 production card images matched their committed PNGs. The advertised ICO, PNG and touch icon on each of the 53 launches and detail pages, plus Packet Trace, matched the corresponding repository files.
+
+All 53 games launched in Chromium without an uncaught exception or a failed same-origin request during the startup check. The homepage worked at 390 px and 1366 px wide. All 81 sitemap URLs returned 200. The sitemap now uses content-update dates for game detail and play pages. An audit date alone does not set a play page’s modification date.
+
+The static release comparison covered 373 published files. Of these, 346 matched byte for byte and 27 HTML responses had equivalent page text and scripts after accounting for hosting markup. The five separately built framework projects also built locally. All 92 checked static assets other than their two generated HTML entry pages matched the published bytes. Last Spot’s Tailwind scan now uses the game's source directory, producing the same stylesheet and JavaScript assets in the local and Netlify builds. Netlify adds hosting markup to HTML, and Last Spot's prerender embeds its build time.
+
+All 53 launches had distinct sets of first-party startup scripts. The additional YES B’Y! deployment is the confirmed duplicate and appears once in the catalogue. Donair Drop catches an ordered list of ingredients in a pita. Harbour Donair stretches dough, builds a pizza and bakes it. Parking Scramble races a dawn convoy in Banff. Last Spot at New London times a lighthouse visit around an evening parking lot on PEI. Both pairs started successfully in live play checks.
+
+The closest editorial overlap is between East Coast Mayhem and The Great Maritime Gauntlet. Both give the player three lives in a sequence of short East Coast challenges. Kitchen Party Tycoon is another candidate for lower placement because its tap-and-buy loop overlaps YES B’Y! and Double-Double Empire. All remain playable. Packet Trace now offers fictional missions set in Halifax Harbour, Langley and the Yukon.
+
 ## Source and publishing inventory
 
 The hub publishes its own games from GitHub `main`. Each independently deployed project has its own production release. A hub push updates its listing and detail page. To update the game at a separate Netlify address, package the matching directory using `python scripts/build_standalone.py --slug <slug>` and publish that package to the project listed below. The five imported framework projects package tracked build source and their Netlify configuration. Original static releases package their game files directly.
