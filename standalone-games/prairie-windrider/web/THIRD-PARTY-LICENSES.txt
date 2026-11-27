@@ -3,7 +3,7 @@ Upstream: https://github.com/processing/p5.js/tree/v2.4.0
 Package: https://www.npmjs.com/package/p5/v/2.4.0
 Copyright p5.js contributors. Licensed under GNU LGPL 2.1.
 
-The complete, unminified upstream ESM distribution is provided separately at vendor/p5.esm.js. It is directly imported by the application, may be replaced with a compatible modified version, and retains upstream dependency notices in its source. The application source and build instructions are maintained in the FunApps repository. No p5 library modifications have been made.
+The complete, unminified upstream ESM distribution is provided separately at vendor/p5.esm.js. It is directly imported by the application, may be replaced with a compatible modified version, and retains upstream dependency notices in its source. The application source and build instructions are maintained in the FunApps repository. The local release points the diagnostic dictionary lookup at the bundled translations.
 
                     GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999

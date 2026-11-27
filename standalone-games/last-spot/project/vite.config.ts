@@ -171,10 +171,8 @@ export default defineConfig(({ command, isPreview }) => ({
     tanstackStart(
       forNetlify
         ? {
-            spa: {
-              enabled: true,
-              prerender: { enabled: true },
-            },
+            prerender: { enabled: true, autoStaticPathsDiscovery: false },
+            pages: [{ path: "/" }],
           }
         : undefined,
     ),

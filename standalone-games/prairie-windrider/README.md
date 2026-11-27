@@ -43,7 +43,7 @@ npm run build
 
 The complete production directory is `web/`. Deploy it recursively, including `vendor/`. Every runtime URL is relative, so the release works under a subdirectory or standalone hostname. `src/engine.mjs` contains deterministic rules and a breadth-first hint solver; `src/game.js` contains HTML interaction and the p5 canvas artwork. `src/planner.html` and `src/style.css` are the optional planner page shell and responsive style.
 
-The build copies the upstream, **unmodified and unminified** p5 ESM distribution to `web/vendor/p5.esm.js` (about 3.7 MB before HTTP compression). It has no unresolved bare imports and is directly imported as a separate module, so it remains replaceable by a compatible modified library. The local source and complete LGPL 2.1 licence are linked from the game's field notes. The exact npm dependency is pinned in the package and lockfile. This intentionally uses more source bytes than a minified bundle in exchange for straightforward source availability and replacement.
+The build copies the unminified p5 ESM distribution and redirects its diagnostic translation lookup to bundled dictionaries. The module is written to `web/vendor/p5.esm.js` (about 3.7 MB before HTTP compression). It has no unresolved bare imports and is directly imported as a separate module, so it remains replaceable by a compatible modified library. The local source and complete LGPL 2.1 licence are linked from the game's field notes. The exact npm dependency is pinned in the package and lockfile. This intentionally uses more source bytes than a minified bundle in exchange for straightforward source availability and replacement.
 
 ## Rules
 

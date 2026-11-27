@@ -1,7 +1,8 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
-import appCss from "../styles.css?inline";
+import "../styles.css";
+import appCss from "../styles.css?url";
 
 const APP_NAME = "Harbour Donair";
 
@@ -19,6 +20,7 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#142033" },
     ],
     links: [
+      { rel: "stylesheet", href: import.meta.env.DEV ? appCss : "/game.css" },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
 
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
@@ -33,7 +35,6 @@ export const Route = createRootRoute({
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <style>{appCss}</style>
       </head>
       <body>
         <PreviewHostBridge />

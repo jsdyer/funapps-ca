@@ -24716,7 +24716,7 @@ let translationPromise = new Promise(async (resolve) => {
 		TL.addTranslations(defaultLanguage, JSON.parse(localTranslation));
 		resolve();
 	} else try {
-		let translationResponse = await fetch(`./${defaultLanguage}.json`);
+		let translationResponse = await fetch(new URL(/^zh(?:-cn|-hans|$)/i.test(defaultLanguage) ? "./translations/zh-CN.json" : "./translations/en.json", import.meta.url));
 		if (!translationResponse.ok) throw new Error("Cannot reach local file");
 		const translation = await translationResponse.json();
 		TL.addTranslations(defaultLanguage, translation);
